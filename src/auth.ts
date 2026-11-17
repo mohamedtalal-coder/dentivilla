@@ -5,6 +5,19 @@ import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/validations";
 import { authConfig } from "@/auth.config";
 
+if (
+  process.env.NODE_ENV === "production" ||
+  process.env.VERCEL === "1" ||
+  Boolean(process.env.VERCEL_ENV)
+) {
+  if (process.env.AUTH_URL?.includes("localhost")) {
+    delete process.env.AUTH_URL;
+  }
+  if (process.env.NEXTAUTH_URL?.includes("localhost")) {
+    delete process.env.NEXTAUTH_URL;
+  }
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   providers: [

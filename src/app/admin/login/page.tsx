@@ -27,7 +27,10 @@ export default function AdminLoginPage() {
       setError("بيانات الدخول غير صحيحة");
       return;
     }
-    router.push("/admin");
+    const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+    const callbackUrl = params?.get("callbackUrl");
+    const destination = callbackUrl && callbackUrl.startsWith("/admin") ? callbackUrl : "/admin";
+    router.push(destination);
     router.refresh();
   }
 

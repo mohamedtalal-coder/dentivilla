@@ -39,7 +39,11 @@
 | `ADMIN_EMAIL` | بريد الدخول للوحة التحكم | مثال: `admin@dentivilla.com` |
 | `ADMIN_PASSWORD` | كلمة مرور قوية للمدير | كلمة المرور لحساب المدير الأول |
 | `ADMIN_NAME` | اسم الطبيب / المدير | مثال: `د. محمد ياسر الجبالي` |
-| `NEXT_PUBLIC_SITE_URL` | رابط الموقع على Vercel | مثال: `https://dentivilla.vercel.app` (أو اتركها `http://localhost:3000` مبدئياً) |
+| `NEXT_PUBLIC_SITE_URL` | رابط الموقع على Vercel | مثال: `https://dentivilla.vercel.app` |
+
+> ⚠️ **تنبيه هام جداً بخصوص `AUTH_URL`**:
+> **لا تقم أبداً** بإضافة متغير `AUTH_URL="http://localhost:3000"` في Vercel!
+> التطبيق مضبوط تلقائياً للتعرف على الدومين الحقيقي للموقع على Vercel. إذا كنت قد أضفت `AUTH_URL` مسبقاً بقيمة `localhost:3000` في Vercel، **قم بحذفه فوراً من لوحة تحكم Vercel Settings -> Environment Variables**.
 
 > **ملاحظة بخصوص Neon**: إذا قمت بإضافة Neon عبر تبويب **Storage** في Vercel، سيقوم Vercel بإضافة `DATABASE_URL` تلقائياً نيابةً عنك!
 
