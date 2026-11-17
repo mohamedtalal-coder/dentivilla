@@ -36,6 +36,7 @@ yarn-error.log*
 
 # temporary preview files
 .intro-preview/
+.intro-frames/
 intro-frame-now.png
 
 # vercel
