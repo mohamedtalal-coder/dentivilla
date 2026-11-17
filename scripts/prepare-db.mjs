@@ -33,7 +33,27 @@ function run(label, command) {
   }
 }
 
-const url = process.env.DATABASE_URL;
+/** Same rule as src/lib/database-url.ts: on Vercel, Dentivilla lives in its own "dentivilla" schema. */
+function appDatabaseUrl(raw) {
+  const schema = process.env.DATABASE_SCHEMA ?? (process.env.VERCEL ? "dentivilla" : undefined);
+  if (!raw || !schema) return raw;
+  try {
+    const parsed = new URL(raw);
+    if (parsed.searchParams.has("schema")) return raw;
+    parsed.searchParams.set("schema", schema);
+    return parsed.toString();
+  } catch {
+    return raw;
+  }
+}
+
+const url = appDatabaseUrl(process.env.DATABASE_URL);
+if (url) {
+  // child processes (prisma CLI, seed) inherit this
+  process.env.DATABASE_URL = url;
+  const schema = new URL(url).searchParams.get("schema");
+  if (schema) console.log(`[prepare-db] Using Postgres schema "${schema}".`);
+}
 if (!url) {
   fail("DATABASE_URL is not set. Add your cloud Postgres URL (e.g. Neon) in Vercel → Settings → Environment Variables.");
 } else if (process.env.VERCEL && /@(localhost|127\.0\.0\.1)[:/]/.test(url)) {
