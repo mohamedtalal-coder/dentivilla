@@ -1,0 +1,177 @@
+@import "tailwindcss";
+
+/* -------------------------------------------------------------------------- */
+/* Design tokens                                                              */
+/* One palette for the whole product: deep teal (brand), bright teal (action),*/
+/* warm gold (accent), alabaster/ivory surfaces, ink text.                    */
+/* -------------------------------------------------------------------------- */
+@theme {
+  --color-alabaster: #faf9f6;
+  --color-cream: #f7f4ee;
+  --color-ivory: #f4f1ea;
+
+  --color-teal: #2ba6a4;
+  --color-teal-hover: #22918f;
+  --color-teal-mid: #167a78;
+  --color-teal-dark: #167a78;
+  --color-teal-deep: #0c4f4d;
+  --color-teal-ink: #093937;
+  --color-teal-light: #e6f6f5;
+
+  --color-amber: #c59b4c;
+  --color-amber-dark: #9a7332;
+  --color-amber-light: #fbf5e9;
+  --color-gold: #c59b4c;
+  --color-gold-soft: #e3c48a;
+
+  --color-ink: #1a2e2c;
+  --color-muted: #5e6b69;
+  --color-line: #e6eae8;
+  --color-card-border: #e6eae8;
+  --color-cardBorder: #e6eae8;
+  --color-spruce-deep: #081b19;
+  --color-spruce-dark: #093937;
+
+  --font-sans: var(--font-readex), system-ui, sans-serif;
+  --font-mono: var(--font-jakarta), ui-monospace, monospace;
+
+  --shadow-card: 0 1px 2px rgb(12 79 77 / 0.04), 0 8px 24px -12px rgb(12 79 77 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(12 79 77 / 0.05), 0 24px 48px -20px rgb(12 79 77 / 0.25);
+
+  --animate-fade-in: fade-in 0.35s ease-out both;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  /* fixed header height + breathing room for in-page anchors */
+  scroll-padding-top: 6.5rem;
+}
+
+body {
+  font-family: var(--font-readex), "Readex Pro", system-ui, sans-serif;
+  background-color: var(--color-alabaster);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-teal);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Components                                                                 */
+/* -------------------------------------------------------------------------- */
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-10;
+  }
+
+  .section {
+    @apply py-20 md:py-28;
+  }
+
+  .eyebrow {
+    @apply mb-3 inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-amber-dark;
+  }
+  .eyebrow::before {
+    content: "";
+    @apply h-px w-6 bg-amber;
+  }
+  .eyebrow-light {
+    @apply text-gold-soft;
+  }
+  .eyebrow-light::before {
+    @apply bg-gold-soft;
+  }
+
+  .heading-xl {
+    @apply text-[2.25rem] leading-[1.15] font-bold tracking-tight text-teal-deep sm:text-5xl md:text-[3.5rem];
+  }
+  .heading-lg {
+    @apply text-3xl leading-[1.2] font-bold tracking-tight text-teal-deep sm:text-[2.6rem];
+  }
+  .heading-md {
+    @apply text-xl leading-snug font-bold text-teal-deep sm:text-2xl;
+  }
+  .lede {
+    @apply text-base leading-8 text-muted sm:text-lg;
+  }
+
+  .card-soft {
+    @apply border border-line bg-white shadow-card;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-sm text-ink transition outline-none placeholder:text-neutral-400 focus:border-teal focus:ring-2 focus:ring-teal/20 aria-invalid:border-red-400 aria-invalid:ring-red-100;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-sm font-medium text-ink;
+  }
+
+  .btn-primary {
+    @apply btn bg-teal text-white shadow-[0_10px_24px_-10px_rgb(12_79_77/0.55)] hover:bg-teal-hover;
+  }
+  .btn-secondary {
+    @apply btn border border-line bg-white text-teal-deep hover:border-teal/40 hover:bg-teal-light/50;
+  }
+  .btn-gold {
+    @apply btn bg-amber text-white hover:bg-amber-dark;
+  }
+  .btn-on-dark {
+    @apply btn border border-white/25 bg-white/5 text-white hover:bg-white/10;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium;
+  }
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Before/after comparison: keep pointer gestures for the slider, allow vertical page scroll */
+.comparison-surface {
+  touch-action: pan-y;
+  user-select: none;
+}
