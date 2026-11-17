@@ -1,7 +1,8 @@
 // Runs before `next build`: applies migrations and seeds reference data.
 // On a Vercel *production* build any problem fails the build with a clear
 // message, instead of shipping a site whose database silently doesn't work.
-import { execSync } from "node:child_process";
+import { execSync, spawnSync } from "node:child_process";
+import { readdirSync } from "node:fs";
 
 if (typeof process.loadEnvFile === "function") {
   try {
@@ -37,6 +38,34 @@ if (!url) {
   fail("DATABASE_URL is not set. Add your cloud Postgres URL (e.g. Neon) in Vercel → Settings → Environment Variables.");
 } else if (process.env.VERCEL && /@(localhost|127\.0\.0\.1)[:/]/.test(url)) {
   fail("DATABASE_URL points to localhost, which does not exist on Vercel. Use a cloud Postgres URL (e.g. Neon).");
-} else if (run("Applying database migrations", "npx prisma migrate deploy")) {
+} else if (migrate()) {
   run("Seeding reference data and the admin account", "npx tsx prisma/seed.ts");
+}
+
+/** prisma migrate deploy, plus a one-time safe baseline for databases created with `db push` (P3005). */
+function migrate() {
+  console.log("[prepare-db] Applying database migrations…");
+  const result = spawnSync("npx prisma migrate deploy", { shell: true, encoding: "utf8" });
+  process.stdout.write(result.stdout ?? "");
+  process.stderr.write(result.stderr ?? "");
+  if (result.status === 0) return true;
+  if (!`${result.stdout}${result.stderr}`.includes("P3005")) {
+    fail("Applying database migrations failed (see the output above).");
+    return false;
+  }
+
+  console.log("[prepare-db] Database has tables but no migration history — baselining it once.");
+  // db push without --accept-data-loss refuses anything destructive, so existing data is safe.
+  if (!run("Syncing the schema (non-destructive)", "npx prisma db push --skip-generate")) return false;
+  const migrations = readdirSync("prisma/migrations", { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+  for (const name of migrations) {
+    if (!run(`Marking ${name} as applied`, `npx prisma migrate resolve --applied ${name}`)) return false;
+  }
+  if (!run("Adding booking-integrity constraints", "npx prisma db execute --file prisma/constraints.sql --schema prisma/schema.prisma")) {
+    return false;
+  }
+  return run("Re-checking migrations", "npx prisma migrate deploy");
 }
