@@ -13,7 +13,10 @@ export const metadata: Metadata = {
 export default async function CasesPage() {
   const [cases, treatments] = await Promise.all([
     getPublishedCases(),
-    prisma.treatment.findMany({ select: { slug: true, nameAr: true } }),
+    prisma.treatment.findMany({ select: { slug: true, nameAr: true } }).catch((error) => {
+      console.warn("Could not fetch treatment names for cases, using fallback:", error);
+      return [];
+    }),
   ]);
   const treatmentName = new Map(treatments.map((t) => [t.slug, t.nameAr]));
 

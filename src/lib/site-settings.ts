@@ -47,7 +47,12 @@ export function isUrlOnHosts(url: string, hosts: readonly string[]) {
  * the defaults in site.ts for anything left empty. Cached per request.
  */
 export const getContactInfo = cache(async (): Promise<ContactInfo> => {
-  const row = await prisma.siteSettings.findUnique({ where: { id: "default" } });
+  let row = null;
+  try {
+    row = await prisma.siteSettings.findUnique({ where: { id: "default" } });
+  } catch (error) {
+    console.warn("Could not query SiteSettings from database, using static defaults:", error);
+  }
   const phone = normalizeEgyptianMobile(row?.phone ?? "") ?? site.phone;
   const whatsappLocal = normalizeEgyptianMobile(row?.whatsapp ?? "") ?? null;
   const whatsappUrl = whatsappLocal ? `https://wa.me/2${whatsappLocal}` : site.whatsappUrl;

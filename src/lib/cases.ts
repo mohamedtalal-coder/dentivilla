@@ -29,20 +29,30 @@ const toPublic = (c: {
 
 /** Published cases (consent is required to publish), in admin-defined order. */
 export async function getPublishedCases() {
-  const rows = await prisma.beforeAfterCase.findMany({
-    where: { published: true, consentOnFile: true },
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-  });
-  return rows.map(toPublic);
+  try {
+    const rows = await prisma.beforeAfterCase.findMany({
+      where: { published: true, consentOnFile: true },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    });
+    return rows.map(toPublic);
+  } catch (error) {
+    console.warn("Could not query cases from database, using fallback:", error);
+    return [];
+  }
 }
 
 /** The homepage case: the featured one, else the first published one. */
 export async function getFeaturedCase() {
-  const row =
-    (await prisma.beforeAfterCase.findFirst({ where: { published: true, consentOnFile: true, featured: true } })) ??
-    (await prisma.beforeAfterCase.findFirst({
-      where: { published: true, consentOnFile: true },
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    }));
-  return row ? toPublic(row) : null;
+  try {
+    const row =
+      (await prisma.beforeAfterCase.findFirst({ where: { published: true, consentOnFile: true, featured: true } })) ??
+      (await prisma.beforeAfterCase.findFirst({
+        where: { published: true, consentOnFile: true },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      }));
+    return row ? toPublic(row) : null;
+  } catch (error) {
+    console.warn("Could not query featured case from database, using fallback:", error);
+    return null;
+  }
 }

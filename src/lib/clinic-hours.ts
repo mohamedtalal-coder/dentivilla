@@ -24,27 +24,35 @@ function formatTime(hhmm: string) {
  * published hours can never disagree with bookable slots.
  */
 export async function getHoursSummary(): Promise<HoursRow[]> {
-  const rows = await prisma.workingHours.findMany();
-  const byDay = new Map(rows.map((row) => [row.weekday, row]));
-  const groups: { start: number; end: number; key: string; hours: string | null }[] = [];
+  try {
+    const rows = await prisma.workingHours.findMany();
+    const byDay = new Map(rows.map((row) => [row.weekday, row]));
+    const groups: { start: number; end: number; key: string; hours: string | null }[] = [];
 
-  for (const weekday of WEEK_ORDER) {
-    const row = byDay.get(weekday);
-    const hours = row?.enabled ? `${formatTime(row.startTime)} – ${formatTime(row.endTime)}` : null;
-    const key = hours ?? "closed";
-    const last = groups[groups.length - 1];
-    if (last && last.key === key) {
-      last.end = weekday;
-    } else {
-      groups.push({ start: weekday, end: weekday, key, hours });
+    for (const weekday of WEEK_ORDER) {
+      const row = byDay.get(weekday);
+      const hours = row?.enabled ? `${formatTime(row.startTime)} – ${formatTime(row.endTime)}` : null;
+      const key = hours ?? "closed";
+      const last = groups[groups.length - 1];
+      if (last && last.key === key) {
+        last.end = weekday;
+      } else {
+        groups.push({ start: weekday, end: weekday, key, hours });
+      }
     }
-  }
 
-  return groups.map((group) => ({
-    days:
-      group.start === group.end
-        ? weekdayLabels[group.start]
-        : `${weekdayLabels[group.start]} – ${weekdayLabels[group.end]}`,
-    hours: group.hours,
-  }));
+    return groups.map((group) => ({
+      days:
+        group.start === group.end
+          ? weekdayLabels[group.start]
+          : `${weekdayLabels[group.start]} – ${weekdayLabels[group.end]}`,
+      hours: group.hours,
+    }));
+  } catch (error) {
+    console.warn("Could not query working hours from database, using fallback schedule:", error);
+    return [
+      { days: "السبت – الخميس", hours: "١٠ ص – ٦ م" },
+      { days: "الجمعة", hours: null },
+    ];
+  }
 }
