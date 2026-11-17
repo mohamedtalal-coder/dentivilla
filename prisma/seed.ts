@@ -88,9 +88,17 @@ const treatments = [
   },
 ];
 
+const DEFAULT_PASSWORD = "change-me-admin";
+const isProduction = process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production";
+
 async function main() {
-  const email = process.env.ADMIN_EMAIL ?? "admin@dentivilla.local";
-  const password = process.env.ADMIN_PASSWORD ?? "change-me-admin";
+  const email = (process.env.ADMIN_EMAIL ?? "admin@dentivilla.local").trim().toLowerCase();
+  const password = process.env.ADMIN_PASSWORD ?? DEFAULT_PASSWORD;
+  if (isProduction && (password === DEFAULT_PASSWORD || password.length < 8)) {
+    throw new Error(
+      "ADMIN_PASSWORD must be set to a real password (8+ characters, not the default) for production.",
+    );
+  }
   const name = process.env.ADMIN_NAME ?? "د. محمد ياسر الجبالي";
   const passwordHash = await bcrypt.hash(password, 12);
 
@@ -133,13 +141,13 @@ async function main() {
   for (const item of hours) {
     await prisma.workingHours.upsert({
       where: { weekday: item.weekday },
-      update: item,
+      update: {},
       create: item,
     });
   }
 
-  const existingPatients = await prisma.patient.count();
-  if (existingPatients === 0) {
+  // Demo records are for local development only — never in a real clinic database.
+  if (!isProduction && (await prisma.patient.count()) === 0) {
     const patient = await prisma.patient.create({
       data: {
         fullName: "مريض تجريبي",

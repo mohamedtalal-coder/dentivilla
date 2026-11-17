@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@dentivilla.local");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
@@ -24,10 +24,12 @@ export default function AdminLoginPage() {
     });
     setPending(false);
     if (result?.error) {
-      if (result.error === "Configuration") {
-        setError("خطأ في إعدادات الخادم: يرجى التأكد من إضافة AUTH_SECRET في متغيرات بيئة Vercel.");
+      if (result.code === "db") {
+        setError("تعذّر الاتصال بقاعدة البيانات. تأكد من ضبط DATABASE_URL على الخادم ثم أعد المحاولة.");
+      } else if (result.error === "Configuration") {
+        setError("خطأ في إعدادات الخادم (AUTH_SECRET). راجع متغيرات البيئة ثم أعد النشر.");
       } else {
-        setError("بيانات الدخول غير صحيحة. يرجى التأكد من البريد وكلمة المرور.");
+        setError("البريد أو كلمة المرور غير صحيحة.");
       }
       return;
     }
