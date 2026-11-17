@@ -24,7 +24,11 @@ export default function AdminLoginPage() {
     });
     setPending(false);
     if (result?.error) {
-      setError("بيانات الدخول غير صحيحة");
+      if (result.error === "Configuration") {
+        setError("خطأ في إعدادات الخادم: يرجى التأكد من إضافة AUTH_SECRET في متغيرات بيئة Vercel.");
+      } else {
+        setError("بيانات الدخول غير صحيحة. يرجى التأكد من البريد وكلمة المرور.");
+      }
       return;
     }
     const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
