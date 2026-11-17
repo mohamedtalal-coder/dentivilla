@@ -1,574 +1,293 @@
 "use client";
 
-import { useCallback, useId, useLayoutEffect, useRef, useState } from "react";
-import {
-  POSE_CLOSED,
-  POSE_OPEN,
-  POSE_SMILE,
-  VIEW,
-  aperturePath,
-  easeInCubic,
-  easeInOutCubic,
-  easeInOutQuint,
-  easeOutCubic,
-  easeOutQuart,
-  lerp,
-  lerpPose,
-  lowerPath,
-  lowerTeethPath,
-  segment,
-  teethPath,
-  toothLines,
-  upperPath,
-  wetLinePath,
-  type LipPose,
-} from "./lips";
-
-/* -------------------------------------------------------------------------- */
-/* Config                                                                     */
-/* -------------------------------------------------------------------------- */
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import Image from "next/image";
+import { Sparkles, ArrowLeft } from "lucide-react";
 
 const STORAGE_KEY = "dentivilla-intro-seen";
-const DURATION = 5600;
-const REDUCED_DURATION = 320;
-const LIP_SCALE = 1.52;
-
-/* -------------------------------------------------------------------------- */
-/* Session helpers                                                            */
-/* -------------------------------------------------------------------------- */
-
-function markSeen() {
-  try {
-    sessionStorage.setItem(STORAGE_KEY, "1");
-  } catch {
-    /* private mode */
-  }
-}
+const DURATION = 3600; // 3.6s snappy, cinematic, elegant
+const REDUCED_DURATION = 350;
 
 function wasSeen() {
+  if (typeof window === "undefined") return false;
   try {
+    // Check URL override: ?intro=1 or ?preview=1 forces it to play
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("intro") || params.has("preview")) {
+      return false;
+    }
     return sessionStorage.getItem(STORAGE_KEY) === "1";
   } catch {
     return false;
   }
 }
 
-/* -------------------------------------------------------------------------- */
-/* Timeline: computes the full animation state at a given millisecond.        */
-/*                                                                            */
-/*   0 –  600ms  Fade-in (lips materialise from transparent)                  */
-/* 300 – 1800ms  Closed → Smile                                              */
-/* 1800 – 2200ms  Hold the smile                                              */
-/* 2200 – 3800ms  Smile → Open                                               */
-/* 3800 – 4600ms  Portal reveals (hole in mask expands)                       */
-/* 4400 – 5600ms  Lips fade out + portal grows to full screen                 */
-/* 5000 – 5600ms  Overlay fades out                                           */
-/* -------------------------------------------------------------------------- */
-
-function poseAt(ms: number) {
-  // Lip materialization fade-in
-  const fadeIn = easeOutCubic(segment(ms, 0, 600));
-
-  // Closed → Smile
-  const smileT = easeInOutCubic(segment(ms, 300, 1800));
-  // Smile → Open
-  const openT = easeInOutCubic(segment(ms, 2200, 3800));
-
-  // Portal reveal (the "looking into the mouth" effect)
-  const revealT = easeInOutQuint(segment(ms, 3800, 4600));
-  // Expand to full screen
-  const expandT = easeInCubic(segment(ms, 4400, DURATION));
-  // Lips fade out
-  const lipsOut = easeInCubic(segment(ms, 4400, DURATION));
-  // Teeth fade before lips disappear
-  const teethFade = 1 - easeOutCubic(segment(ms, 3800, 4400));
-  // Overlay fade
-  const overlayFade = 1 - easeOutQuart(segment(ms, 5000, DURATION));
-
-  // Build the interpolated pose
-  const pose =
-    openT > 0
-      ? lerpPose(POSE_SMILE, POSE_OPEN, openT)
-      : lerpPose(POSE_CLOSED, POSE_SMILE, smileT);
-
-  // Portal hole: starts at zero, then expands through the mouth opening
-  const hole = lerp(0.001, 1.2, revealT) + lerp(0, 50, expandT);
-
-  return {
-    pose,
-    hole,
-    lipsOpacity: fadeIn * (1 - lipsOut),
-    overlayOpacity: overlayFade,
-    teethMul: teethFade,
-  };
+function markSeen() {
+  try {
+    sessionStorage.setItem(STORAGE_KEY, "1");
+  } catch {
+    /* private mode fallback */
+  }
 }
 
-/* -------------------------------------------------------------------------- */
-/* Component                                                                  */
-/* -------------------------------------------------------------------------- */
-
-type Phase = "play" | "reduced" | "off";
-
-/**
- * Compute the initial phase synchronously during client render.
- * On the server we return "off" (SSR never shows the intro), which avoids
- * a brief flash of the overlay. On the client the initializer reads
- * sessionStorage synchronously.
- */
-function getInitialPhase(): Phase {
-  if (typeof window === "undefined") return "off";
-  if (wasSeen()) return "off";
-  const reduced = typeof window.matchMedia === "function"
-    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  return reduced ? "reduced" : "play";
-}
-
-export function WelcomeIntro() {
+export function WelcomeIntro({ forcePlay = false }: { forcePlay?: boolean }) {
   const reactId = useId().replace(/:/g, "");
-  const [phase, setPhase] = useState<Phase>(getInitialPhase);
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number>(0);
+  const [phase, setPhase] = useState<"loading" | "play" | "reduced" | "off">(() => {
+    if (typeof window === "undefined") return "loading";
+    if (!forcePlay && wasSeen()) return "off";
+    const reduced = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    return reduced ? "reduced" : "play";
+  });
+  const [progress, setProgress] = useState(0); // 0 to 1
 
-  // SVG element refs
-  const upperRef = useRef<SVGPathElement>(null);
-  const lowerRef = useRef<SVGPathElement>(null);
-  const lowerShadeRef = useRef<SVGPathElement>(null);
-  const lowerClipRef = useRef<SVGPathElement>(null);
-  const cavityRef = useRef<SVGPathElement>(null);
-  const clipRef = useRef<SVGPathElement>(null);
-  const teethRef = useRef<SVGPathElement>(null);
-  const lowerTeethRef = useRef<SVGPathElement>(null);
-  const toothLinesRef = useRef<SVGGElement>(null);
-  const holeRef = useRef<SVGPathElement>(null);
-  const highlightRef = useRef<SVGEllipseElement>(null);
-  const upperHighlightRef = useRef<SVGEllipseElement>(null);
-  const wetRef = useRef<SVGPathElement>(null);
-  const lipsGroupRef = useRef<SVGGElement>(null);
-  const innerShadowRef = useRef<SVGPathElement>(null);
-  const upperShinePath = useRef<SVGPathElement>(null);
-  const lowerShinePath = useRef<SVGPathElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const portalHoleRef = useRef<SVGPathElement>(null);
+  const rafRef = useRef<number>(0);
 
   const finish = useCallback(() => {
     markSeen();
     setPhase("off");
+    document.documentElement.style.overflow = "";
   }, []);
 
-  /* ---- Animation loop ---- */
-  useLayoutEffect(() => {
+  // Client hydration check if initialized as "loading" on SSR
+  useEffect(() => {
+    if (phase !== "loading") return;
+    const shouldSkip = !forcePlay && wasSeen();
+    if (shouldSkip) {
+      // Defer state update outside of synchronous render phase
+      requestAnimationFrame(() => setPhase("off"));
+      return;
+    }
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    requestAnimationFrame(() => setPhase(reduced ? "reduced" : "play"));
+  }, [forcePlay, phase]);
+
+  // Main animation driver
+  useEffect(() => {
     if (phase !== "play" && phase !== "reduced") return;
 
-    const overlay = overlayRef.current;
     const html = document.documentElement;
-    const previousOverflow = html.style.overflow;
+    const prevOverflow = html.style.overflow;
     html.style.overflow = "hidden";
 
-    const apply = (
-      pose: LipPose,
-      holeScale: number,
-      lipsOpacity: number,
-      overlayOpacity: number,
-      teethMul: number,
-    ) => {
-      const upper = upperPath(pose);
-      const lower = lowerPath(pose);
-      const aperture = aperturePath(pose);
-      const teeth = teethPath(pose);
-      const tLines = toothLines(pose);
-      const lTeeth = lowerTeethPath(pose);
+    const startTime = performance.now();
 
-      upperRef.current?.setAttribute("d", upper);
-      lowerRef.current?.setAttribute("d", lower);
-      lowerShadeRef.current?.setAttribute("d", lower);
-      lowerClipRef.current?.setAttribute("d", lower);
-      cavityRef.current?.setAttribute("d", aperture);
-      clipRef.current?.setAttribute("d", aperture);
-      holeRef.current?.setAttribute("d", aperture);
-      holeRef.current?.setAttribute(
-        "transform",
-        `translate(500 510) scale(${holeScale * LIP_SCALE}) translate(-500 -510)`,
-      );
-
-      // Upper lip shine (follows the cupid's bow)
-      upperShinePath.current?.setAttribute("d", upper);
-      // Lower lip shine (follows the lower contour)
-      lowerShinePath.current?.setAttribute("d", lower);
-
-      // Teeth
-      teethRef.current?.setAttribute("d", teeth);
-      teethRef.current?.setAttribute("opacity", String(pose.teeth.opacity * teethMul));
-
-      // Tooth separation lines
-      if (toothLinesRef.current) {
-        const lines = toothLinesRef.current.children;
-        for (let i = 0; i < lines.length; i++) {
-          const lineEl = lines[i] as SVGPathElement;
-          if (tLines[i]) {
-            lineEl.setAttribute("d", tLines[i]);
-            lineEl.setAttribute("opacity", String(pose.teeth.opacity * teethMul * 0.15));
-          } else {
-            lineEl.setAttribute("opacity", "0");
-          }
-        }
-      }
-
-      // Lower teeth
-      if (lowerTeethRef.current) {
-        lowerTeethRef.current.setAttribute("d", lTeeth || "M0 0");
-        lowerTeethRef.current.setAttribute("opacity", lTeeth ? String(pose.teeth.opacity * teethMul * 0.5) : "0");
-      }
-
-      // Wet line
-      wetRef.current?.setAttribute("d", wetLinePath(pose));
-
-      // Inner shadow under upper lip
-      if (innerShadowRef.current) {
-        innerShadowRef.current.setAttribute("d", aperture);
-        innerShadowRef.current.setAttribute("opacity", String(pose.innerShadowOpacity * teethMul));
-      }
-
-      // Lower lip highlight
-      highlightRef.current?.setAttribute("cx", String(pose.highlight.cx));
-      highlightRef.current?.setAttribute("cy", String(pose.highlight.cy));
-      highlightRef.current?.setAttribute("rx", String(pose.highlight.rx));
-      highlightRef.current?.setAttribute("ry", String(pose.highlight.ry));
-      highlightRef.current?.setAttribute("opacity", String(pose.highlight.opacity));
-
-      // Upper lip philtrum highlight
-      upperHighlightRef.current?.setAttribute("cx", String(pose.upperHighlight.cx));
-      upperHighlightRef.current?.setAttribute("cy", String(pose.upperHighlight.cy));
-      upperHighlightRef.current?.setAttribute("rx", String(pose.upperHighlight.rx));
-      upperHighlightRef.current?.setAttribute("ry", String(pose.upperHighlight.ry));
-      upperHighlightRef.current?.setAttribute("opacity", String(pose.upperHighlight.opacity));
-
-      if (lipsGroupRef.current) lipsGroupRef.current.style.opacity = String(lipsOpacity);
-      if (overlay) overlay.style.opacity = String(overlayOpacity);
-    };
-
-    const start = performance.now();
     const tick = (now: number) => {
-      const elapsed = now - start;
+      const elapsed = now - startTime;
 
       if (phase === "reduced") {
         const t = Math.min(1, elapsed / REDUCED_DURATION);
-        apply(POSE_CLOSED, 0.001, 1 - t, 1 - easeOutCubic(t), 0);
-        if (t < 1) rafRef.current = requestAnimationFrame(tick);
-        else finish();
+        setProgress(t);
+        if (t >= 1) {
+          finish();
+        } else {
+          rafRef.current = requestAnimationFrame(tick);
+        }
         return;
       }
 
-      const { pose, hole, lipsOpacity, overlayOpacity, teethMul } = poseAt(elapsed);
-      apply(pose, hole, lipsOpacity, overlayOpacity, teethMul);
+      const t = Math.min(1, elapsed / DURATION);
+      setProgress(t);
 
-      if (elapsed < DURATION) rafRef.current = requestAnimationFrame(tick);
-      else finish();
+      // Dynamically update SVG portal mask scale during portal reveal (t: 0.65 to 1.0)
+      if (portalHoleRef.current) {
+        if (t < 0.62) {
+          // Closed portal
+          portalHoleRef.current.setAttribute(
+            "transform",
+            "translate(512 485) scale(0.001) translate(-512 -485)"
+          );
+        } else {
+          // Expand portal through the mouth aperture
+          const portalT = (t - 0.62) / 0.38; // 0 to 1
+          // Exponential easing for dramatic zoom-in
+          const scale = 0.001 + Math.pow(portalT, 3.2) * 55;
+          portalHoleRef.current.setAttribute(
+            "transform",
+            `translate(512 485) scale(${scale.toFixed(3)}) translate(-512 -485)`
+          );
+        }
+      }
+
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        finish();
+      }
     };
 
-    apply(POSE_CLOSED, 0.001, 0, 1, 0);
     rafRef.current = requestAnimationFrame(tick);
 
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") finish();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") finish();
     };
     window.addEventListener("keydown", onKey);
 
     return () => {
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener("keydown", onKey);
-      html.style.overflow = previousOverflow;
+      html.style.overflow = prevOverflow;
     };
   }, [phase, finish]);
 
-  if (phase === "off") return null;
+  if (phase === "off" || phase === "loading") {
+    // When inactive, render a discreet helper pill at bottom-left in dev mode or for users
+    return (
+      <aside className="fixed bottom-4 left-4 z-40 hidden sm:block">
+        <button
+          type="button"
+          onClick={() => {
+            sessionStorage.removeItem(STORAGE_KEY);
+            setPhase("play");
+            setProgress(0);
+          }}
+          className="group flex items-center gap-2 rounded-full border border-teal/20 bg-white/90 px-4 py-2 text-xs font-medium text-teal-deep shadow-sm backdrop-blur-md transition-all hover:border-teal hover:bg-teal hover:text-white"
+          title="إعادة تشغيل ترحيب العيادة"
+        >
+          <Sparkles className="size-3.5 text-amber transition-transform group-hover:rotate-12 group-hover:text-white" />
+          <span>مشاهدة ترحيب العيادة</span>
+        </button>
+      </aside>
+    );
+  }
 
-  /* ---- SVG IDs (guaranteed unique with useId) ---- */
-  const maskId = `intro-portal-${reactId}`;
-  const clipId = `intro-teeth-${reactId}`;
-  const lowerClipId = `intro-lower-${reactId}`;
-  const upperClipId = `intro-upper-${reactId}`;
-  const filterId = `intro-soft-${reactId}`;
-  const upperGrad = `intro-ug-${reactId}`;
-  const upperGrad2 = `intro-ug2-${reactId}`;
-  const lowerGrad = `intro-lg-${reactId}`;
-  const lowerRadial = `intro-lr-${reactId}`;
-  const cavityGrad = `intro-cg-${reactId}`;
-  const innerShadowGrad = `intro-is-${reactId}`;
-  const shineGrad = `intro-sh-${reactId}`;
-  const lowerShineGrad = `intro-lsh-${reactId}`;
-  const gumGrad = `intro-gum-${reactId}`;
-  const showLips = phase !== "reduced";
+  // Animation timeline values calculated from progress (0 to 1)
+  // 1. Initial State (0 to 0.20): Closed lips + warm welcome message
+  // 2. The Smile (0.20 to 0.55): Lips blossom into radiant smile
+  // 3. The Hold (0.55 to 0.65): Luminous dental shine
+  // 4. Portal Open & Website Reveal (0.65 to 1.0): Camera zooms through smile into site
+
+  // Smile morph opacity (0 = closed lips, 1 = smiling lips)
+  const smileOpacity = Math.min(1, Math.max(0, (progress - 0.2) / 0.35));
+
+  // Subtle camera push-in / dolly zoom effect
+  const zoomScale = 1 + Math.pow(progress, 2.5) * 0.45;
+
+  // Header welcome text fade out as smile takes center stage
+  const textOpacity = progress < 0.25 ? 1 : Math.max(0, 1 - (progress - 0.25) / 0.25);
+
+  // Overlay fadeout at the very end
+  const overlayOpacity = progress > 0.88 ? Math.max(0, 1 - (progress - 0.88) / 0.12) : 1;
+
+  const maskId = `welcome-portal-mask-${reactId}`;
 
   return (
     <div
-      ref={overlayRef}
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-alabaster"
+      ref={containerRef}
+      className="fixed inset-0 z-[200] flex flex-col items-center justify-between overflow-hidden bg-alabaster select-none"
+      style={{ opacity: overlayOpacity }}
       role="dialog"
       aria-modal="true"
-      aria-label="مقدمة الموقع"
+      aria-label="مقدمة ترحيب Dentivilla"
     >
-      <svg
-        className="absolute inset-0 h-full w-full"
-        viewBox={`0 0 ${VIEW} ${VIEW}`}
-        preserveAspectRatio="xMidYMid slice"
-        aria-hidden="true"
-      >
+      {/* SVG Mask defining the mouth aperture portal */}
+      <svg className="absolute inset-0 h-0 w-0" aria-hidden="true">
         <defs>
-          {/* ---- Upper lip gradient: deep rose tones with warmth ---- */}
-          <linearGradient id={upperGrad} x1="50%" y1="0%" x2="50%" y2="100%">
-            <stop offset="0%" stopColor="#8b3a48" />
-            <stop offset="30%" stopColor="#b25668" />
-            <stop offset="60%" stopColor="#c97080" />
-            <stop offset="100%" stopColor="#d4828e" />
-          </linearGradient>
-
-          {/* Upper lip shadow layer for depth */}
-          <radialGradient id={upperGrad2} cx="50%" cy="80%" r="60%">
-            <stop offset="0%" stopColor="#6b2838" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#6b2838" stopOpacity="0" />
-          </radialGradient>
-
-          {/* ---- Lower lip gradient: warmer, more luminous ---- */}
-          <linearGradient id={lowerGrad} x1="50%" y1="0%" x2="50%" y2="100%">
-            <stop offset="0%" stopColor="#d88a94" />
-            <stop offset="35%" stopColor="#c87884" />
-            <stop offset="70%" stopColor="#ba6672" />
-            <stop offset="100%" stopColor="#8b3a48" />
-          </linearGradient>
-
-          {/* Lower lip radial glow */}
-          <radialGradient id={lowerRadial} cx="50%" cy="30%" r="65%">
-            <stop offset="0%" stopColor="#f0c8cc" stopOpacity="0.5" />
-            <stop offset="40%" stopColor="#d4828e" stopOpacity="0.15" />
-            <stop offset="100%" stopColor="#6b2838" stopOpacity="0.3" />
-          </radialGradient>
-
-          {/* ---- Mouth cavity: dark interior ---- */}
-          <radialGradient id={cavityGrad} cx="50%" cy="42%" r="65%">
-            <stop offset="0%" stopColor="#200c10" />
-            <stop offset="60%" stopColor="#140608" />
-            <stop offset="100%" stopColor="#0a0304" />
-          </radialGradient>
-
-          {/* Inner shadow under upper lip */}
-          <linearGradient id={innerShadowGrad} x1="50%" y1="0%" x2="50%" y2="100%">
-            <stop offset="0%" stopColor="#0a0304" stopOpacity="0.8" />
-            <stop offset="40%" stopColor="#0a0304" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#0a0304" stopOpacity="0" />
-          </linearGradient>
-
-          {/* ---- Upper lip specular shine ---- */}
-          <linearGradient id={shineGrad} x1="50%" y1="0%" x2="50%" y2="100%">
-            <stop offset="0%" stopColor="#fce4e6" stopOpacity="0.5" />
-            <stop offset="50%" stopColor="#fce4e6" stopOpacity="0.12" />
-            <stop offset="100%" stopColor="#fce4e6" stopOpacity="0" />
-          </linearGradient>
-
-          {/* ---- Lower lip specular shine ---- */}
-          <radialGradient id={lowerShineGrad} cx="50%" cy="35%" r="50%">
-            <stop offset="0%" stopColor="#fce4e6" stopOpacity="0.45" />
-            <stop offset="60%" stopColor="#fce4e6" stopOpacity="0.08" />
-            <stop offset="100%" stopColor="#fce4e6" stopOpacity="0" />
-          </radialGradient>
-
-          {/* ---- Gum gradient ---- */}
-          <linearGradient id={gumGrad} x1="50%" y1="0%" x2="50%" y2="100%">
-            <stop offset="0%" stopColor="#d4727e" />
-            <stop offset="100%" stopColor="#a84858" />
-          </linearGradient>
-
-          {/* ---- Soft shadow filter ---- */}
-          <filter id={filterId} x="-25%" y="-25%" width="150%" height="150%">
-            <feDropShadow dx="0" dy="8" stdDeviation="18" floodColor="#0c4f4d" floodOpacity="0.10" />
-            <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#4a1c26" floodOpacity="0.08" />
-          </filter>
-
-          {/* ---- Clip paths ---- */}
-          <clipPath id={clipId}>
-            <path ref={clipRef} d={aperturePath(POSE_CLOSED)} />
-          </clipPath>
-          <clipPath id={lowerClipId}>
-            <path ref={lowerClipRef} d={lowerPath(POSE_CLOSED)} />
-          </clipPath>
-          <clipPath id={upperClipId}>
-            <path d={upperPath(POSE_CLOSED)} />
-          </clipPath>
-
-          {/* ---- Portal mask: white everywhere except the growing hole ---- */}
-          <mask id={maskId} maskUnits="userSpaceOnUse">
-            <rect x="0" y="0" width={VIEW} height={VIEW} fill="white" />
-            <path
-              ref={holeRef}
-              d={aperturePath(POSE_CLOSED)}
-              fill="black"
-              transform="translate(500 510) scale(0.001) translate(-500 -510)"
-            />
-          </mask>
-        </defs>
-
-        {/* Everything rendered inside the portal mask */}
-        <g mask={`url(#${maskId})`}>
-          {/* Background */}
-          <rect width={VIEW} height={VIEW} fill="#faf9f6" />
-
-          {showLips ? (
-            <g
-              ref={lipsGroupRef}
-              filter={`url(#${filterId})`}
-              transform={`translate(500 510) scale(${LIP_SCALE}) translate(-500 -510)`}
-              style={{ opacity: 0 }}
-            >
-              {/* === LAYER 1: Dark mouth cavity === */}
+          <mask id={maskId} maskUnits="userSpaceOnUse" width="100%" height="100%">
+            {/* White = keep intro visible */}
+            <rect width="100%" height="100%" fill="white" />
+            {/* Black hole = punches through into the website beneath */}
+            <g transform="translate(0, 0)">
               <path
-                ref={cavityRef}
-                d={aperturePath(POSE_CLOSED)}
-                fill={`url(#${cavityGrad})`}
-              />
-
-              {/* === LAYER 2: Gum tissue visible behind teeth === */}
-              <rect
-                x="400" y="460" width="200" height="100"
-                fill={`url(#${gumGrad})`}
-                clipPath={`url(#${clipId})`}
-                opacity="0.4"
-              />
-
-              {/* === LAYER 3: Upper teeth === */}
-              <path
-                ref={teethRef}
-                d={teethPath(POSE_CLOSED)}
-                fill="#f5f2ec"
-                opacity="0"
-                clipPath={`url(#${clipId})`}
-              />
-
-              {/* Tooth separation lines for realism */}
-              <g ref={toothLinesRef} clipPath={`url(#${clipId})`}>
-                {Array.from({ length: 7 }).map((_, i) => (
-                  <path
-                    key={i}
-                    d="M0 0"
-                    fill="none"
-                    stroke="#c4b8a8"
-                    strokeWidth="0.6"
-                    opacity="0"
-                  />
-                ))}
-              </g>
-
-              {/* === LAYER 4: Lower teeth === */}
-              <path
-                ref={lowerTeethRef}
-                d="M0 0"
-                fill="#ebe8e2"
-                opacity="0"
-                clipPath={`url(#${clipId})`}
-              />
-
-              {/* === LAYER 5: Inner shadow under upper lip edge === */}
-              <path
-                ref={innerShadowRef}
-                d={aperturePath(POSE_CLOSED)}
-                fill={`url(#${innerShadowGrad})`}
-                opacity="0"
-                clipPath={`url(#${clipId})`}
-              />
-
-              {/* === LAYER 6: Upper lip === */}
-              <path
-                ref={upperRef}
-                d={upperPath(POSE_CLOSED)}
-                fill={`url(#${upperGrad})`}
-              />
-              {/* Upper lip depth shadow overlay */}
-              <path
-                d={upperPath(POSE_CLOSED)}
-                fill={`url(#${upperGrad2})`}
-              />
-              {/* Upper lip specular highlight band */}
-              <path
-                ref={upperShinePath}
-                d={upperPath(POSE_CLOSED)}
-                fill={`url(#${shineGrad})`}
-                style={{ mixBlendMode: "soft-light" }}
-              />
-
-              {/* Philtrum area highlight */}
-              <ellipse
-                ref={upperHighlightRef}
-                cx={POSE_CLOSED.upperHighlight.cx}
-                cy={POSE_CLOSED.upperHighlight.cy}
-                rx={POSE_CLOSED.upperHighlight.rx}
-                ry={POSE_CLOSED.upperHighlight.ry}
-                fill="#fce4e6"
-                opacity={POSE_CLOSED.upperHighlight.opacity}
-                style={{ mixBlendMode: "soft-light" }}
-              />
-
-              {/* === LAYER 7: Lower lip === */}
-              <path
-                ref={lowerRef}
-                d={lowerPath(POSE_CLOSED)}
-                fill={`url(#${lowerGrad})`}
-              />
-              {/* Lower lip radial glow overlay */}
-              <path
-                ref={lowerShadeRef}
-                d={lowerPath(POSE_CLOSED)}
-                fill={`url(#${lowerRadial})`}
-              />
-              {/* Lower lip shine */}
-              <path
-                ref={lowerShinePath}
-                d={lowerPath(POSE_CLOSED)}
-                fill={`url(#${lowerShineGrad})`}
-                style={{ mixBlendMode: "screen" }}
-              />
-
-              {/* Lower lip central highlight (the rounded shine) */}
-              <ellipse
-                ref={highlightRef}
-                cx={POSE_CLOSED.highlight.cx}
-                cy={POSE_CLOSED.highlight.cy}
-                rx={POSE_CLOSED.highlight.rx}
-                ry={POSE_CLOSED.highlight.ry}
-                fill="#fce4e6"
-                opacity={POSE_CLOSED.highlight.opacity}
-                clipPath={`url(#${lowerClipId})`}
-                style={{ mixBlendMode: "soft-light" }}
-              />
-
-              {/* === LAYER 8: Wet line (lip junction) === */}
-              <path
-                ref={wetRef}
-                d={wetLinePath(POSE_CLOSED)}
-                fill="none"
-                stroke="#5a2230"
-                strokeWidth="1.2"
-                strokeLinecap="round"
-                opacity="0.3"
-              />
-              {/* Thin bright line just above the wet line (moisture reflection) */}
-              <path
-                d={wetLinePath(POSE_CLOSED)}
-                fill="none"
-                stroke="#f0c8cc"
-                strokeWidth="0.5"
-                strokeLinecap="round"
-                opacity="0.2"
-                transform="translate(0 -1.5)"
+                ref={portalHoleRef}
+                d="M 195 435 C 330 405 694 405 829 435 C 750 535 512 565 274 535 Z"
+                fill="black"
+                transform="translate(512 485) scale(0.001) translate(-512 -485)"
               />
             </g>
-          ) : null}
-        </g>
+          </mask>
+        </defs>
       </svg>
 
-      {/* Skip button */}
-      <button
-        type="button"
-        onClick={finish}
-        className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 rounded-full border border-line bg-white/85 px-5 py-2 text-sm font-medium text-muted shadow-sm backdrop-blur-sm transition-colors hover:border-teal/40 hover:text-teal-deep"
+      {/* Ambient warm clinic atmosphere */}
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(197,155,76,0.08)_0%,rgba(250,249,246,0)_65%)]"
+        aria-hidden="true"
+      />
+
+      {/* Top Welcoming Header — establishes this as a warm hospitality welcome, NOT a loading screen */}
+      <header
+        className="relative z-20 pt-8 text-center transition-opacity duration-500 sm:pt-12"
+        style={{ opacity: textOpacity }}
       >
-        تخطي المقدمة
-      </button>
+        <span className="inline-flex items-center gap-2 rounded-full border border-amber/30 bg-amber-light/80 px-4 py-1 text-xs font-semibold text-amber-dark backdrop-blur-sm">
+          <Sparkles className="size-3 text-amber" />
+          عيادة Dentivilla لطب وتجميل الأسنان
+        </span>
+        <h1 className="mt-3 text-2xl font-bold tracking-tight text-teal-deep sm:text-3xl">
+          ابتسامة ترحب بك
+        </h1>
+        <p className="mt-1 text-xs font-medium text-muted sm:text-sm">
+          د. محمد ياسر الجبالي · استشاري تجميل وزراعة الأسنان
+        </p>
+      </header>
+
+      {/* Central Visual: Hyper-realistic human lips transitioning into a radiant smile */}
+      <div className="relative z-10 my-auto flex items-center justify-center">
+        <div
+          className="relative aspect-square w-[340px] sm:w-[460px] md:w-[540px] lg:w-[600px] overflow-hidden rounded-full shadow-[0_20px_60px_-15px_rgba(12,79,77,0.12)]"
+          style={{
+            transform: `scale(${zoomScale})`,
+            transition: "transform 0.05s linear",
+          }}
+        >
+          {/* Layer 1: Closed Natural Lips */}
+          <div className="absolute inset-0">
+            <Image
+              src="/images/intro/lips-closed.jpg"
+              alt="شفاه طبيعية متناسقة"
+              fill
+              priority
+              className="object-cover"
+              sizes="(max-width: 768px) 340px, 600px"
+            />
+          </div>
+
+          {/* Layer 2: Radiant Natural Smile (cross-fades seamlessly over closed lips) */}
+          <div
+            className="absolute inset-0 transition-opacity duration-75"
+            style={{ opacity: smileOpacity }}
+          >
+            <Image
+              src="/images/intro/lips-smile.jpg"
+              alt="ابتسامة طبيعية مشرقة"
+              fill
+              priority
+              className="object-cover"
+              sizes="(max-width: 768px) 340px, 600px"
+            />
+          </div>
+
+          {/* Luminous dental enamel gleam during the smile hold */}
+          <div
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_48%,rgba(255,255,255,0.45)_0%,rgba(255,255,255,0)_40%)] mix-blend-overlay transition-opacity duration-300"
+            style={{
+              opacity: progress > 0.45 && progress < 0.75 ? 1 : 0,
+            }}
+          />
+
+          {/* Golden portal rim light as the transition approaches */}
+          <div
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(197,155,76,0.3)_0%,rgba(12,79,77,0)_60%)] mix-blend-screen transition-opacity duration-500"
+            style={{
+              opacity: progress > 0.6 ? Math.min(1, (progress - 0.6) / 0.25) : 0,
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Bottom Bar: Elegant Skip / Enter Action */}
+      <footer className="relative z-20 pb-8 sm:pb-12">
+        <button
+          type="button"
+          onClick={finish}
+          className="group inline-flex items-center gap-2 rounded-full border border-line bg-white/90 px-6 py-2.5 text-sm font-semibold text-teal-deep shadow-md backdrop-blur-md transition-all hover:border-teal/40 hover:bg-teal-light/60 hover:text-teal-deep"
+        >
+          <span>تخطي والبدء</span>
+          <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
+        </button>
+      </footer>
     </div>
   );
 }
