@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { ArrowLeft, Award, GraduationCap, Microscope, Phone, Presentation } from "lucide-react";
+import { ArrowLeft, FileCheck, Microscope, Phone, ShieldCheck, Sparkles } from "lucide-react";
 import { BookLink } from "@/components/booking/BookLink";
 import { DoctorPortrait } from "@/components/site/DoctorPortrait";
 import { getHoursSummary } from "@/lib/clinic-hours";
@@ -8,15 +8,15 @@ import { getContactInfo } from "@/lib/site-settings";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "عن الطبيب",
-  description: `تعرّف على ${site.doctor.name}، ${site.doctor.title}، ومؤسس عيادة Dentivilla بالقاهرة.`,
+  title: "عن العيادة",
+  description: `تعرّف على رؤية عيادة Dentivilla وفلسفة الرعاية القائمة على الدقة والراحة بالقاهرة.`,
 };
 
-const credentials = [
-  { icon: Award, title: "البورد الألماني", text: "تجميل وزراعة الأسنان المتقدمة والحلول الجراحية الموجهة رقمياً." },
-  { icon: GraduationCap, title: "ماجستير سريري", text: "إعادة تأهيل الفم الكامل وتجميل الابتسامة وعلاج الإطباق." },
-  { icon: Microscope, title: "عضو ESCD", text: "الجمعية الأوروبية لطب الأسنان التجميلي." },
-  { icon: Presentation, title: "محاضر ومدرب", text: "التصميم الرقمي للابتسامة (Digital Smile Design)." },
+const commitments = [
+  { icon: Microscope, title: "تشخيص رقمي مكبّر", text: "تصوير ثلاثي الأبعاد وفحص مجهري يحدد بدقة مصدر المشكلة قبل البدء بأي تدخل." },
+  { icon: FileCheck, title: "خطة واضحة ومسبقة", text: "شفافية تامة في خطوات العلاج ومدته وتكلفته المحددة دون أي تكاليف خفية أو مفاجآت." },
+  { icon: Sparkles, title: "علاج لطيف بلا ألم", text: "استخدام أحدث بروتوكولات التخدير الموضعي وتقنيات الراحة لتجربة مطمئنة بلا توتر." },
+  { icon: ShieldCheck, title: "تعقيم بمواصفات أوروبية", text: "بروتوكول تعقيم صارم وأدوات فردية تضمن سلامتك التامة في كل زيارة." },
 ];
 
 export default async function AboutPage() {
@@ -25,16 +25,16 @@ export default async function AboutPage() {
     <div className="container-page pt-28 pb-20 md:pt-36">
       <section className="grid items-center gap-12 lg:grid-cols-12">
         <div className="lg:col-span-7">
-          <p className="eyebrow">السيرة المهنية</p>
+          <p className="eyebrow">رؤيتنا الطبية</p>
           <h1 className="heading-xl">{site.doctor.name}</h1>
-          <p className="mt-2 text-xl text-amber-dark">رؤية طبية تجمع بين الدقة والفن.</p>
+          <p className="mt-2 text-xl text-amber-dark">رؤية طبية تجمع بين الدقة، الأمان، وراحة المريض.</p>
           <p className="lede mt-6">
-            {site.doctor.title} وإعادة تأهيل الفم الكامل، بخبرة سريرية تتجاوز ١٤ عاماً. يتبنى نهج طب الأسنان المحافظ
-            الذي يقدّم الحفاظ على بنية السن الطبيعية على أي اعتبار آخر.
+            يقود {site.doctor.name} عيادة Dentivilla برؤية قائمة على الرعاية الفردية الصادقة وتبني نهج طب الأسنان المحافظ؛
+            حيث نضع الحفاظ على بنية السن الطبيعية وراحة المريض على رأس كل قرار علاجي.
           </p>
           <p className="lede mt-4">
-            يعتمد على الفحص المكبّر والأشعة المقطعية ثلاثية الأبعاد (CBCT) في التشخيص، ويضع لكل مريض خطة مكتوبة يفهمها
-            ويوافق عليها قبل بدء أي إجراء.
+            نعتمد على الفحص الرقمي والأشعة ثلاثية الأبعاد (CBCT) للوصول إلى أدق تشخيص، ونحرص على مناقشة خطة مكتوبة
+            وواضحة معك قبل البدء، لتكون مطمئناً لكل خطوة وتكلفتها دون استعجال.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <BookLink intent={{ treatmentSlug: "consultation" }} className="btn-primary">
@@ -52,13 +52,13 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <section className="mt-24" aria-labelledby="credentials-title">
-        <p className="eyebrow">المؤهلات</p>
-        <h2 id="credentials-title" className="heading-lg">
-          الدرجات العلمية والعضويات
+      <section className="mt-24" aria-labelledby="standards-title">
+        <p className="eyebrow">معاييرنا</p>
+        <h2 id="standards-title" className="heading-lg">
+          التزاماتنا الطبية في كل جلسة
         </h2>
         <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {credentials.map(({ icon: Icon, title, text }) => (
+          {commitments.map(({ icon: Icon, title, text }) => (
             <li key={title} className="card-soft rounded-[1.5rem] p-6">
               <span className="grid size-11 place-items-center rounded-xl bg-teal-light text-teal-deep">
                 <Icon className="size-5" aria-hidden />
@@ -75,10 +75,10 @@ export default async function AboutPage() {
           <div className="p-8 sm:p-12 lg:col-span-7">
             <p className="eyebrow eyebrow-light">فلسفة العيادة</p>
             <h2 id="philosophy-title" className="text-3xl leading-tight font-bold sm:text-4xl">
-              «الإنسان أولاً، ثم تبدأ الخطة»
+              «الاستماع أولاً، ثم تبدأ الرعاية»
             </h2>
             <p className="mt-5 leading-8 text-teal-light/85">
-              الابتسامة ليست قالباً مكرراً. لكل مريض ملامحه وتاريخه الصحي وتوقعاته؛ لذلك نمنح الوقت للاستماع، ونشرح
+              الابتسامة ليست قالباً مكرراً. لكل مريض ملامحه وتاريخه الصحي وتوقعاته؛ لذلك نمنح الوقت الكامل للاستماع، ونشرح
               تفاصيل الخطة قبل أن نلمس أياً من أسنانك.
             </p>
             <dl className="mt-8 grid gap-6 border-t border-white/10 pt-6 text-sm sm:grid-cols-2">

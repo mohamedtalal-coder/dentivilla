@@ -7,7 +7,7 @@ import { CalendarCheck, Menu, X } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 
 const navLinks = [
-  { href: "/#about", label: "الطبيب" },
+  { href: "/#about", label: "عن العيادة" },
   { href: "/#concerns", label: "احتياجك" },
   { href: "/treatments", label: "العلاجات" },
   { href: "/#results", label: "قبل وبعد" },
@@ -63,6 +63,12 @@ export function Header() {
         </ul>
 
         <div className="flex items-center gap-1.5">
+          <Link
+            href="/booking/status"
+            className="hidden sm:inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold text-neutral-600 transition-colors hover:bg-teal-light hover:text-teal-deep"
+          >
+            متابعة طلب الحجز
+          </Link>
           <Link href="/booking" className="btn-primary px-4 py-2.5 whitespace-nowrap sm:px-5">
             <CalendarCheck className="size-4" aria-hidden />
             <span className="sm:hidden">احجز</span>

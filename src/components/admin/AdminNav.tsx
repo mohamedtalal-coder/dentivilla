@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Clock, ExternalLink, Images, LayoutDashboard, ListChecks, Settings, Users } from "lucide-react";
+import { CalendarDays, Clock, ExternalLink, HelpCircle, Images, LayoutDashboard, ListChecks, Settings, Tag, Users } from "lucide-react";
 
 const LINKS = [
   { href: "/admin", label: "نظرة عامة", icon: LayoutDashboard, exact: true },
@@ -11,6 +11,8 @@ const LINKS = [
   { href: "/admin/patients", label: "المرضى", icon: Users },
   { href: "/admin/availability", label: "ساعات العمل والتوافر", icon: Clock },
   { href: "/admin/cases", label: "حالات قبل وبعد", icon: Images },
+  { href: "/admin/offers", label: "العروض الخاصة", icon: Tag },
+  { href: "/admin/faq", label: "الأسئلة الشائعة", icon: HelpCircle },
   { href: "/admin/settings", label: "التواصل والسوشيال", icon: Settings },
 ];
 

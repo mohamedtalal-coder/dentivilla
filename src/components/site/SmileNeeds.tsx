@@ -204,8 +204,17 @@ export function SmileNeeds({ whatsappUrl }: { whatsappUrl: string }) {
             aria-labelledby={`need-tab-${active.id}`}
             className="card-soft min-w-0 overflow-hidden rounded-[1.75rem] lg:col-span-7"
           >
-            <div key={active.id} className="grid animate-fade-in gap-0 md:grid-cols-[1fr_200px]">
-              <div className="p-6 sm:p-8">
+            <div key={active.id} className="grid animate-fade-in grid-cols-1 md:grid-cols-[1fr_200px]">
+              <div className="flex items-center justify-center bg-gradient-to-b from-teal-light/70 to-ivory px-6 py-4 md:order-2 md:py-6">
+                <Image
+                  src={active.image}
+                  alt={active.imageAlt}
+                  width={180}
+                  height={300}
+                  className="h-20 w-auto object-contain drop-shadow-[0_18px_22px_rgba(12,79,77,0.22)] sm:h-24 md:h-64"
+                />
+              </div>
+              <div className="p-6 sm:p-8 md:order-1">
                 <h3 className="heading-md">{active.title}</h3>
                 <blockquote className="mt-4 border-s-2 border-amber ps-4 text-[15px] leading-7 text-muted">
                   «{active.concern}»
@@ -254,15 +263,7 @@ export function SmileNeeds({ whatsappUrl }: { whatsappUrl: string }) {
                   </a>
                 </div>
               </div>
-              <div className="relative hidden items-center justify-center bg-gradient-to-b from-teal-light/70 to-ivory p-6 md:flex">
-                <Image
-                  src={active.image}
-                  alt={active.imageAlt}
-                  width={180}
-                  height={300}
-                  className="h-64 w-auto object-contain drop-shadow-[0_18px_22px_rgba(12,79,77,0.22)]"
-                />
-              </div>
+
             </div>
           </div>
         </div>

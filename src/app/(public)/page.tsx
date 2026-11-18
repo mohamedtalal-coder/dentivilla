@@ -1,24 +1,42 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Award, GraduationCap, Microscope, Presentation } from "lucide-react";
+import { ArrowLeft, FileCheck, Microscope, ShieldCheck, Sparkles } from "lucide-react";
 import { BookingFlow } from "@/components/booking/BookingFlow";
 import { BookLink } from "@/components/booking/BookLink";
-import { BeforeAfter } from "@/components/site/BeforeAfter";
+import { CasesCarousel } from "@/components/site/CasesCarousel";
 import { DoctorPortrait } from "@/components/site/DoctorPortrait";
 import { Faq } from "@/components/site/Faq";
+import { OffersCarousel } from "@/components/site/OffersCarousel";
 import { PhilosophyPanel } from "@/components/site/PhilosophyPanel";
 import { SmileNeeds } from "@/components/site/SmileNeeds";
 import { ToothJourneyCard } from "@/components/site/ToothJourneyCard";
-import { getFeaturedCase } from "@/lib/cases";
+import { getHomepageCases } from "@/lib/cases";
 import { getContactInfo } from "@/lib/site-settings";
 import { getBookingTreatments } from "@/lib/treatments";
+import { getPublicOffers } from "@/lib/offers";
 import { site } from "@/lib/site";
 
-const credentials = [
-  { icon: Award, title: "البورد الألماني", text: "تجميل وزراعة الأسنان المتقدمة" },
-  { icon: GraduationCap, title: "ماجستير سريري", text: "إعادة تأهيل الفم الكامل وتجميل الابتسامة" },
-  { icon: Microscope, title: "عضو ESCD", text: "الجمعية الأوروبية لطب الأسنان التجميلي" },
-  { icon: Presentation, title: "محاضر دولي", text: "التصميم الرقمي للابتسامة (DSD)" },
+const careStandards = [
+  {
+    icon: Microscope,
+    title: "فحص رقمي مكبّر",
+    text: "تصوير ثلاثي الأبعاد ورؤية مجهرية دقيقة لأصغر التفاصيل لتشخيص سليم قبل البدء.",
+  },
+  {
+    icon: FileCheck,
+    title: "خطة علاجية مكتوبة",
+    text: "نوضح لك الخيارات المتاحة، المدة الزمنية، والتكلفة بالتفصيل دون أي مفاجآت.",
+  },
+  {
+    icon: Sparkles,
+    title: "علاج محافظ ولطيف",
+    text: "أولويتنا الحفاظ على بنيتك السنية الطبيعية، مع أحدث أساليب الراحة بدون ألم.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "أعلى معايير التعقيم",
+    text: "بروتوكولات مكافحة عدوى أوروبية صارمة وأدوات مجهزة بأعلى مواصفات السلامة.",
+  },
 ];
 
 const journey = [
@@ -42,10 +60,11 @@ const journey = [
 ];
 
 export default async function HomePage() {
-  const [treatments, contact, featuredCase] = await Promise.all([
+  const [treatments, contact, homepageCases, offers] = await Promise.all([
     getBookingTreatments(),
     getContactInfo(),
-    getFeaturedCase(),
+    getHomepageCases(4),
+    getPublicOffers(),
   ]);
   const featured = treatments.find((t) => t.slug === "smile-makeover");
   const others = treatments.filter((t) => t.slug !== "smile-makeover" && t.slug !== "consultation").slice(0, 4);
@@ -74,19 +93,45 @@ export default async function HomePage() {
                 ابدأ من احتياجك
               </Link>
             </div>
-            <dl className="mt-12 grid max-w-lg grid-cols-3 divide-x divide-x-reverse divide-line border-t border-line pt-6">
+            <p className="mt-3.5 flex items-center gap-1.5 text-xs text-muted">
+              <span>لديك حجز بالفعل؟</span>
+              <Link
+                href="/booking/status"
+                className="inline-flex items-center gap-1 font-semibold text-teal-mid hover:text-teal-deep hover:underline"
+              >
+                متابعة طلب الحجز
+                <ArrowLeft className="size-3" aria-hidden />
+              </Link>
+            </p>
+            <ul className="mt-12 grid max-w-xl grid-cols-1 gap-4 border-t border-line pt-6 sm:grid-cols-3 sm:gap-6">
               {[
-                { value: site.doctor.experienceYears, label: "عاماً من الخبرة" },
-                { value: site.doctor.smilesCount, label: "ابتسامة ناجحة" },
-                { value: site.doctor.rating, label: "متوسط تقييم المرضى" },
-              ].map((stat) => (
-                <div key={stat.label} className="px-4 first:ps-0">
-                  <dt className="sr-only">{stat.label}</dt>
-                  <dd className="text-2xl font-bold text-teal-deep sm:text-3xl">{stat.value}</dd>
-                  <dd className="mt-1 text-sm text-muted">{stat.label}</dd>
-                </div>
+                {
+                  title: "تشخيص رقمي دقيق",
+                  desc: "فحص مجهري وتصوير ثلاثي الأبعاد قبل أي قرار.",
+                  icon: Microscope,
+                },
+                {
+                  title: "خطة وشفافية ١٠٠٪",
+                  desc: "خطوات واضحة وتكلفة محددة مسبقاً دون مفاجآت.",
+                  icon: FileCheck,
+                },
+                {
+                  title: "جلسات هادئة بلا ألم",
+                  desc: "أحدث أساليب التخدير والراحة لكسر حاجز التوتر.",
+                  icon: Sparkles,
+                },
+              ].map((pillar) => (
+                <li key={pillar.title} className="flex flex-col">
+                  <div className="flex items-center gap-2 font-bold text-teal-deep">
+                    <span className="grid size-7 place-items-center rounded-lg bg-teal-light text-teal-deep">
+                      <pillar.icon className="size-4" aria-hidden />
+                    </span>
+                    <span className="text-sm font-semibold sm:text-base">{pillar.title}</span>
+                  </div>
+                  <p className="mt-1.5 text-xs leading-5 text-muted">{pillar.desc}</p>
+                </li>
               ))}
-            </dl>
+            </ul>
           </div>
           <div className="lg:col-span-5">
             <DoctorPortrait preload />
@@ -94,20 +139,20 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* About */}
+      {/* Care Standards */}
       <section id="about" className="section border-t border-line bg-white" aria-labelledby="about-title">
         <div className="container-page grid items-center gap-12 lg:grid-cols-12">
           <div className="lg:col-span-7">
-            <p className="eyebrow">عن الطبيب</p>
+            <p className="eyebrow">تجربة المريض أولاً</p>
             <h2 id="about-title" className="heading-lg">
-              الإنسان أولاً، ثم تبدأ الخطة.
+              طب أسنان حديث يمنحك الراحة، الشفافية، والنتيجة التي تستحقها.
             </h2>
             <p className="lede mt-5 max-w-2xl">
-              يؤمن {site.doctor.name} بأن أفضل علاج يبدأ بالاستماع. يجمع بين التخطيط الرقمي والعمل تحت التكبير،
-              مع أولوية واضحة: أقل تدخل ممكن للحفاظ على بنية السن الطبيعية.
+              في Dentivilla، نؤمن بأن زيارة طبيب الأسنان لا يجب أن تكون مصدر قلق. نكرّس كامل وقتنا للاستماع إليك وشرح حالتك،
+              معتمدين على أحدث التقنيات الرقمية لنقدم لك علاجاً دقيقاً ومحافظاً يحمي أسنانك الطبيعية.
             </p>
             <ul className="mt-10 grid gap-4 sm:grid-cols-2">
-              {credentials.map(({ icon: Icon, title, text }) => (
+              {careStandards.map(({ icon: Icon, title, text }) => (
                 <li key={title} className="flex gap-4 rounded-2xl border border-line p-5">
                   <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-teal-light text-teal-deep">
                     <Icon className="size-5" aria-hidden />
@@ -119,8 +164,8 @@ export default async function HomePage() {
                 </li>
               ))}
             </ul>
-            <Link href="/about" className="mt-8 inline-flex items-center gap-2 font-semibold text-teal-mid hover:text-teal-deep">
-              السيرة المهنية كاملة
+            <Link href="#experience" className="mt-8 inline-flex items-center gap-2 font-semibold text-teal-mid hover:text-teal-deep">
+              تعرّف على خطوات رحلتك معنا
               <ArrowLeft className="size-4" aria-hidden />
             </Link>
           </div>
@@ -148,15 +193,15 @@ export default async function HomePage() {
 
           <div className="mt-12 grid gap-5 lg:grid-cols-12">
             {featured && (
-              <article className="relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-[2rem] bg-teal-deep p-8 text-white sm:p-10 lg:col-span-7">
+              <article className="relative flex flex-col overflow-hidden rounded-[2rem] bg-teal-deep p-8 text-white sm:min-h-[420px] sm:justify-between sm:p-10 lg:col-span-7">
+                <span className="chip relative w-fit border-white/20 bg-white/10 text-gold-soft">التخصص الأبرز</span>
                 <Image
                   src="/images/teeth/incisor.webp"
                   alt=""
                   width={220}
                   height={570}
-                  className="pointer-events-none absolute -bottom-24 left-4 hidden h-[95%] w-auto drop-shadow-[0_30px_40px_rgba(0,0,0,0.35)] sm:block sm:left-12"
+                  className="pointer-events-none relative mx-auto my-5 h-40 w-auto drop-shadow-[0_20px_28px_rgba(0,0,0,0.3)] sm:absolute sm:-bottom-24 sm:left-12 sm:mx-0 sm:my-0 sm:h-[95%] sm:drop-shadow-[0_30px_40px_rgba(0,0,0,0.35)]"
                 />
-                <span className="chip relative w-fit border-white/20 bg-white/10 text-gold-soft">التخصص الأبرز</span>
                 <div className="relative max-w-sm">
                   <h3 className="text-3xl font-bold">{featured.nameAr}</h3>
                   <p className="mt-3 leading-8 text-teal-light/85">{featured.summaryAr}</p>
@@ -189,21 +234,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <aside className="mt-5 flex flex-col items-start justify-between gap-6 rounded-[1.5rem] border border-amber/30 bg-amber-light p-6 sm:flex-row sm:items-center sm:p-8">
-            <div>
-              <span className="chip border-amber/40 bg-white text-amber-dark">عرض White Friday</span>
-              <h3 className="mt-3 text-xl font-bold text-teal-deep">تبييض الأسنان في العيادة — جلسة واحدة</h3>
-              <p className="mt-1 text-sm text-muted">يشمل تسجيل درجة اللون قبل وبعد الجلسة وإرشادات العناية.</p>
-            </div>
-            <div className="flex items-center gap-5">
-              <p className="text-teal-deep">
-                <span className="text-3xl font-bold">2000</span> <span className="text-sm">ج.م</span>
-              </p>
-              <BookLink intent={{ treatmentSlug: "whitening" }} className="btn-gold">
-                احجز العرض
-              </BookLink>
-            </div>
-          </aside>
+          <OffersCarousel offers={offers} />
         </div>
       </section>
 
@@ -237,19 +268,7 @@ export default async function HomePage() {
             </h2>
             <p className="lede mt-4">اسحب المؤشر — أو استخدم الأسهم في لوحة المفاتيح — للمقارنة.</p>
           </div>
-          <div className="mx-auto mt-10 max-w-4xl">
-            {featuredCase ? (
-              <BeforeAfter
-                beforeSrc={featuredCase.beforeSrc}
-                afterSrc={featuredCase.afterSrc}
-                beforeAlt={`${featuredCase.title} — قبل العلاج`}
-                afterAlt={`${featuredCase.title} — بعد العلاج`}
-                caption={`${featuredCase.title}. نُشرت بموافقة المريض، والنتائج تختلف من حالة لأخرى.`}
-              />
-            ) : (
-              <BeforeAfter caption="صور توضيحية. النتيجة الفعلية تختلف من حالة لأخرى وتُناقش بعد الفحص." />
-            )}
-          </div>
+          <CasesCarousel cases={homepageCases} />
           <p className="mt-6 text-center">
             <Link href="/cases" className="inline-flex items-center gap-2 font-semibold text-teal-mid hover:text-teal-deep">
               المزيد من الحالات
