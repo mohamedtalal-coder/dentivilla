@@ -56,3 +56,56 @@ export async function getFeaturedCase() {
     return null;
   }
 }
+
+const DEFAULT_CASES: PublicCase[] = [
+  {
+    id: "demo-1",
+    title: "تصميم وتجميل الابتسامة",
+    description: "إعادة تناسق اللون ومحاذاة الأسنان مع الحفاظ الكامل على بنيتها الطبيعية.",
+    treatmentSlug: "smile-makeover",
+    beforeSrc: "/images/smile_before.jpg",
+    afterSrc: "/images/smile_after.jpg",
+  },
+  {
+    id: "demo-2",
+    title: "تبييض الأسنان وإشراقة الابتسامة",
+    description: "تفتيح اللون وإزالة التصبغات العميقة بجلسة مريحة واستعادة الإشراقة.",
+    treatmentSlug: "whitening",
+    beforeSrc: "/images/intro/lips-closed.jpg",
+    afterSrc: "/images/intro/lips-smile.jpg",
+  },
+  {
+    id: "demo-3",
+    title: "ترميم وتجميل الأسنان الأمامية",
+    description: "علاج دقيق تحت التكبير المجهري لإغلاق الفراغات وإعادة المظهر الطبيعي.",
+    treatmentSlug: "restorative",
+    beforeSrc: "/images/smile_before.jpg",
+    afterSrc: "/images/smile_after.jpg",
+  },
+  {
+    id: "demo-4",
+    title: "تأهيل كامل للابتسامة",
+    description: "توازن مدروس بين الناحية الوظيفية والجمالية لابتسامة طبيعية متألقة.",
+    treatmentSlug: "veneers",
+    beforeSrc: "/images/intro/lips-closed.jpg",
+    afterSrc: "/images/intro/lips-smile.jpg",
+  },
+];
+
+/** Fetch up to `limit` cases for the homepage carousel; pads with demo cases if fewer exist. */
+export async function getHomepageCases(limit = 4): Promise<PublicCase[]> {
+  try {
+    const rows = await prisma.beforeAfterCase.findMany({
+      where: { published: true, consentOnFile: true },
+      orderBy: [{ featured: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
+      take: limit,
+    });
+    const publicRows = rows.map(toPublic);
+    if (publicRows.length >= limit) return publicRows;
+    const remaining = limit - publicRows.length;
+    return [...publicRows, ...DEFAULT_CASES.slice(0, remaining)];
+  } catch (error) {
+    console.warn("Could not query homepage cases from database, using fallback:", error);
+    return DEFAULT_CASES.slice(0, limit);
+  }
+}
