@@ -103,35 +103,6 @@ export default async function HomePage() {
                 <ArrowLeft className="size-3" aria-hidden />
               </Link>
             </p>
-            <ul className="mt-12 grid max-w-xl grid-cols-1 gap-4 border-t border-line pt-6 sm:grid-cols-3 sm:gap-6">
-              {[
-                {
-                  title: "تشخيص رقمي دقيق",
-                  desc: "فحص مجهري وتصوير ثلاثي الأبعاد قبل أي قرار.",
-                  icon: Microscope,
-                },
-                {
-                  title: "خطة وشفافية ١٠٠٪",
-                  desc: "خطوات واضحة وتكلفة محددة مسبقاً دون مفاجآت.",
-                  icon: FileCheck,
-                },
-                {
-                  title: "جلسات هادئة بلا ألم",
-                  desc: "أحدث أساليب التخدير والراحة لكسر حاجز التوتر.",
-                  icon: Sparkles,
-                },
-              ].map((pillar) => (
-                <li key={pillar.title} className="flex flex-col">
-                  <div className="flex items-center gap-2 font-bold text-teal-deep">
-                    <span className="grid size-7 place-items-center rounded-lg bg-teal-light text-teal-deep">
-                      <pillar.icon className="size-4" aria-hidden />
-                    </span>
-                    <span className="text-sm font-semibold sm:text-base">{pillar.title}</span>
-                  </div>
-                  <p className="mt-1.5 text-xs leading-5 text-muted">{pillar.desc}</p>
-                </li>
-              ))}
-            </ul>
           </div>
           <div className="lg:col-span-5">
             <DoctorPortrait preload />
