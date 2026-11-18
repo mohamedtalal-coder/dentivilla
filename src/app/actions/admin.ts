@@ -11,6 +11,8 @@ import { deleteMediaIfUnused } from "@/lib/media";
 import {
   availabilitySettingsSchema,
   caseSchema,
+  faqSchema,
+  offerSchema,
   siteSettingsSchema,
   blockedPeriodSchema,
   extraSlotSchema,
@@ -288,5 +290,156 @@ export async function deleteCase(id: string) {
     }
     revalidateCases();
     return "تم حذف الحالة وصورها";
+  });
+}
+
+/* --------------------------------- offers --------------------------------- */
+
+function revalidateOffers() {
+  revalidatePath("/");
+  revalidatePath("/admin/offers");
+}
+
+export async function createOffer(input: unknown) {
+  return run(async () => {
+    const data = offerSchema.parse(input);
+    const last = await prisma.offer.aggregate({ _max: { sortOrder: true } });
+    await prisma.offer.create({
+      data: {
+        ...data,
+        treatmentSlug: data.treatmentSlug || null,
+        sortOrder: (last._max.sortOrder ?? 0) + 1,
+      },
+    });
+    revalidateOffers();
+    return "تمت إضافة العرض بنجاح";
+  });
+}
+
+export async function updateOffer(id: string, input: unknown) {
+  return run(async () => {
+    const data = offerSchema.parse(input);
+    const current = await prisma.offer.findUnique({ where: { id } });
+    if (!current) throw new UserFacingError("العرض غير موجود");
+    await prisma.offer.update({
+      where: { id },
+      data: {
+        ...data,
+        treatmentSlug: data.treatmentSlug || null,
+      },
+    });
+    revalidateOffers();
+    return "تم تعديل العرض بنجاح";
+  });
+}
+
+export async function toggleOfferActive(id: string, active: boolean) {
+  return run(async () => {
+    const current = await prisma.offer.findUnique({ where: { id } });
+    if (!current) throw new UserFacingError("العرض غير موجود");
+    await prisma.offer.update({
+      where: { id },
+      data: { active },
+    });
+    revalidateOffers();
+    return active ? "تم تفعيل العرض" : "تم تعطيل العرض";
+  });
+}
+
+export async function deleteOffer(id: string) {
+  return run(async () => {
+    const current = await prisma.offer.delete({ where: { id } }).catch(() => null);
+    if (!current) throw new UserFacingError("العرض غير موجود");
+    revalidateOffers();
+    return "تم حذف العرض";
+  });
+}
+
+export async function moveOffer(id: string, direction: "up" | "down") {
+  return run(async () => {
+    const all = await prisma.offer.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] });
+    const index = all.findIndex((o) => o.id === id);
+    const swapWith = direction === "up" ? index - 1 : index + 1;
+    if (index < 0 || swapWith < 0 || swapWith >= all.length) return;
+    const ordered = [...all];
+    [ordered[index], ordered[swapWith]] = [ordered[swapWith], ordered[index]];
+    await prisma.$transaction(
+      ordered.map((o, i) => prisma.offer.update({ where: { id: o.id }, data: { sortOrder: i + 1 } })),
+    );
+    revalidateOffers();
+  });
+}
+
+
+/* ---------------------------------- faqs ---------------------------------- */
+
+function revalidateFaqs() {
+  revalidatePath("/");
+  revalidatePath("/admin/faq");
+}
+
+export async function createFaq(input: unknown) {
+  return run(async () => {
+    const data = faqSchema.parse(input);
+    const last = await prisma.faq.aggregate({ _max: { sortOrder: true } });
+    await prisma.faq.create({
+      data: {
+        ...data,
+        sortOrder: (last._max.sortOrder ?? 0) + 1,
+      },
+    });
+    revalidateFaqs();
+    return "تمت إضافة السؤال بنجاح";
+  });
+}
+
+export async function updateFaq(id: string, input: unknown) {
+  return run(async () => {
+    const data = faqSchema.parse(input);
+    const current = await prisma.faq.findUnique({ where: { id } });
+    if (!current) throw new UserFacingError("السؤال غير موجود");
+    await prisma.faq.update({
+      where: { id },
+      data,
+    });
+    revalidateFaqs();
+    return "تم تعديل السؤال بنجاح";
+  });
+}
+
+export async function toggleFaqPublished(id: string, published: boolean) {
+  return run(async () => {
+    const current = await prisma.faq.findUnique({ where: { id } });
+    if (!current) throw new UserFacingError("السؤال غير موجود");
+    await prisma.faq.update({
+      where: { id },
+      data: { published },
+    });
+    revalidateFaqs();
+    return published ? "تم نشر السؤال" : "تم إخفاء السؤال";
+  });
+}
+
+export async function deleteFaq(id: string) {
+  return run(async () => {
+    const current = await prisma.faq.delete({ where: { id } }).catch(() => null);
+    if (!current) throw new UserFacingError("السؤال غير موجود");
+    revalidateFaqs();
+    return "تم حذف السؤال";
+  });
+}
+
+export async function moveFaq(id: string, direction: "up" | "down") {
+  return run(async () => {
+    const all = await prisma.faq.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] });
+    const index = all.findIndex((f) => f.id === id);
+    const swapWith = direction === "up" ? index - 1 : index + 1;
+    if (index < 0 || swapWith < 0 || swapWith >= all.length) return;
+    const ordered = [...all];
+    [ordered[index], ordered[swapWith]] = [ordered[swapWith], ordered[index]];
+    await prisma.$transaction(
+      ordered.map((f, i) => prisma.faq.update({ where: { id: f.id }, data: { sortOrder: i + 1 } })),
+    );
+    revalidateFaqs();
   });
 }

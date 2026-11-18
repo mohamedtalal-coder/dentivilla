@@ -189,3 +189,20 @@ export const caseSchema = z
     message: "لا يمكن النشر دون تأكيد وجود موافقة المريض",
     path: ["consentOnFile"],
   });
+
+export const offerSchema = z.object({
+  badge: z.string().trim().min(2, "اكتب وسام العرض (مثلاً: عرض خاص)").max(40, "الوسام طويل جداً"),
+  titleAr: z.string().trim().min(3, "اكتب عنواناً للعرض").max(120, "العنوان طويل جداً"),
+  descriptionAr: z.string().trim().min(5, "اكتب تفاصيل العرض").max(300, "الوصف طويل جداً"),
+  price: z.coerce.number().int().min(1, "أدخل سعر العرض"),
+  originalPrice: z.coerce.number().int().min(1).optional().nullable(),
+  treatmentSlug: z.string().trim().optional().nullable(),
+  active: z.boolean().default(true),
+  sortOrder: z.coerce.number().int().default(0),
+});
+
+export const faqSchema = z.object({
+  question: z.string().trim().min(5, "اكتب السؤال (٥ أحرف على الأقل)").max(300, "السؤال طويل جداً"),
+  answer: z.string().trim().min(5, "اكتب الإجابة (٥ أحرف على الأقل)").max(1000, "الإجابة طويلة جداً"),
+  published: z.boolean().default(true),
+});

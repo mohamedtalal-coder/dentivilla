@@ -162,3 +162,31 @@ model BeforeAfterCase {
 
   @@index([published, sortOrder])
 }
+
+model Offer {
+  id            String   @id @default(cuid())
+  badge         String   @default("عرض خاص")
+  titleAr       String
+  descriptionAr String
+  price         Int
+  originalPrice Int?
+  treatmentSlug String?
+  active        Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([active, sortOrder])
+}
+
+model Faq {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  published Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, sortOrder])
+}
