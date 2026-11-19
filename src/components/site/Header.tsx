@@ -7,12 +7,11 @@ import { CalendarCheck, Menu, X } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 
 const navLinks = [
-  { href: "/#about", label: "عن العيادة" },
-  { href: "/#concerns", label: "احتياجك" },
+  { href: "/", label: "الرئيسية" },
   { href: "/treatments", label: "العلاجات" },
-  { href: "/#results", label: "قبل وبعد" },
-  { href: "/education", label: "تعرّف على أسنانك" },
-  { href: "/contact", label: "تواصل" },
+  { href: "/about", label: "عن الطبيب" },
+  { href: "/cases", label: "قبل وبعد" },
+  { href: "/contact", label: "تواصل معنا" },
 ];
 
 export function Header() {
@@ -34,7 +33,7 @@ export function Header() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const isActive = (href: string) => !href.startsWith("/#") && pathname.startsWith(href);
+  const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
   return (
     <header className="fixed inset-x-0 top-3 z-50 px-3 sm:top-4 sm:px-6">

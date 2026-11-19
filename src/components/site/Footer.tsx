@@ -7,10 +7,10 @@ import { site } from "@/lib/site";
 import { getContactInfo } from "@/lib/site-settings";
 
 const pageLinks = [
-  { href: "/about", label: "عن العيادة" },
+  { href: "/", label: "الرئيسية" },
   { href: "/treatments", label: "العلاجات" },
-  { href: "/cases", label: "قبل وبعد" },
-  { href: "/education", label: "تعرّف على أسنانك" },
+  { href: "/about", label: "عن الطبيب" },
+  { href: "/cases", label: "معرض الحالات" },
   { href: "/contact", label: "تواصل معنا" },
 ];
 
