@@ -3,6 +3,7 @@ import { CalendarDays } from "lucide-react";
 import type { AppointmentStatus, Prisma } from "@prisma/client";
 import { requireAdminSession } from "@/lib/admin-auth";
 import { formatCairoDateTime } from "@/lib/datetime";
+import { decryptAppointmentWithPatient } from "@/lib/encryption";
 import { statusLabel } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
 
@@ -37,7 +38,7 @@ export default async function AppointmentsPage({ searchParams }: { searchParams:
   const key: FilterKey = filter && filter in all ? (filter as FilterKey) : "upcoming";
   const current = all[key];
 
-  const [appointments, counts] = await Promise.all([
+  const [rawAppointments, counts] = await Promise.all([
     prisma.appointment.findMany({
       where: current.where,
       include: { patient: true, treatment: true },
@@ -46,6 +47,8 @@ export default async function AppointmentsPage({ searchParams }: { searchParams:
     }),
     Promise.all((Object.keys(all) as FilterKey[]).map((k) => prisma.appointment.count({ where: all[k].where }))),
   ]);
+
+  const appointments = rawAppointments.map(decryptAppointmentWithPatient);
 
   return (
     <div className="grid gap-6">

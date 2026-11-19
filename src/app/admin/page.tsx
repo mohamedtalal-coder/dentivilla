@@ -4,6 +4,7 @@ import { requireAdminSession } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { cairoYmd, formatCairoDateTime, startOfCairoDay } from "@/lib/datetime";
 import { listPublicSlots } from "@/lib/booking";
+import { decryptAppointmentWithPatient } from "@/lib/encryption";
 import { statusLabel } from "@/lib/labels";
 
 export default async function AdminHomePage() {
@@ -12,7 +13,7 @@ export default async function AdminHomePage() {
   const startToday = startOfCairoDay(cairoYmd(now));
   const endToday = addDays(startToday, 1);
 
-  const [today, pending, patients, treatments] = await Promise.all([
+  const [rawToday, pending, patients, treatments] = await Promise.all([
     prisma.appointment.findMany({
       where: {
         startsAt: { gte: startToday, lt: endToday },
@@ -26,6 +27,8 @@ export default async function AdminHomePage() {
     prisma.treatment.findMany(),
   ]);
 
+  const today = rawToday.map(decryptAppointmentWithPatient);
+
   let weekSlots = 0;
   for (let i = 0; i < 7; i += 1) {
     const day = addDays(now, i);
@@ -36,12 +39,14 @@ export default async function AdminHomePage() {
     weekSlots += slots.length;
   }
 
-  const pendingList = await prisma.appointment.findMany({
+  const rawPendingList = await prisma.appointment.findMany({
     where: { status: "PENDING" },
     include: { patient: true, treatment: true },
     orderBy: { startsAt: "asc" },
     take: 8,
   });
+
+  const pendingList = rawPendingList.map(decryptAppointmentWithPatient);
 
   const cards = [
     { label: "مواعيد اليوم", value: today.length },

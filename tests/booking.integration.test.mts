@@ -16,14 +16,19 @@ const { prisma } = await import("../src/lib/prisma");
 const booking = await import("../src/lib/booking");
 const { addDaysYmd } = await import("../src/lib/availability");
 const { cairoYmd } = await import("../src/lib/datetime");
+const { computePhoneBlindIndex, encryptField } = await import("../src/lib/encryption");
 
 const PHONE_PREFIX = "0109"; // test patients: 0109XXXXXXX
+const testBlindIndexes = [
+  ...Array.from({ length: 100 }, (_, n) => computePhoneBlindIndex(`${PHONE_PREFIX}${String(1000000 + n).slice(-7)}`)),
+  computePhoneBlindIndex(`${PHONE_PREFIX}9999999`),
+];
 let treatment: { id: string; durationMinutes: number };
 let day: string;
 
 async function cleanup() {
-  await prisma.appointment.deleteMany({ where: { patient: { phone: { startsWith: PHONE_PREFIX } } } });
-  await prisma.patient.deleteMany({ where: { phone: { startsWith: PHONE_PREFIX } } });
+  await prisma.appointment.deleteMany({ where: { patient: { phoneBlindIndex: { in: testBlindIndexes } } } });
+  await prisma.patient.deleteMany({ where: { phoneBlindIndex: { in: testBlindIndexes } } });
   await prisma.blockedPeriod.deleteMany({ where: { reason: "integration-test" } });
 }
 
@@ -77,7 +82,7 @@ describe("booking engine against PostgreSQL", () => {
   it("the buffer is enforced: neighbouring starts inside it are no longer offered or bookable", async () => {
     const settings = await prisma.availabilitySettings.findUniqueOrThrow({ where: { id: "default" } });
     const held = await prisma.appointment.findFirstOrThrow({
-      where: { patient: { phone: { startsWith: PHONE_PREFIX } }, status: "PENDING" },
+      where: { patient: { phoneBlindIndex: { in: testBlindIndexes } }, status: "PENDING" },
     });
     const offered = await booking.listPublicSlots(day, treatment.durationMinutes);
     const bufferMs = settings.bufferMinutes * 60_000;
@@ -119,7 +124,7 @@ describe("booking engine against PostgreSQL", () => {
 
   it("cancelling a held appointment frees its time again", async () => {
     const held = await prisma.appointment.findFirstOrThrow({
-      where: { patient: { phone: { startsWith: PHONE_PREFIX } }, status: "PENDING" },
+      where: { patient: { phoneBlindIndex: { in: testBlindIndexes } }, status: "PENDING" },
     });
     await prisma.appointment.update({ where: { id: held.id }, data: { status: "CANCELLED" } });
     const slots = await booking.listPublicSlots(day, treatment.durationMinutes);
@@ -127,7 +132,14 @@ describe("booking engine against PostgreSQL", () => {
   });
 
   it("the database itself refuses overlapping held appointments (exclusion constraint)", async () => {
-    const patient = await prisma.patient.create({ data: { fullName: "Constraint", phone: `${PHONE_PREFIX}9999999` } });
+    const phone99 = `${PHONE_PREFIX}9999999`;
+    const patient = await prisma.patient.create({
+      data: {
+        fullName: encryptField("Constraint"),
+        phone: encryptField(phone99),
+        phoneBlindIndex: computePhoneBlindIndex(phone99),
+      },
+    });
     const start = new Date(`${addDaysYmd(day, 1)}T09:00:00Z`);
     const base = {
       patientId: patient.id,

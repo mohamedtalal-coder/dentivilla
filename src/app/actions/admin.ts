@@ -9,6 +9,12 @@ import { assertSlotAvailable, BookingError, findConflict, lockBookings } from "@
 import { TIMEZONE } from "@/lib/site";
 import { deleteMediaIfUnused } from "@/lib/media";
 import {
+  computePhoneBlindIndex,
+  decryptOptional,
+  encryptField,
+  encryptOptional,
+} from "@/lib/encryption";
+import {
   availabilitySettingsSchema,
   caseSchema,
   faqSchema,
@@ -53,7 +59,7 @@ async function run(fn: () => Promise<string | void>): Promise<ActionResult> {
     if (error instanceof Error && /Appointment_no_overlap|23P01/.test(error.message)) {
       return { ok: false, error: "يتعارض هذا الوقت مع موعد آخر محجوز." };
     }
-    console.error("admin action failed", error);
+    console.error("[admin] action failed:", error instanceof Error ? error.message : "operation error");
     return { ok: false, error: "تعذر تنفيذ العملية. حاول مرة أخرى." };
   }
 }
@@ -85,11 +91,13 @@ export async function setAppointmentStatus(id: string, status: AppointmentStatus
         if (conflict) throw new UserFacingError(`لا يمكن التأكيد: ${conflict}`);
       }
       const note = adminNotes?.trim();
+      const existingDecrypted = decryptOptional(current.adminNotes);
+      const combined = note ? [existingDecrypted, note].filter(Boolean).join("\n") : existingDecrypted;
       await tx.appointment.update({
         where: { id },
         data: {
           status,
-          adminNotes: note ? [current.adminNotes, note].filter(Boolean).join("\n") : current.adminNotes,
+          adminNotes: encryptOptional(combined),
         },
       });
     });
@@ -128,18 +136,18 @@ export async function updatePatient(id: string, input: unknown) {
     const existing = await prisma.patient.findUnique({ where: { id } });
     if (!existing) throw new UserFacingError("المريض غير موجود");
 
-    if (data.phone !== existing.phone) {
-      const phoneTaken = await prisma.patient.findUnique({ where: { phone: data.phone } });
-      if (phoneTaken && phoneTaken.id !== id) {
-        throw new UserFacingError("رقم الهاتف هذا مسجل بالفعل لمريض آخر.");
-      }
+    const newBlindIndex = computePhoneBlindIndex(data.phone);
+    const phoneTaken = await prisma.patient.findUnique({ where: { phoneBlindIndex: newBlindIndex } });
+    if (phoneTaken && phoneTaken.id !== id) {
+      throw new UserFacingError("رقم الهاتف هذا مسجل بالفعل لمريض آخر.");
     }
 
     await prisma.patient.update({
       where: { id },
       data: {
-        fullName: data.fullName,
-        phone: data.phone,
+        fullName: encryptField(data.fullName),
+        phone: encryptField(data.phone),
+        phoneBlindIndex: newBlindIndex,
         notes: null, // Privacy rule: ensure extraneous notes are stripped
       },
     });

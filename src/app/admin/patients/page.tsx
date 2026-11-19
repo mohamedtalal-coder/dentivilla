@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { ArrowLeft, CalendarCheck, Lock, Phone, Search, Shield, User, X } from "lucide-react";
-import type { Prisma } from "@prisma/client";
 import { requireAdminSession } from "@/lib/admin-auth";
 import { formatCairoDateTime } from "@/lib/datetime";
+import { decryptField } from "@/lib/encryption";
 import { statusLabel } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
 
@@ -17,19 +17,9 @@ export default async function PatientsPage({
   const { q } = await searchParams;
   const query = q?.trim() ?? "";
 
-  // 2. Search by name or phone
-  const where: Prisma.PatientWhereInput = query
-    ? {
-        OR: [
-          { fullName: { contains: query, mode: "insensitive" } },
-          { phone: { contains: query } },
-        ],
-      }
-    : {};
-
-  const [patients, totalCount] = await Promise.all([
+  // 2. Fetch patients with strict admin authorization
+  const [rawPatients, totalCount] = await Promise.all([
     prisma.patient.findMany({
-      where,
       include: {
         _count: { select: { appointments: true } },
         appointments: {
@@ -42,6 +32,24 @@ export default async function PatientsPage({
     }),
     prisma.patient.count(),
   ]);
+
+  // 3. Decrypt sensitive fields securely in server memory
+  const decryptedPatients = rawPatients.map((p) => ({
+    ...p,
+    fullName: decryptField(p.fullName),
+    phone: decryptField(p.phone),
+  }));
+
+  // 4. Privacy-preserving search across decrypted patient names and phone numbers
+  const patients = query
+    ? decryptedPatients.filter((p) => {
+        const qLower = query.toLowerCase();
+        return (
+          p.fullName.toLowerCase().includes(qLower) ||
+          p.phone.includes(query)
+        );
+      })
+    : decryptedPatients;
 
   return (
     <div className="space-y-6">

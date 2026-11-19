@@ -4,6 +4,7 @@ import { HeartPulse } from "lucide-react";
 import { AppointmentActions } from "@/components/admin/AppointmentActions";
 import { requireAdminSession } from "@/lib/admin-auth";
 import { formatCairoDateTime } from "@/lib/datetime";
+import { decryptAppointmentWithPatient } from "@/lib/encryption";
 import { statusLabel } from "@/lib/labels";
 import { MEDICAL_CONDITION_LABEL } from "@/lib/medical-conditions";
 import { prisma } from "@/lib/prisma";
@@ -12,11 +13,13 @@ import { formatTeeth } from "@/lib/teeth";
 export default async function AppointmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdminSession();
   const { id } = await params;
-  const appointment = await prisma.appointment.findUnique({
+  const rawAppointment = await prisma.appointment.findUnique({
     where: { id },
     include: { patient: true, treatment: true },
   });
-  if (!appointment) notFound();
+  if (!rawAppointment) notFound();
+
+  const appointment = decryptAppointmentWithPatient(rawAppointment);
 
   const conditions = appointment.medicalConditions.map((c) => MEDICAL_CONDITION_LABEL[c] ?? c);
 

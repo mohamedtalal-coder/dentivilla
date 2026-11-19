@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { fromZonedTime } from "date-fns-tz";
+import { computePhoneBlindIndex, encryptField, encryptOptional } from "../src/lib/encryption";
 
 const prisma = new PrismaClient();
 const TIMEZONE = "Africa/Cairo";
@@ -148,12 +149,14 @@ async function main() {
 
   // Demo records are for local development only — never in a real clinic database.
   if (!isProduction && (await prisma.patient.count()) === 0) {
+    const demoPhone = "01011112222";
     const patient = await prisma.patient.create({
       data: {
-        fullName: "مريض تجريبي",
-        phone: "01011112222",
-        whatsapp: "01011112222",
-        notes: "سجل تجريبي لاختبار لوحة الإدارة فقط.",
+        fullName: encryptField("مريض تجريبي"),
+        phone: encryptField(demoPhone),
+        phoneBlindIndex: computePhoneBlindIndex(demoPhone),
+        whatsapp: encryptOptional(demoPhone),
+        notes: encryptOptional("سجل تجريبي لاختبار لوحة الإدارة فقط."),
       },
     });
     const treatment = await prisma.treatment.findUniqueOrThrow({
@@ -172,7 +175,7 @@ async function main() {
         startsAt: startCairo,
         endsAt: new Date(startCairo.getTime() + treatment.durationMinutes * 60 * 1000),
         status: "PENDING",
-        patientNotes: "طلب تجريبي للمراجعة.",
+        patientNotes: encryptOptional("طلب تجريبي للمراجعة."),
       },
     });
   }

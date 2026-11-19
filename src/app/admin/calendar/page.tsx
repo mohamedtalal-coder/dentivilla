@@ -11,6 +11,7 @@ import {
 } from "@/lib/availability";
 import { loadAvailabilityData } from "@/lib/booking";
 import { cairoYmd, formatCairoTime, startOfCairoDay } from "@/lib/datetime";
+import { decryptField } from "@/lib/encryption";
 import { statusLabel } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
 
@@ -60,13 +61,20 @@ export default async function AdminCalendarPage({
   const data = await loadAvailabilityData(dataRangeForDays(rangeFrom, rangeTo, 24 * 60));
   const now = new Date();
 
-  const appointments = await prisma.appointment.findMany({
+  const rawAppointments = await prisma.appointment.findMany({
     where: {
       startsAt: { gte: startOfCairoDay(rangeFrom), lt: startOfCairoDay(addDaysYmd(rangeTo, 1)) },
     },
     include: { patient: { select: { fullName: true, phone: true } }, treatment: { select: { nameAr: true } } },
     orderBy: { startsAt: "asc" },
   });
+  const appointments = rawAppointments.map((a) => ({
+    ...a,
+    patient: {
+      fullName: decryptField(a.patient.fullName),
+      phone: decryptField(a.patient.phone),
+    },
+  }));
   const byDay = new Map<string, typeof appointments>();
   for (const a of appointments) {
     const key = cairoYmd(a.startsAt);

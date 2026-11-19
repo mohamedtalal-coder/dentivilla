@@ -3,6 +3,11 @@ import type { AppointmentStatus, Prisma, PrismaClient } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { cairoYmd, formatCairoTime } from "@/lib/datetime";
 import {
+  computePhoneBlindIndex,
+  encryptField,
+  encryptOptional,
+} from "@/lib/encryption";
+import {
   addDaysYmd,
   computeDaySlots,
   countSlotsByDay,
@@ -186,14 +191,31 @@ export type NewBooking = {
  */
 export async function createPendingAppointment(input: NewBooking, db: PrismaClient = prisma) {
   const endsAt = new Date(input.startsAt.getTime() + input.treatment.durationMinutes * 60_000);
+  const phoneBlindIndex = computePhoneBlindIndex(input.phone);
+  const encryptedPhone = encryptField(input.phone);
+  const encryptedFullName = encryptField(input.fullName);
+  const encryptedWhatsapp = encryptOptional(input.whatsapp);
+  const encryptedNotes = encryptOptional(input.notes);
+  const encryptedConditions = input.medicalConditions.map((c) => encryptField(c));
+
   return db.$transaction(async (tx) => {
     await lockBookings(tx);
     await assertSlotAvailable(input.startsAt, input.treatment.durationMinutes, { db: tx });
 
     const patient = await tx.patient.upsert({
-      where: { phone: input.phone },
-      update: { fullName: input.fullName, notes: null },
-      create: { fullName: input.fullName, phone: input.phone },
+      where: { phoneBlindIndex },
+      update: {
+        fullName: encryptedFullName,
+        phone: encryptedPhone,
+        whatsapp: encryptedWhatsapp,
+        notes: null,
+      },
+      create: {
+        fullName: encryptedFullName,
+        phone: encryptedPhone,
+        phoneBlindIndex,
+        whatsapp: encryptedWhatsapp,
+      },
     });
 
     return tx.appointment.create({
@@ -205,8 +227,8 @@ export async function createPendingAppointment(input: NewBooking, db: PrismaClie
         startsAt: input.startsAt,
         endsAt,
         status: "PENDING",
-        patientNotes: input.notes || null,
-        medicalConditions: input.medicalConditions,
+        patientNotes: encryptedNotes,
+        medicalConditions: encryptedConditions,
       },
     });
   });

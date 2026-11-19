@@ -72,6 +72,11 @@ export async function Footer() {
                 متابعة طلب حجز
               </Link>
             </li>
+            <li>
+              <Link href="/privacy" className="transition-colors hover:text-white">
+                سياسة الخصوصية
+              </Link>
+            </li>
           </ul>
         </nav>
 
@@ -124,7 +129,13 @@ export async function Footer() {
           <p>
             © {year} Dentivilla — {site.doctor.name}
           </p>
-          <p>المعلومات على الموقع تعريفية ولا تغني عن الكشف الطبي.</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link href="/privacy" className="transition-colors hover:text-white underline-offset-4 hover:underline">
+              سياسة الخصوصية وحماية البيانات
+            </Link>
+            <span aria-hidden>•</span>
+            <p>المعلومات على الموقع تعريفية ولا تغني عن الكشف الطبي.</p>
+          </div>
         </div>
       </div>
     </footer>

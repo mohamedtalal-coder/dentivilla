@@ -14,6 +14,7 @@ import type { AppointmentStatus } from "@prisma/client";
 import { PatientEditForm } from "@/components/admin/PatientEditForm";
 import { requireAdminSession } from "@/lib/admin-auth";
 import { formatCairoDateTime } from "@/lib/datetime";
+import { decryptAppointment, decryptPatient } from "@/lib/encryption";
 import { statusLabel } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
 import { formatTeeth } from "@/lib/teeth";
@@ -35,7 +36,7 @@ export default async function PatientDetailPage({
   await requireAdminSession();
 
   const { id } = await params;
-  const patient = await prisma.patient.findUnique({
+  const rawPatient = await prisma.patient.findUnique({
     where: { id },
     include: {
       appointments: {
@@ -44,7 +45,12 @@ export default async function PatientDetailPage({
       },
     },
   });
-  if (!patient) notFound();
+  if (!rawPatient) notFound();
+
+  const patient = {
+    ...decryptPatient(rawPatient),
+    appointments: rawPatient.appointments.map(decryptAppointment),
+  };
 
   return (
     <div className="space-y-6">

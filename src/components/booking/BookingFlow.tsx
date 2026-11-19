@@ -406,8 +406,11 @@ export function BookingFlow({
                         <ReviewRow label="ملاحظات" value={details.notes} onEdit={() => goTo("details")} />
                       )}
                     </dl>
-                    <p className="mt-4 text-sm text-muted">
-                      بالضغط على «تأكيد الحجز» يُحجز هذا الوقت باسمك، وتتواصل معك العيادة لتأكيده.
+                    <p className="mt-4 text-xs leading-6 text-muted">
+                      بالضغط على «تأكيد الحجز»، تُحجز هذه الفترة باسمك وتوافق على قيام العيادة بالتواصل معك لتأكيد الموعد ومعالجة بياناتك وفق{" "}
+                      <Link href="/privacy" target="_blank" className="font-semibold text-teal-deep underline underline-offset-4 hover:text-teal">
+                        سياسة الخصوصية وحماية البيانات
+                      </Link>.
                     </p>
                     {errors.form && (
                       <p role="alert" tabIndex={-1} className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
