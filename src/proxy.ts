@@ -4,7 +4,7 @@ import { authConfig } from "@/auth.config";
 
 const { auth } = NextAuth(authConfig);
 
-export default auth((request) => {
+const proxyHandler = auth((request) => {
   const { pathname, search } = request.nextUrl;
   const isAdmin = pathname.startsWith("/admin");
   const isLogin = pathname.startsWith("/admin/login");
@@ -30,6 +30,9 @@ export default auth((request) => {
   }
   return NextResponse.next();
 });
+
+export default proxyHandler;
+export { proxyHandler as proxy };
 
 export const config = {
   matcher: ["/admin/:path*"],

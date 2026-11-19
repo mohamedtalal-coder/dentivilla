@@ -192,8 +192,8 @@ export async function createPendingAppointment(input: NewBooking, db: PrismaClie
 
     const patient = await tx.patient.upsert({
       where: { phone: input.phone },
-      update: { fullName: input.fullName, whatsapp: input.whatsapp ?? input.phone },
-      create: { fullName: input.fullName, phone: input.phone, whatsapp: input.whatsapp ?? input.phone },
+      update: { fullName: input.fullName, notes: null },
+      create: { fullName: input.fullName, phone: input.phone },
     });
 
     return tx.appointment.create({

@@ -13,6 +13,7 @@ import {
   caseSchema,
   faqSchema,
   offerSchema,
+  patientUpdateSchema,
   siteSettingsSchema,
   blockedPeriodSchema,
   extraSlotSchema,
@@ -121,10 +122,38 @@ export async function rescheduleAppointment(id: string, startsAtIso: string) {
   });
 }
 
+export async function updatePatient(id: string, input: unknown) {
+  return run(async () => {
+    const data = patientUpdateSchema.parse(input);
+    const existing = await prisma.patient.findUnique({ where: { id } });
+    if (!existing) throw new UserFacingError("المريض غير موجود");
+
+    if (data.phone !== existing.phone) {
+      const phoneTaken = await prisma.patient.findUnique({ where: { phone: data.phone } });
+      if (phoneTaken && phoneTaken.id !== id) {
+        throw new UserFacingError("رقم الهاتف هذا مسجل بالفعل لمريض آخر.");
+      }
+    }
+
+    await prisma.patient.update({
+      where: { id },
+      data: {
+        fullName: data.fullName,
+        phone: data.phone,
+        notes: null, // Privacy rule: ensure extraneous notes are stripped
+      },
+    });
+
+    revalidatePath("/admin/patients");
+    revalidatePath(`/admin/patients/${id}`);
+    return "تم تحديث بيانات المريض بنجاح";
+  });
+}
+
 export async function savePatientNotes(id: string, notes: string) {
   return run(async () => {
     if (notes.length > 2000) throw new UserFacingError("الملاحظات طويلة جداً");
-    await prisma.patient.update({ where: { id }, data: { notes: notes.trim() || null } });
+    await prisma.patient.update({ where: { id }, data: { notes: null } });
     return "تم حفظ الملاحظات";
   });
 }

@@ -2,8 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { weekdayLabels } from "@/lib/site";
 import { formatCairoDateTime } from "@/lib/datetime";
 import { AvailabilityForms } from "@/components/admin/AvailabilityForms";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export default async function AvailabilityPage() {
+  await requireAdminSession();
   const [settings, hours, blocked, extras] = await Promise.all([
     prisma.availabilitySettings.findUniqueOrThrow({ where: { id: "default" } }),
     prisma.workingHours.findMany({ orderBy: { weekday: "asc" } }),

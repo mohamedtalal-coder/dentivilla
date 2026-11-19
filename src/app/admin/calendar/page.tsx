@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Clock, Lock } from "lucide-react";
 import type { AppointmentStatus } from "@prisma/client";
+import { requireAdminSession } from "@/lib/admin-auth";
 import {
   addDaysYmd,
   computeDaySlots,
@@ -35,6 +36,7 @@ export default async function AdminCalendarPage({
 }: {
   searchParams: Promise<{ month?: string; day?: string; treatment?: string }>;
 }) {
+  await requireAdminSession();
   const params = await searchParams;
   const today = cairoYmd(new Date());
   const selectedDay = isDay(params.day) ? params.day! : today;

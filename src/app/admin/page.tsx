@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { addDays } from "date-fns";
+import { requireAdminSession } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { cairoYmd, formatCairoDateTime, startOfCairoDay } from "@/lib/datetime";
 import { listPublicSlots } from "@/lib/booking";
 import { statusLabel } from "@/lib/labels";
 
 export default async function AdminHomePage() {
+  await requireAdminSession();
   const now = new Date();
   const startToday = startOfCairoDay(cairoYmd(now));
   const endToday = addDays(startToday, 1);

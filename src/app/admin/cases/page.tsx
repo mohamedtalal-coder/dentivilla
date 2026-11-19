@@ -1,7 +1,9 @@
 import { CaseManager } from "@/components/admin/CaseManager";
+import { requireAdminSession } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 
 export default async function CasesAdminPage() {
+  await requireAdminSession();
   const [cases, treatments] = await Promise.all([
     prisma.beforeAfterCase.findMany({
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],

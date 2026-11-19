@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { FaqManager } from "@/components/admin/FaqManager";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export default async function FaqAdminPage() {
+  await requireAdminSession();
   const faqs = await prisma.faq.findMany({
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     select: {

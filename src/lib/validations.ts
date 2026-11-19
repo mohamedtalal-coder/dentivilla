@@ -57,6 +57,11 @@ export const bookingSchema = z.object({
     .transform((ids) => [...new Set(ids)]),
 });
 
+export const patientUpdateSchema = z.object({
+  fullName: z.string().trim().min(2, "الاسم مطلوب (حرفان على الأقل)").max(80, "الاسم طويل جداً"),
+  phone: egyptianMobile,
+});
+
 export const loginSchema = z.object({
   email: z.string().email("بريد غير صالح"),
   password: z.string().min(6, "كلمة المرور قصيرة"),

@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { OfferManager } from "@/components/admin/OfferManager";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export default async function OffersAdminPage() {
+  await requireAdminSession();
   const [offers, treatments] = await Promise.all([
     prisma.offer.findMany({
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],

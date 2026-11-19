@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CalendarDays } from "lucide-react";
 import type { AppointmentStatus, Prisma } from "@prisma/client";
+import { requireAdminSession } from "@/lib/admin-auth";
 import { formatCairoDateTime } from "@/lib/datetime";
 import { statusLabel } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
@@ -29,6 +30,7 @@ function filters(now: Date): Record<FilterKey, { label: string; where: Prisma.Ap
 }
 
 export default async function AppointmentsPage({ searchParams }: { searchParams: Promise<{ filter?: string }> }) {
+  await requireAdminSession();
   const { filter } = await searchParams;
   const now = new Date();
   const all = filters(now);
