@@ -92,8 +92,8 @@ const DEFAULT_CASES: PublicCase[] = [
   },
 ];
 
-/** Fetch up to `limit` cases for the homepage carousel; pads with demo cases if fewer exist. */
-export async function getHomepageCases(limit = 4): Promise<PublicCase[]> {
+/** Fetch up to `limit` cases for the homepage carousel directly from the database. */
+export async function getHomepageCases(limit = 6): Promise<PublicCase[]> {
   try {
     const rows = await prisma.beforeAfterCase.findMany({
       where: { published: true, consentOnFile: true },
@@ -101,9 +101,8 @@ export async function getHomepageCases(limit = 4): Promise<PublicCase[]> {
       take: limit,
     });
     const publicRows = rows.map(toPublic);
-    if (publicRows.length >= limit) return publicRows;
-    const remaining = limit - publicRows.length;
-    return [...publicRows, ...DEFAULT_CASES.slice(0, remaining)];
+    if (publicRows.length > 0) return publicRows;
+    return DEFAULT_CASES.slice(0, limit);
   } catch (error) {
     console.warn("Could not query homepage cases from database, using fallback:", error);
     return DEFAULT_CASES.slice(0, limit);

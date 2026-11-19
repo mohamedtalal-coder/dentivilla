@@ -105,7 +105,7 @@ export function CasesCarousel({ cases }: { cases: PublicCase[] }) {
                     }`}
                   >
                     {isActive && <Sparkles className="size-3 text-gold-soft animate-pulse" aria-hidden />}
-                    <span>حالة {index + 1}</span>
+                    <span>{c.title}</span>
                   </button>
                 );
               })}

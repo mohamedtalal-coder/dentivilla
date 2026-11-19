@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { CasesCarousel } from "@/components/site/CasesCarousel";
 import { DoctorPortrait } from "@/components/site/DoctorPortrait";
+import { Faq } from "@/components/site/Faq";
 import { OffersCarousel } from "@/components/site/OffersCarousel";
 import { PhilosophyPanel } from "@/components/site/PhilosophyPanel";
 import { getHomepageCases } from "@/lib/cases";
@@ -221,32 +222,34 @@ export default async function HomePage() {
       </section>
 
       {/* 4. Selected Before-and-After Cases */}
-      <section className="section border-t border-line bg-white" aria-labelledby="cases-title">
-        <div className="container-page">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="eyebrow">نتائج إكلينيكية</p>
-            <h2 id="cases-title" className="heading-lg">
-              نتائج حقيقية تعكس الطبيعة والتناسق
-            </h2>
-            <p className="lede mt-3">
-              اسحب المؤشر للمقارنة قبل وبعد العلاج. كل نتيجة تعبر عن خطة علاجية مخصصة لصاحبها.
-            </p>
+      {homepageCases.length > 0 && (
+        <section className="section border-t border-line bg-white" aria-labelledby="cases-title">
+          <div className="container-page">
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="eyebrow">نتائج إكلينيكية</p>
+              <h2 id="cases-title" className="heading-lg">
+                نتائج حقيقية تعكس الطبيعة والتناسق
+              </h2>
+              <p className="lede mt-3">
+                اسحب المؤشر للمقارنة قبل وبعد العلاج. كل نتيجة تعبر عن خطة علاجية مخصصة لصاحبها.
+              </p>
+            </div>
+            <CasesCarousel cases={homepageCases} />
+            <div className="mt-8 flex flex-col items-center gap-3">
+              <Link
+                href="/cases"
+                className="inline-flex items-center gap-2 font-semibold text-teal-mid hover:text-teal-deep"
+              >
+                مشاهدة المزيد من الحالات في المعرض
+                <ArrowLeft className="size-4" aria-hidden />
+              </Link>
+              <p className="text-xs text-muted">
+                تُنشر الصور بموافقة المرضى. الخطة والنتيجة الفعلية تُحدد بعد الفحص السريري.
+              </p>
+            </div>
           </div>
-          <CasesCarousel cases={homepageCases} />
-          <div className="mt-8 flex flex-col items-center gap-3">
-            <Link
-              href="/cases"
-              className="inline-flex items-center gap-2 font-semibold text-teal-mid hover:text-teal-deep"
-            >
-              مشاهدة المزيد من الحالات في المعرض
-              <ArrowLeft className="size-4" aria-hidden />
-            </Link>
-            <p className="text-xs text-muted">
-              تُنشر الصور بموافقة المرضى. الخطة والنتيجة الفعلية تُحدد بعد الفحص السريري.
-            </p>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 5. A Few Genuine Reasons to Choose the Clinic */}
       <section className="section bg-alabaster" aria-labelledby="reasons-title">
@@ -274,7 +277,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 6. Location, Contact Information and Booking CTA */}
+      {/* 6. Frequently Asked Questions (from Database) */}
+      <Faq />
+
+      {/* 7. Location, Contact Information and Booking CTA */}
       <section className="section border-t border-line bg-white" aria-labelledby="contact-cta-title">
         <div className="container-page">
           <div className="mx-auto max-w-2xl text-center">

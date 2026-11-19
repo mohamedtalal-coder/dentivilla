@@ -256,6 +256,106 @@ async function main() {
     });
   }
 
+  await prisma.siteSettings.upsert({
+    where: { id: "default" },
+    update: {},
+    create: {
+      id: "default",
+      phone: "01132081093",
+      whatsapp: "01132081093",
+      email: "contact@dentivilla.com",
+      address: "Medical Center 3 (مديكال سنتر ٣)، شارع مكرم عبيد، مدينة نصر، القاهرة",
+      mapsUrl:
+        "https://www.google.com/maps/search/?api=1&query=" +
+        encodeURIComponent("Medical Center 3, Makram Ebeid, Nasr City, Cairo"),
+      instagram: "https://instagram.com/dentivilla",
+      facebook: "https://facebook.com/dentivilla",
+    },
+  });
+
+  if ((await prisma.beforeAfterCase.count()) === 0) {
+    try {
+      const fs = await import("fs/promises");
+      const path = await import("path");
+      const sharp = (await import("sharp")).default;
+
+      async function createMedia(filePath: string) {
+        const buf = await fs.readFile(filePath);
+        const { data, info } = await sharp(buf)
+          .rotate()
+          .resize({ width: 1800, height: 1800, fit: "inside", withoutEnlargement: true })
+          .webp({ quality: 84, effort: 5 })
+          .toBuffer({ resolveWithObject: true });
+
+        return prisma.media.create({
+          data: {
+            mimeType: "image/webp",
+            width: info.width,
+            height: info.height,
+            sizeBytes: data.byteLength,
+            data,
+          },
+          select: { id: true },
+        });
+      }
+
+      const smileBeforePath = path.join(process.cwd(), "public", "images", "smile_before.jpg");
+      const smileAfterPath = path.join(process.cwd(), "public", "images", "smile_after.jpg");
+      const lipsClosedPath = path.join(process.cwd(), "public", "images", "intro", "lips-closed.jpg");
+      const lipsSmilePath = path.join(process.cwd(), "public", "images", "intro", "lips-smile.jpg");
+
+      const [media1, media2, media3, media4] = await Promise.all([
+        createMedia(smileBeforePath),
+        createMedia(smileAfterPath),
+        createMedia(lipsClosedPath),
+        createMedia(lipsSmilePath),
+      ]);
+
+      await prisma.beforeAfterCase.createMany({
+        data: [
+          {
+            titleAr: "تصميم وتجميل الابتسامة",
+            descriptionAr:
+              "إعادة تناسق اللون ومحاذاة الأسنان مع الحفاظ الكامل على بنيتها الطبيعية وتوازن خط الابتسامة.",
+            treatmentSlug: "smile-makeover",
+            beforeMediaId: media1.id,
+            afterMediaId: media2.id,
+            consentOnFile: true,
+            published: true,
+            featured: true,
+            sortOrder: 1,
+          },
+          {
+            titleAr: "تبييض الأسنان بالليزر واستعادة الإشراقة",
+            descriptionAr:
+              "تفتيح لون الأسنان بجلسة واحدة آمنة وحماية طبقة المينا من أي تحسس، مع نتيجة فورية وطبيعية.",
+            treatmentSlug: "whitening",
+            beforeMediaId: media3.id,
+            afterMediaId: media4.id,
+            consentOnFile: true,
+            published: true,
+            featured: false,
+            sortOrder: 2,
+          },
+          {
+            titleAr: "الوجوه التجميلية التحفظية (Veneers)",
+            descriptionAr:
+              "قشور خزفية رقيقة لتعديل أبعاد وتناسق الأسنان الأمامية بأقل قدر ممكن من التحضير.",
+            treatmentSlug: "veneers",
+            beforeMediaId: media1.id,
+            afterMediaId: media2.id,
+            consentOnFile: true,
+            published: true,
+            featured: false,
+            sortOrder: 3,
+          },
+        ],
+      });
+    } catch (e) {
+      console.warn("Could not seed cases in seed.ts:", e);
+    }
+  }
+
   console.log("Seed complete");
   console.log(`Admin: ${email}`);
 }
