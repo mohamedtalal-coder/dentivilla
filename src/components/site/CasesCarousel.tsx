@@ -1,29 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { BeforeAfter } from "@/components/site/BeforeAfter";
 import type { PublicCase } from "@/lib/cases";
 
-const INTERVAL_MS = 4200;
-
 export function CasesCarousel({ cases }: { cases: PublicCase[] }) {
   const [current, setCurrent] = useState(0);
   const count = cases.length;
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Auto-move carousel every 4.2 seconds
-  useEffect(() => {
-    if (count <= 1) return;
-
-    timerRef.current = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % count);
-    }, INTERVAL_MS);
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [count, current]);
 
   if (count === 0) return null;
 
