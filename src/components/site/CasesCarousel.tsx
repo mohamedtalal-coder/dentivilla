@@ -1,13 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { BeforeAfter } from "@/components/site/BeforeAfter";
 import type { PublicCase } from "@/lib/cases";
 
+const INTERVAL_MS = 4200;
+
 export function CasesCarousel({ cases }: { cases: PublicCase[] }) {
   const [current, setCurrent] = useState(0);
   const count = cases.length;
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-move carousel every 4.2 seconds
+  useEffect(() => {
+    if (count <= 1) return;
+
+    timerRef.current = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % count);
+    }, INTERVAL_MS);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [count, current]);
 
   if (count === 0) return null;
 
@@ -70,8 +86,8 @@ export function CasesCarousel({ cases }: { cases: PublicCase[] }) {
 
             <div className="hidden h-6 w-px bg-line sm:block" aria-hidden />
 
-            {/* Case Selector Pills */}
-            <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="تنقل بين الحالات">
+            {/* Case Selector Pills — using role="group" instead of "tablist" to suppress Chrome's auto-play carousel indicator */}
+            <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="تنقل بين الحالات">
               {cases.map((c, index) => {
                 const isActive = index === current;
                 return (
@@ -80,8 +96,7 @@ export function CasesCarousel({ cases }: { cases: PublicCase[] }) {
                     type="button"
                     onClick={() => setCurrent(index)}
                     aria-label={`عرض الحالة ${index + 1}: ${c.title}`}
-                    aria-selected={isActive}
-                    role="tab"
+                    aria-pressed={isActive}
                     className={`relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
                       isActive
                         ? "bg-teal-deep text-white shadow-sm ring-2 ring-teal-light"
