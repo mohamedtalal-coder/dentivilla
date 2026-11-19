@@ -112,16 +112,9 @@ export function CasesCarousel({ cases }: { cases: PublicCase[] }) {
             </div>
           </div>
 
-          {/* Live Auto-Moving Status Indicator */}
-          <div className="flex items-center justify-between gap-3 border-t border-line/40 pt-3 text-xs text-muted sm:border-0 sm:pt-0">
-            <span className="flex items-center gap-2">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-teal opacity-75" />
-                <span className="relative inline-flex size-2 rounded-full bg-teal" />
-              </span>
-              <span>يتحرك تلقائياً</span>
-            </span>
-            <span className="rounded-md bg-teal-light/70 px-2 py-0.5 font-bold text-teal-deep">
+          {/* Slide Counter */}
+          <div className="flex items-center justify-end border-t border-line/40 pt-2.5 text-xs sm:border-0 sm:pt-0">
+            <span className="rounded-md bg-teal-light/70 px-2.5 py-1 font-bold text-teal-deep">
               {current + 1} من {count}
             </span>
           </div>
