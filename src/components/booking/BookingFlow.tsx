@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clock, MessageCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, MessageCircle } from "lucide-react";
 import { submitBooking } from "@/app/actions/booking";
 import { AvailabilityCalendar, formatDayLabel } from "@/components/booking/AvailabilityCalendar";
 import { ToothSelector } from "@/components/booking/ToothSelector";
@@ -317,10 +317,6 @@ export function BookingFlow({
                               </span>
                             </span>
                             <span className="mt-1.5 line-clamp-2 text-sm leading-6 text-muted">{item.summaryAr}</span>
-                            <span className="mt-3 inline-flex items-center gap-1.5 text-xs text-teal-mid">
-                              <Clock className="size-3.5" aria-hidden />
-                              {DIGITS.format(item.durationMinutes)} دقيقة
-                            </span>
                           </button>
                         );
                       })}
@@ -352,8 +348,7 @@ export function BookingFlow({
                   <div>
                     <h3 className="heading-md">اختر اليوم والوقت</h3>
                     <p className="mt-1 mb-5 text-sm text-muted">
-                      الأوقات محسوبة من جدول الطبيب الفعلي لموعد مدته {DIGITS.format(treatment.durationMinutes)} دقيقة
-                      (بتوقيت القاهرة).
+                      الأوقات المتاحة محسوبة وفق جدول مواعيد العيادة الفعلي (بتوقيت القاهرة).
                     </p>
                     <AvailabilityCalendar
                       treatmentId={treatment.id}

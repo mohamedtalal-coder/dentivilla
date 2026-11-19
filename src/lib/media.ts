@@ -43,10 +43,11 @@ export async function storeImage(buffer: Buffer) {
 
 export const mediaUrl = (id: string) => `/media/${id}`;
 
-/** Removes media rows no longer referenced by any case. */
+/** Removes media rows no longer referenced by any case or site image slot. */
 export async function deleteMediaIfUnused(ids: string[]) {
   for (const id of ids) {
-    const used = await prisma.beforeAfterCase.count({ where: { OR: [{ beforeMediaId: id }, { afterMediaId: id }] } });
-    if (!used) await prisma.media.delete({ where: { id } }).catch(() => undefined);
+    const usedInCase = await prisma.beforeAfterCase.count({ where: { OR: [{ beforeMediaId: id }, { afterMediaId: id }] } });
+    const usedInSite = await prisma.siteImage.count({ where: { mediaId: id } });
+    if (!usedInCase && !usedInSite) await prisma.media.delete({ where: { id } }).catch(() => undefined);
   }
 }

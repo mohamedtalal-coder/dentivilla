@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Clock } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { BookLink } from "@/components/booking/BookLink";
 import { getBookingTreatments } from "@/lib/treatments";
 
@@ -8,8 +8,6 @@ export const metadata: Metadata = {
   title: "العلاجات",
   description: "تجميل وزراعة الأسنان والتقويم وعلاج العصب والترميم في عيادة Dentivilla بالقاهرة.",
 };
-
-const DIGITS = new Intl.NumberFormat("ar-EG");
 
 export default async function TreatmentsPage() {
   const treatments = await getBookingTreatments();
@@ -27,11 +25,7 @@ export default async function TreatmentsPage() {
               href={`/treatments/${item.slug}`}
               className="group flex h-full flex-col rounded-[1.5rem] border border-line bg-white p-6 transition-all hover:-translate-y-0.5 hover:border-teal/40 hover:shadow-card"
             >
-              <span className="inline-flex w-fit items-center gap-1.5 text-xs text-teal-mid">
-                <Clock className="size-3.5" aria-hidden />
-                موعد {DIGITS.format(item.durationMinutes)} دقيقة
-              </span>
-              <h2 className="mt-3 text-xl font-bold text-teal-deep">{item.nameAr}</h2>
+              <h2 className="text-xl font-bold text-teal-deep">{item.nameAr}</h2>
               <p className="mt-2 flex-1 leading-7 text-muted">{item.summaryAr}</p>
               <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-teal-mid">
                 التفاصيل

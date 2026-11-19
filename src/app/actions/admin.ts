@@ -20,12 +20,15 @@ import {
   faqSchema,
   offerSchema,
   patientUpdateSchema,
+  siteImageSlotSchema,
   siteSettingsSchema,
+  treatmentSchema,
   blockedPeriodSchema,
   extraSlotSchema,
   rescheduleSchema,
   workingHoursSchema,
 } from "@/lib/validations";
+import { CORE_IMAGE_SLOTS } from "@/lib/site-images";
 
 export type ActionResult = { ok: true; message?: string } | { ok: false; error: string };
 
@@ -480,3 +483,130 @@ export async function moveFaq(id: string, direction: "up" | "down") {
     revalidateFaqs();
   });
 }
+
+function revalidateTreatments() {
+  revalidatePath("/treatments", "page");
+  revalidatePath("/", "page");
+  revalidatePath("/booking", "page");
+  revalidatePath("/admin/treatments", "page");
+}
+
+export async function createTreatment(input: unknown) {
+  return run(async () => {
+    const data = treatmentSchema.parse(input);
+    const existing = await prisma.treatment.findUnique({ where: { slug: data.slug } });
+    if (existing) throw new UserFacingError("الاسم اللاتيني (Slug) مستخدم بالفعل لعلاج آخر");
+    const count = await prisma.treatment.count();
+    await prisma.treatment.create({
+      data: {
+        ...data,
+        sortOrder: count + 1,
+      },
+    });
+    revalidateTreatments();
+    return "تمت إضافة العلاج بنجاح";
+  });
+}
+
+export async function updateTreatment(id: string, input: unknown) {
+  return run(async () => {
+    const data = treatmentSchema.parse(input);
+    const existingSlug = await prisma.treatment.findFirst({
+      where: { slug: data.slug, NOT: { id } },
+    });
+    if (existingSlug) throw new UserFacingError("الاسم اللاتيني (Slug) مستخدم بالفعل لعلاج آخر");
+    const current = await prisma.treatment.update({
+      where: { id },
+      data,
+    }).catch(() => null);
+    if (!current) throw new UserFacingError("العلاج غير موجود");
+    revalidateTreatments();
+    return "تم تعديل العلاج بنجاح";
+  });
+}
+
+export async function deleteTreatment(id: string) {
+  return run(async () => {
+    const appointmentsCount = await prisma.appointment.count({ where: { treatmentId: id } });
+    if (appointmentsCount > 0) {
+      throw new UserFacingError(`لا يمكن حذف هذا العلاج لوجود ${appointmentsCount} موعد مرتبط به في السجلات.`);
+    }
+    const current = await prisma.treatment.delete({ where: { id } }).catch(() => null);
+    if (!current) throw new UserFacingError("العلاج غير موجود");
+    revalidateTreatments();
+    return "تم حذف العلاج بنجاح";
+  });
+}
+
+export async function moveTreatment(id: string, direction: "up" | "down") {
+  return run(async () => {
+    const all = await prisma.treatment.findMany({ orderBy: { sortOrder: "asc" } });
+    const index = all.findIndex((t) => t.id === id);
+    const swapWith = direction === "up" ? index - 1 : index + 1;
+    if (index < 0 || swapWith < 0 || swapWith >= all.length) return;
+    const ordered = [...all];
+    [ordered[index], ordered[swapWith]] = [ordered[swapWith], ordered[index]];
+    await prisma.$transaction(
+      ordered.map((t, i) => prisma.treatment.update({ where: { id: t.id }, data: { sortOrder: i + 1 } })),
+    );
+    revalidateTreatments();
+  });
+}
+
+function revalidateSiteImages() {
+  revalidatePath("/", "layout");
+  revalidatePath("/admin/images", "page");
+}
+
+export async function updateSiteImageSlot(input: unknown) {
+  return run(async () => {
+    const { key, mediaId, customUrl } = siteImageSlotSchema.parse(input);
+    const slotDef = CORE_IMAGE_SLOTS.find((s) => s.key === key);
+    const labelAr = slotDef?.labelAr ?? key;
+    const description = slotDef?.locationAr;
+
+    await prisma.siteImage.upsert({
+      where: { id: key },
+      update: {
+        mediaId: mediaId || null,
+        customUrl: customUrl || null,
+      },
+      create: {
+        id: key,
+        labelAr,
+        description,
+        mediaId: mediaId || null,
+        customUrl: customUrl || null,
+      },
+    });
+    revalidateSiteImages();
+    return "تم تحديث صورة الموقع بنجاح";
+  });
+}
+
+export async function resetSiteImageSlot(key: string) {
+  return run(async () => {
+    const existing = await prisma.siteImage.findUnique({ where: { id: key } });
+    if (existing) {
+      await prisma.siteImage.delete({ where: { id: key } });
+      if (existing.mediaId) {
+        await deleteMediaIfUnused([existing.mediaId]);
+      }
+    }
+    revalidateSiteImages();
+    return "تمت استعادة الصورة الافتراضية";
+  });
+}
+
+export async function deleteMedia(id: string) {
+  return run(async () => {
+    const usedInCase = await prisma.beforeAfterCase.count({ where: { OR: [{ beforeMediaId: id }, { afterMediaId: id }] } });
+    if (usedInCase > 0) throw new UserFacingError("لا يمكن حذف الصورة لأنها مستخدمة في حالات قبل وبعد.");
+    const usedInSite = await prisma.siteImage.count({ where: { mediaId: id } });
+    if (usedInSite > 0) throw new UserFacingError("لا يمكن حذف الصورة لأنها مستخدمة كصورة رئيسية للموقع.");
+    await prisma.media.delete({ where: { id } }).catch(() => null);
+    revalidateSiteImages();
+    return "تم حذف الصورة من مكتبة الوسائط";
+  });
+}
+

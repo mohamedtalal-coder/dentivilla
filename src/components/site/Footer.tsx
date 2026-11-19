@@ -14,7 +14,7 @@ const pageLinks = [
   { href: "/contact", label: "تواصل معنا" },
 ];
 
-export async function Footer() {
+export async function Footer({ logoUrl }: { logoUrl?: string } = {}) {
   const [hours, contact] = await Promise.all([getHoursSummary(), getContactInfo()]);
   const year = new Intl.DateTimeFormat("ar-EG", { year: "numeric", timeZone: "Africa/Cairo" }).format(new Date());
 
@@ -24,7 +24,7 @@ export async function Footer() {
         <div className="lg:col-span-4">
           <div className="flex items-center gap-3">
             <span className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-full bg-white p-1 ring-1 ring-amber/40">
-              <Image src="/images/logo.png" alt="" width={48} height={48} className="size-full object-contain" />
+              <Image src={logoUrl || "/images/logo.png"} alt="" width={48} height={48} className="size-full object-contain" />
             </span>
             <div>
               <p className="font-bold">{site.doctor.name}</p>

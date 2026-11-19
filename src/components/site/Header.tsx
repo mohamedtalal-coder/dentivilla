@@ -14,7 +14,7 @@ const navLinks = [
   { href: "/contact", label: "تواصل معنا" },
 ];
 
-export function Header() {
+export function Header({ logoUrl }: { logoUrl?: string } = {}) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
@@ -44,7 +44,7 @@ export function Header() {
         }`}
       >
         <Link href="/" className="shrink-0 rounded-full" aria-label="Dentivilla — الصفحة الرئيسية">
-          <Logo />
+          <Logo src={logoUrl} />
         </Link>
 
         <ul className="hidden items-center gap-1 text-sm text-neutral-600 lg:flex">

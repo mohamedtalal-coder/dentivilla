@@ -7,12 +7,18 @@ import { site } from "@/lib/site";
  * width is ~85% of the image, which keeps that signage out of view at every
  * breakpoint.
  */
-export function DoctorPortrait({ preload = false }: { preload?: boolean }) {
+export function DoctorPortrait({
+  src = "/images/doctor.jpg",
+  preload = false,
+}: {
+  src?: string;
+  preload?: boolean;
+}) {
   return (
     <figure className="relative mx-auto w-full max-w-[480px]">
       <div className="relative aspect-[5/6] overflow-hidden rounded-[2rem] bg-ivory shadow-lift ring-1 ring-black/5">
         <Image
-          src="/images/doctor.jpg"
+          src={src}
           alt={`${site.doctor.name} — ${site.doctor.title}`}
           fill
           sizes="(min-width: 1024px) 480px, 92vw"

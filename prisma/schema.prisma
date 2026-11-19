@@ -142,6 +142,7 @@ model Media {
   createdAt DateTime          @default(now())
   beforeOf  BeforeAfterCase[] @relation("CaseBefore")
   afterOf   BeforeAfterCase[] @relation("CaseAfter")
+  siteImages SiteImage[]
 }
 
 model BeforeAfterCase {
@@ -190,3 +191,15 @@ model Faq {
 
   @@index([published, sortOrder])
 }
+
+model SiteImage {
+  id          String   @id
+  labelAr     String
+  description String?
+  mediaId     String?
+  customUrl   String?
+  media       Media?   @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+

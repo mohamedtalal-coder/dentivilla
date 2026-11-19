@@ -5,6 +5,7 @@ import { BookLink } from "@/components/booking/BookLink";
 import { DoctorPortrait } from "@/components/site/DoctorPortrait";
 import { getHoursSummary } from "@/lib/clinic-hours";
 import { getContactInfo } from "@/lib/site-settings";
+import { getSiteImages } from "@/lib/site-images";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -20,7 +21,11 @@ const commitments = [
 ];
 
 export default async function AboutPage() {
-  const [hours, contact] = await Promise.all([getHoursSummary(), getContactInfo()]);
+  const [hours, contact, siteImages] = await Promise.all([
+    getHoursSummary(),
+    getContactInfo(),
+    getSiteImages(),
+  ]);
   return (
     <div className="container-page pt-28 pb-20 md:pt-36">
       <section className="grid items-center gap-12 lg:grid-cols-12">
@@ -48,7 +53,7 @@ export default async function AboutPage() {
           </div>
         </div>
         <div className="lg:col-span-5">
-          <DoctorPortrait preload />
+          <DoctorPortrait preload src={siteImages.doctor} />
         </div>
       </section>
 
@@ -100,7 +105,7 @@ export default async function AboutPage() {
             aria-hidden
             className="relative flex min-h-72 items-center justify-center gap-4 bg-[radial-gradient(90%_70%_at_50%_40%,rgb(43_166_164/0.4),transparent_70%)] p-10 lg:col-span-5"
           >
-            <Image src="/images/teeth/molar.webp" alt="" width={200} height={330} className="h-56 w-auto drop-shadow-[0_24px_30px_rgba(0,0,0,0.35)]" />
+            <Image src={siteImages.about} alt="" width={200} height={330} className="h-56 w-auto drop-shadow-[0_24px_30px_rgba(0,0,0,0.35)]" />
             <Image src="/images/teeth/implant.webp" alt="" width={180} height={320} className="h-52 w-auto opacity-90" />
           </div>
         </div>

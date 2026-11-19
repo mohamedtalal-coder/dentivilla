@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, Clock, Crosshair } from "lucide-react";
+import { ArrowLeft, ArrowRight, Crosshair, Sparkles } from "lucide-react";
 import { BookLink } from "@/components/booking/BookLink";
 import { prisma } from "@/lib/prisma";
 
 type Props = { params: Promise<{ slug: string }> };
-const DIGITS = new Intl.NumberFormat("ar-EG");
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -36,10 +35,10 @@ export default async function TreatmentPage({ params }: Props) {
         <p className="mt-4 leading-9 whitespace-pre-line text-ink/85">{treatment.descriptionAr}</p>
         <dl className="mt-8 grid gap-4 border-t border-line pt-6 sm:grid-cols-2">
           <div className="flex gap-3 rounded-2xl bg-ivory p-4">
-            <Clock className="mt-0.5 size-5 text-teal" aria-hidden />
+            <Sparkles className="mt-0.5 size-5 text-teal" aria-hidden />
             <div>
-              <dt className="text-sm text-muted">مدة الموعد</dt>
-              <dd className="font-semibold">{DIGITS.format(treatment.durationMinutes)} دقيقة</dd>
+              <dt className="text-sm text-muted">خطة العلاج</dt>
+              <dd className="font-semibold">تُحدد بدقة بعد الكشف السريري</dd>
             </div>
           </div>
           <div className="flex gap-3 rounded-2xl bg-ivory p-4">

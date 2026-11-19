@@ -71,8 +71,8 @@ const DEFAULT_CASES: PublicCase[] = [
     title: "تبييض الأسنان وإشراقة الابتسامة",
     description: "تفتيح اللون وإزالة التصبغات العميقة بجلسة مريحة واستعادة الإشراقة.",
     treatmentSlug: "whitening",
-    beforeSrc: "/images/intro/lips-closed.jpg",
-    afterSrc: "/images/intro/lips-smile.jpg",
+    beforeSrc: "/images/smile_before.jpg",
+    afterSrc: "/images/smile_after.jpg",
   },
   {
     id: "demo-3",
@@ -87,8 +87,8 @@ const DEFAULT_CASES: PublicCase[] = [
     title: "تأهيل كامل للابتسامة",
     description: "توازن مدروس بين الناحية الوظيفية والجمالية لابتسامة طبيعية متألقة.",
     treatmentSlug: "veneers",
-    beforeSrc: "/images/intro/lips-closed.jpg",
-    afterSrc: "/images/intro/lips-smile.jpg",
+    beforeSrc: "/images/smile_before.jpg",
+    afterSrc: "/images/smile_after.jpg",
   },
 ];
 

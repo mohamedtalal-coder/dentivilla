@@ -3,7 +3,6 @@ import {
   ArrowLeft,
   CalendarCheck,
   CheckCircle2,
-  Clock,
   FileCheck,
   MapPin,
   MessageCircle,
@@ -23,8 +22,7 @@ import { getPublicOffers } from "@/lib/offers";
 import { site } from "@/lib/site";
 import { getContactInfo } from "@/lib/site-settings";
 import { getBookingTreatments } from "@/lib/treatments";
-
-const DIGITS = new Intl.NumberFormat("ar-EG");
+import { getSiteImages } from "@/lib/site-images";
 
 const reasons = [
   {
@@ -50,12 +48,13 @@ const reasons = [
 ];
 
 export default async function HomePage() {
-  const [treatments, contact, homepageCases, offers, hours] = await Promise.all([
+  const [treatments, contact, homepageCases, offers, hours, siteImages] = await Promise.all([
     getBookingTreatments(),
     getContactInfo(),
     getHomepageCases(4),
     getPublicOffers(),
     getHoursSummary(),
+    getSiteImages(),
   ]);
 
   // Featured treatments to display on the homepage
@@ -105,7 +104,7 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="lg:col-span-5">
-            <DoctorPortrait preload />
+            <DoctorPortrait preload src={siteImages.doctor} />
           </div>
         </div>
       </section>
@@ -138,8 +137,8 @@ export default async function HomePage() {
                 <div>
                   <div className="flex items-center justify-between gap-2">
                     <span className="chip border-teal/20 bg-teal-light text-teal-deep">
-                      <Clock className="size-3" aria-hidden />
-                      {DIGITS.format(treatment.durationMinutes)} دقيقة
+                      <Sparkles className="size-3" aria-hidden />
+                      علاج مخصص
                     </span>
                   </div>
                   <h3 className="mt-4 text-xl font-bold text-teal-deep group-hover:text-teal">
@@ -217,7 +216,7 @@ export default async function HomePage() {
               </Link>
             </div>
           </div>
-          <PhilosophyPanel className="aspect-[4/5] lg:col-span-5" />
+          <PhilosophyPanel className="aspect-[4/5] lg:col-span-5" src={siteImages.philosophy} />
         </div>
       </section>
 

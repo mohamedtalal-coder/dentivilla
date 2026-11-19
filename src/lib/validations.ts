@@ -211,3 +211,23 @@ export const faqSchema = z.object({
   answer: z.string().trim().min(5, "اكتب الإجابة (٥ أحرف على الأقل)").max(1000, "الإجابة طويلة جداً"),
   published: z.boolean().default(true),
 });
+
+export const treatmentSchema = z.object({
+  nameAr: z.string().trim().min(2, "اكتب اسم العلاج (حرفان على الأقل)").max(100, "اسم العلاج طويل جداً"),
+  slug: z
+    .string()
+    .trim()
+    .min(2, "الاسم اللاتيني (Slug) مطلوب")
+    .max(60, "الاسم اللاتيني طويل جداً")
+    .regex(/^[a-z0-9-]+$/, "الاسم اللاتيني يجب أن يحتوي على أحرف إنجليزية صغيرة وأرقام وشرطات فقط"),
+  summaryAr: z.string().trim().min(5, "اكتب نبذة مختصرة عن العلاج").max(300, "النبذة طويلة جداً"),
+  descriptionAr: z.string().trim().min(10, "اكتب شرحاً تفصيلياً للإجراء").max(2000, "الشرح طويل جداً"),
+  requiresTeeth: z.boolean().default(true),
+  durationMinutes: z.coerce.number().int().min(15).max(180).default(45),
+});
+
+export const siteImageSlotSchema = z.object({
+  key: z.string().trim().min(1, "المفتاح مطلوب"),
+  mediaId: z.string().trim().optional().nullable(),
+  customUrl: z.string().trim().optional().nullable(),
+});
