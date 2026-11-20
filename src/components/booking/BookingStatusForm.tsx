@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarClock, Search } from "lucide-react";
+import { CalendarClock, MessageCircle, Search } from "lucide-react";
 import type { AppointmentStatus } from "@prisma/client";
 import { lookupBooking, type LookupResult } from "@/app/actions/booking";
 import { formatCairoDateTime } from "@/lib/datetime";
@@ -16,7 +16,13 @@ const STATUS_TONE: Record<AppointmentStatus, string> = {
   CANCELLED: "bg-red-50 text-red-800 border-red-200",
 };
 
-export function BookingStatusForm({ initialReference = "" }: { initialReference?: string }) {
+export function BookingStatusForm({
+  initialReference = "",
+  whatsappUrl = "https://wa.me/201132081093",
+}: {
+  initialReference?: string;
+  whatsappUrl?: string;
+}) {
   const [reference, setReference] = useState(initialReference);
   const [phone, setPhone] = useState("");
   const [pending, setPending] = useState(false);
@@ -109,6 +115,19 @@ export function BookingStatusForm({ initialReference = "" }: { initialReference?
               </div>
             )}
           </dl>
+          <div className="mt-6 border-t border-line pt-4">
+            <a
+              href={`${whatsappUrl}?text=${encodeURIComponent(
+                `Hello Dentivilla, I am inquiring about my booking reference: ${result.appointment.reference} (${result.appointment.treatment})`
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+              className="btn-secondary inline-flex items-center gap-2"
+            >
+              <MessageCircle className="size-4" aria-hidden />
+              Message Clinic on WhatsApp
+            </a>
+          </div>
         </section>
       )}
     </div>

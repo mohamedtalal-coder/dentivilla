@@ -11,6 +11,7 @@ import type { PublicSlot } from "@/lib/booking-types";
 import { MEDICAL_CONDITIONS, MEDICAL_CONDITION_LABEL } from "@/lib/medical-conditions";
 import { normalizeEgyptianMobile } from "@/lib/phone";
 import { TEETH_BY_FDI } from "@/lib/teeth";
+import { buildBookingWhatsAppUrl } from "@/lib/whatsapp";
 
 export type BookingTreatment = {
   id: string;
@@ -37,6 +38,16 @@ type Details = {
   notes: string;
   conditions: string[];
   noConditions: boolean;
+};
+
+type DoneBooking = {
+  reference: string;
+  startsAt: string;
+  treatmentName: string;
+  teeth: string[];
+  fullName: string;
+  phone: string;
+  whatsappMessageUrl: string;
 };
 
 type Errors = Partial<Record<"treatment" | "teeth" | "slot" | keyof Details | "form", string>>;
@@ -76,7 +87,7 @@ export function BookingFlow({
   const [errors, setErrors] = useState<Errors>({});
   const [pending, setPending] = useState(false);
   const [refreshToken, setRefreshToken] = useState(0);
-  const [done, setDone] = useState<{ reference: string; startsAt: string } | null>(null);
+  const [done, setDone] = useState<DoneBooking | null>(null);
 
   const treatment = treatments.find((t) => t.id === treatmentId);
   const steps: StepId[] = useMemo(
@@ -179,8 +190,33 @@ export function BookingFlow({
         medicalConditions: details.noConditions ? [] : details.conditions,
       });
       if (result.ok) {
-        setDone({ reference: result.reference, startsAt: result.startsAt });
+        const waUrl = buildBookingWhatsAppUrl(whatsappUrl, {
+          reference: result.reference,
+          startsAt: result.startsAt,
+          treatmentName: treatment.nameAr,
+          teeth,
+          fullName: details.fullName,
+          phone: details.phone,
+          whatsapp: details.whatsapp,
+          conditions: details.noConditions ? [] : details.conditions,
+          notes: details.notes,
+        });
+
+        setDone({
+          reference: result.reference,
+          startsAt: result.startsAt,
+          treatmentName: treatment.nameAr,
+          teeth,
+          fullName: details.fullName,
+          phone: details.phone,
+          whatsappMessageUrl: waUrl,
+        });
         scrollToTop();
+
+        // Open WhatsApp in a new tab with the reservation details
+        if (typeof window !== "undefined") {
+          window.open(waUrl, "_blank", "noopener,noreferrer");
+        }
         return;
       }
       if (result.code === "SLOT_TAKEN" || result.code === "SLOT_INVALID") {
@@ -236,10 +272,12 @@ export function BookingFlow({
           <Confirmation
             reference={done.reference}
             startsAt={done.startsAt}
-            treatment={treatment?.nameAr ?? ""}
-            teeth={teeth}
+            treatment={done.treatmentName}
+            teeth={done.teeth}
+            fullName={done.fullName}
+            phone={done.phone}
+            whatsappMessageUrl={done.whatsappMessageUrl}
             onAgain={resetAll}
-            whatsappUrl={whatsappUrl}
           />
         ) : (
           <>
@@ -625,14 +663,18 @@ function Confirmation({
   startsAt,
   treatment,
   teeth,
+  fullName,
+  phone,
+  whatsappMessageUrl,
   onAgain,
-  whatsappUrl,
 }: {
-  whatsappUrl: string;
   reference: string;
   startsAt: string;
   treatment: string;
   teeth: string[];
+  fullName: string;
+  phone: string;
+  whatsappMessageUrl: string;
   onAgain: () => void;
 }) {
   const when = new Intl.DateTimeFormat("en-US", {
@@ -646,38 +688,64 @@ function Confirmation({
   }).format(new Date(startsAt));
 
   return (
-    <div className="grid place-items-center px-6 py-14 text-center" role="status">
-      <CheckCircle2 className="size-14 text-teal" aria-hidden />
-      <h3 className="heading-md mt-4">Booking Received & Slot Reserved</h3>
-      <p className="mt-2 max-w-md leading-7 text-muted">
-        Our clinic team will contact you to confirm your appointment. Please keep your reference code to check your status anytime.
-      </p>
-      <div className="mt-6 w-full max-w-sm rounded-2xl border border-line bg-ivory p-5 text-left">
-        <p className="text-xs text-muted">Reference Code</p>
-        <p className="mt-1 font-mono text-2xl font-bold tracking-wider text-teal-deep" dir="ltr">
-          {reference}
-        </p>
-        <p className="mt-3 text-sm font-semibold text-ink">{treatment}</p>
-        <p className="text-sm text-muted">{when} (Cairo Time)</p>
-        {teeth.length > 0 && <p className="mt-1 font-mono text-xs text-muted">FDI Teeth: {teeth.join(", ")}</p>}
+    <div className="grid place-items-center px-6 py-12 text-center" role="status">
+      <div className="grid size-16 place-items-center rounded-full bg-teal-light text-teal-deep">
+        <CheckCircle2 className="size-10 text-teal" aria-hidden />
       </div>
-      <div className="mt-6 flex flex-wrap justify-center gap-3">
-        <Link href={`/booking/status?ref=${encodeURIComponent(reference)}`} className="btn-primary">
-          Check Booking Status
-        </Link>
+      <h3 className="heading-md mt-4 text-2xl font-bold text-teal-deep">
+        Booking Received &amp; Slot Reserved!
+      </h3>
+      <p className="mt-2 max-w-md leading-7 text-muted">
+        Your reservation has been recorded on our website. WhatsApp is opening in a new tab with your booking details.
+      </p>
+
+      {/* Auto-redirect visual banner */}
+      <div className="mt-5 flex items-center justify-center gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs sm:text-sm font-medium text-emerald-900 shadow-sm animate-pulse">
+        <MessageCircle className="size-4 shrink-0 text-[#25D366]" aria-hidden />
+        <span>Opening WhatsApp in a new tab with your reservation details…</span>
+      </div>
+
+      <div className="mt-6 w-full max-w-sm rounded-2xl border border-line bg-ivory p-5 text-left">
+        <div className="flex items-center justify-between border-b border-line pb-3">
+          <div>
+            <p className="text-xs text-muted">Reference Code</p>
+            <p className="mt-0.5 font-mono text-xl font-bold tracking-wider text-teal-deep" dir="ltr">
+              {reference}
+            </p>
+          </div>
+          <span className="rounded-full bg-teal-light px-2.5 py-1 text-xs font-semibold text-teal-deep">
+            Reserved
+          </span>
+        </div>
+        <div className="mt-3 space-y-1.5 text-sm">
+          <p className="font-semibold text-ink">{treatment}</p>
+          <p className="text-muted">{when} (Cairo Time)</p>
+          <p className="text-xs text-muted">{fullName} · {phone}</p>
+          {teeth.length > 0 && <p className="font-mono text-xs text-muted">FDI Teeth: {teeth.join(", ")}</p>}
+        </div>
+      </div>
+
+      <div className="mt-6 flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3">
         <a
-          href={`${whatsappUrl}?text=${encodeURIComponent(`Hello, my booking reference is ${reference}`)}`}
+          href={whatsappMessageUrl}
           target="_blank"
           rel="noreferrer"
-          className="btn-secondary"
+          className="btn inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-3.5 text-sm sm:text-base font-semibold text-white shadow-md transition-all hover:bg-[#20ba59] hover:scale-[1.02] active:scale-[0.98]"
         >
-          <MessageCircle className="size-4" aria-hidden />
-          Message Clinic
+          <MessageCircle className="size-5" aria-hidden />
+          Open WhatsApp Now
         </a>
-        <button type="button" onClick={onAgain} className="btn px-4 text-muted hover:text-ink">
+        <Link href={`/booking/status?ref=${encodeURIComponent(reference)}`} className="btn-secondary w-full sm:w-auto">
+          Check Booking Status
+        </Link>
+        <button type="button" onClick={onAgain} className="btn w-full sm:w-auto px-4 text-muted hover:text-ink">
           Book Another Appointment
         </button>
       </div>
+
+      <p className="mt-4 text-xs text-muted">
+        If WhatsApp didn&apos;t open automatically in a new tab, click &ldquo;Open WhatsApp Now&rdquo; above.
+      </p>
     </div>
   );
 }
