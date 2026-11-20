@@ -22,7 +22,7 @@ export function useAdminAction() {
           router.refresh();
         }
       } catch {
-        setResult({ ok: false, error: "تعذر الاتصال بالخادم." });
+        setResult({ ok: false, error: "Could not connect to the server." });
       }
     });
   }
@@ -35,7 +35,7 @@ export function ActionFeedback({ result }: { result: ActionResult | null }) {
   return result.ok ? (
     <p role="status" className="flex items-center gap-1.5 text-sm text-teal-mid">
       <CheckCircle2 className="size-4" aria-hidden />
-      {result.message ?? "تم الحفظ"}
+      {result.message ?? "Saved successfully"}
     </p>
   ) : (
     <p role="alert" className="flex items-center gap-1.5 text-sm text-red-700">

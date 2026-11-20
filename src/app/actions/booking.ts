@@ -29,7 +29,7 @@ export async function submitBooking(input: unknown): Promise<BookingResult> {
       return {
         ok: false,
         code: "SERVER",
-        error: `تم تجاوز الحد المسموح به للمحاولات. يرجى الانتظار ${Math.ceil(rate.resetSeconds / 60)} دقيقة والمحاولة لاحقاً.`,
+        error: `Too many booking attempts. Please wait ${Math.ceil(rate.resetSeconds / 60)} minutes and try again.`,
       };
     }
   } catch {
@@ -43,16 +43,16 @@ export async function submitBooking(input: unknown): Promise<BookingResult> {
     return {
       ok: false,
       code: "VALIDATION",
-      error: issue?.message ?? "بيانات غير مكتملة",
+      error: issue?.message ?? "Incomplete form details",
       field: issue?.path.join("."),
     };
   }
   const data = parsed.data;
 
   const treatment = await prisma.treatment.findUnique({ where: { id: data.treatmentId } });
-  if (!treatment) return { ok: false, code: "NOT_FOUND", error: "نوع الزيارة غير موجود. حدّث الصفحة وحاول مرة أخرى." };
+  if (!treatment) return { ok: false, code: "NOT_FOUND", error: "Selected treatment not found. Please refresh the page." };
   if (treatment.requiresTeeth && data.teeth.length === 0) {
-    return { ok: false, code: "VALIDATION", error: "حدد السن أو الأسنان المعنية.", field: "teeth" };
+    return { ok: false, code: "VALIDATION", error: "Please select the affected tooth or teeth.", field: "teeth" };
   }
 
   for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -74,22 +74,27 @@ export async function submitBooking(input: unknown): Promise<BookingResult> {
     } catch (error) {
       if (error instanceof BookingError) {
         const code = error.code === "SLOT_TAKEN" || error.code === "SLOT_INVALID" ? error.code : "SERVER";
-        return { ok: false, code, error: error.message };
+        const message =
+          error.code === "SLOT_TAKEN"
+            ? "Sorry, this time slot was just taken. Please choose another time."
+            : error.code === "SLOT_INVALID"
+              ? "This slot is no longer available. Please choose another time."
+              : error.message;
+        return { ok: false, code, error: message };
       }
       if (isOverlapViolation(error)) {
-        return { ok: false, code: "SLOT_TAKEN", error: "عذراً، حُجز هذا الوقت للتو. اختر وقتاً آخر." };
+        return { ok: false, code: "SLOT_TAKEN", error: "Sorry, this time slot was just booked. Please choose another time." };
       }
       if (isUniqueViolation(error)) continue; // reference collision — try a new one
 
-      // Security: never log patient PII or raw error dumps that might leak patient info
       console.error(
         "[booking] submitBooking attempt failed:",
         error instanceof Error ? error.message : "database error",
       );
-      return { ok: false, code: "SERVER", error: "تعذر إتمام الحجز الآن. حاول مرة أخرى بعد قليل." };
+      return { ok: false, code: "SERVER", error: "Could not complete booking at this time. Please try again shortly." };
     }
   }
-  return { ok: false, code: "SERVER", error: "تعذر إتمام الحجز الآن. حاول مرة أخرى بعد قليل." };
+  return { ok: false, code: "SERVER", error: "Could not complete booking at this time. Please try again shortly." };
 }
 
 export type LookupResult =
@@ -114,7 +119,7 @@ export async function lookupBooking(input: unknown): Promise<LookupResult> {
     if (!rate.allowed) {
       return {
         ok: false,
-        error: `تم تجاوز عدد محاولات الاستعلام المسموح بها. يرجى الانتظار ${Math.ceil(rate.resetSeconds / 60)} دقيقة.`,
+        error: `Too many attempts. Please wait ${Math.ceil(rate.resetSeconds / 60)} minutes and try again.`,
       };
     }
   } catch {
@@ -124,7 +129,7 @@ export async function lookupBooking(input: unknown): Promise<LookupResult> {
   // 2. Strict input validation
   const parsed = bookingLookupSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? "بيانات غير مكتملة" };
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid reference or mobile number." };
   }
 
   // 3. Search using keyed HMAC blind index (zero plaintext phone exposure or unindexed queries)
@@ -138,10 +143,8 @@ export async function lookupBooking(input: unknown): Promise<LookupResult> {
     include: { treatment: true },
   });
 
-  // Same constant-time uniform message whether the reference or the phone is wrong, so references can't be probed.
-  if (!appointment) return { ok: false, error: "لا يوجد طلب بهذا الرقم المرجعي ورقم الهاتف." };
+  if (!appointment) return { ok: false, error: "No booking found matching this reference code and mobile number." };
 
-  // Minimal necessary information disclosure: never return patient name, notes, or full medical history
   return {
     ok: true,
     appointment: {

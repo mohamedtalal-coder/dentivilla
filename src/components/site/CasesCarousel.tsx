@@ -44,13 +44,13 @@ export function CasesCarousel({ cases }: { cases: PublicCase[] }) {
           style={{ transform: `translateX(-${current * 100}%)` }}
         >
           {cases.map((c) => (
-            <div key={c.id} className="w-full shrink-0" dir="rtl">
+            <div key={c.id} className="w-full shrink-0">
               <BeforeAfter
                 beforeSrc={c.beforeSrc}
                 afterSrc={c.afterSrc}
-                beforeAlt={`${c.title} — قبل العلاج`}
-                afterAlt={`${c.title} — بعد العلاج`}
-                caption={`${c.title}. ${c.description ?? ""} نُشرت بموافقة المريض، والنتائج تختلف من حالة لأخرى.`}
+                beforeAlt={`${c.title} — Before treatment`}
+                afterAlt={`${c.title} — After treatment`}
+                caption={`${c.title}. ${c.description ?? ""} Published with patient consent. Actual results vary by individual case.`}
               />
             </div>
           ))}
@@ -62,32 +62,31 @@ export function CasesCarousel({ cases }: { cases: PublicCase[] }) {
         <div className="mt-5 flex flex-col gap-4 rounded-2xl border border-line/60 bg-white/80 p-4 shadow-sm backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
           {/* Controls: Next & Previous Buttons + Case Selector Pills */}
           <div className="flex flex-wrap items-center gap-3">
-            {/* Next and Previous Buttons placed under the images */}
-            <div className="flex items-center gap-1.5" aria-label="أزرار التنقل">
+            <div className="flex items-center gap-1.5" aria-label="Navigation controls">
               <button
                 type="button"
                 onClick={prev}
-                aria-label="الحالة السابقة"
-                title="الحالة السابقة"
+                aria-label="Previous case"
+                title="Previous case"
                 className="grid size-10 place-items-center rounded-full border border-line bg-white text-teal-deep shadow-sm transition-all hover:border-teal/40 hover:bg-teal-light hover:text-teal-deep active:scale-95"
               >
-                <ChevronRight className="size-5" />
+                <ChevronLeft className="size-5" />
               </button>
               <button
                 type="button"
                 onClick={next}
-                aria-label="الحالة التالية"
-                title="الحالة التالية"
+                aria-label="Next case"
+                title="Next case"
                 className="grid size-10 place-items-center rounded-full border border-line bg-white text-teal-deep shadow-sm transition-all hover:border-teal/40 hover:bg-teal-light hover:text-teal-deep active:scale-95"
               >
-                <ChevronLeft className="size-5" />
+                <ChevronRight className="size-5" />
               </button>
             </div>
 
             <div className="hidden h-6 w-px bg-line sm:block" aria-hidden />
 
-            {/* Case Selector Pills — using role="group" instead of "tablist" to suppress Chrome's auto-play carousel indicator */}
-            <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="تنقل بين الحالات">
+            {/* Case Selector Pills */}
+            <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Browse cases">
               {cases.map((c, index) => {
                 const isActive = index === current;
                 return (
@@ -95,7 +94,7 @@ export function CasesCarousel({ cases }: { cases: PublicCase[] }) {
                     key={c.id}
                     type="button"
                     onClick={() => setCurrent(index)}
-                    aria-label={`عرض الحالة ${index + 1}: ${c.title}`}
+                    aria-label={`View case ${index + 1}: ${c.title}`}
                     aria-pressed={isActive}
                     className={`relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
                       isActive
@@ -114,7 +113,7 @@ export function CasesCarousel({ cases }: { cases: PublicCase[] }) {
           {/* Slide Counter */}
           <div className="flex items-center justify-end border-t border-line/40 pt-2.5 text-xs sm:border-0 sm:pt-0">
             <span className="rounded-md bg-teal-light/70 px-2.5 py-1 font-bold text-teal-deep">
-              {current + 1} من {count}
+              {current + 1} of {count}
             </span>
           </div>
         </div>

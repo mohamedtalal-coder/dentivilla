@@ -7,7 +7,7 @@ import { LOWER_LEFT, LOWER_RIGHT, TEETH_BY_FDI, UPPER_LEFT, UPPER_RIGHT } from "
 
 const Jaw3D = dynamic(() => import("@/components/dental/Jaw3D"), {
   ssr: false,
-  loading: () => <JawPlaceholder label="جارٍ تحميل نموذج الفك…" />,
+  loading: () => <JawPlaceholder label="Loading 3D jaw model…" />,
 });
 
 function JawPlaceholder({ label }: { label: string }) {
@@ -36,8 +36,8 @@ function detectWebGL() {
 
 /** Viewer's perspective (patient facing you): patient's right is on your left. */
 const ROWS = [
-  { label: "الفك العلوي", left: UPPER_RIGHT, right: UPPER_LEFT },
-  { label: "الفك السفلي", left: LOWER_RIGHT, right: LOWER_LEFT },
+  { label: "Upper Arch", left: UPPER_RIGHT, right: UPPER_LEFT },
+  { label: "Lower Arch", left: LOWER_RIGHT, right: LOWER_LEFT },
 ];
 
 export function ToothSelector({
@@ -63,18 +63,18 @@ export function ToothSelector({
           {webgl ? (
             <Jaw3D className="size-full" selected={selected} onToggle={onToggle} onHoverChange={setHovered} />
           ) : (
-            <JawPlaceholder label="متصفحك لا يدعم العرض ثلاثي الأبعاد — استخدم المخطط بالأسفل" />
+            <JawPlaceholder label="WebGL not available in your browser — use the dental chart below" />
           )}
         </div>
         {/* physical sides: the patient faces you, so their right is on your left */}
         <div dir="ltr" className="pointer-events-none absolute inset-x-3 top-3 flex items-start justify-between gap-2 text-xs">
-          <span className="rounded-full bg-white/85 px-3 py-1 text-muted backdrop-blur">يمين المريض</span>
-          <span className="rounded-full bg-white/85 px-3 py-1 text-muted backdrop-blur">يسار المريض</span>
+          <span className="rounded-full bg-white/85 px-3 py-1 text-muted backdrop-blur">Patient&apos;s Right</span>
+          <span className="rounded-full bg-white/85 px-3 py-1 text-muted backdrop-blur">Patient&apos;s Left</span>
         </div>
         <div className="absolute inset-x-3 bottom-3 flex flex-wrap items-end justify-between gap-2">
           <p
             aria-live="polite"
-            className="pointer-events-none max-w-[75%] rounded-2xl bg-white/90 px-4 py-2 text-sm shadow-card backdrop-blur"
+            className="pointer-events-none max-w-[85%] rounded-2xl bg-white/90 px-4 py-2 text-sm shadow-card backdrop-blur"
           >
             {focusTooth ? (
               <>
@@ -82,79 +82,78 @@ export function ToothSelector({
                 <span className="text-muted"> — {focusTooth.nameAr}</span>
               </>
             ) : (
-              <span className="text-muted">اضغط على السن لتحديده · اسحب لتدوير النموذج</span>
+              <span className="text-muted">Click tooth to select · Drag to rotate 3D view</span>
             )}
           </p>
         </div>
       </div>
 
       <div className="grid gap-5">
-      {/* Accessible chart: works with keyboard and screen readers, and mirrors the 3D selection */}
-      <fieldset className="grid gap-3" aria-describedby={error ? "teeth-error" : undefined}>
-        <legend className="field-label">أو اختر من المخطط (ترقيم FDI)</legend>
-        {ROWS.map((row) => (
-          <div key={row.label} className="grid gap-1.5">
-            <span className="text-xs text-muted">{row.label}</span>
-            <div dir="ltr" className="grid grid-cols-[repeat(16,minmax(0,1fr))] gap-1">
-              {[...row.left, ...row.right].map((fdi, index) => {
-                const isSelected = selected.includes(fdi);
-                return (
-                  <button
-                    key={fdi}
-                    type="button"
-                    aria-pressed={isSelected}
-                    aria-label={`${fdi} — ${TEETH_BY_FDI[fdi]?.nameAr}`}
-                    title={TEETH_BY_FDI[fdi]?.nameAr}
-                    onClick={() => onToggle(fdi)}
-                    onMouseEnter={() => setHovered(fdi)}
-                    onMouseLeave={() => setHovered(null)}
-                    className={`h-9 rounded-lg border font-mono text-[11px] font-semibold transition-colors sm:text-xs ${
-                      index === 8 ? "ms-1.5" : ""
-                    } ${
-                      isSelected
-                        ? "border-teal bg-teal text-white"
-                        : "border-line bg-white text-ink hover:border-teal/50 hover:bg-teal-light"
-                    }`}
-                  >
-                    {fdi}
-                  </button>
-                );
-              })}
+        <fieldset className="grid gap-3" aria-describedby={error ? "teeth-error" : undefined}>
+          <legend className="field-label">Or select from chart (FDI notation)</legend>
+          {ROWS.map((row) => (
+            <div key={row.label} className="grid gap-1.5">
+              <span className="text-xs text-muted">{row.label}</span>
+              <div dir="ltr" className="grid grid-cols-[repeat(16,minmax(0,1fr))] gap-1">
+                {[...row.left, ...row.right].map((fdi, index) => {
+                  const isSelected = selected.includes(fdi);
+                  return (
+                    <button
+                      key={fdi}
+                      type="button"
+                      aria-pressed={isSelected}
+                      aria-label={`${fdi} — ${TEETH_BY_FDI[fdi]?.nameAr}`}
+                      title={TEETH_BY_FDI[fdi]?.nameAr}
+                      onClick={() => onToggle(fdi)}
+                      onMouseEnter={() => setHovered(fdi)}
+                      onMouseLeave={() => setHovered(null)}
+                      className={`h-9 rounded-lg border font-mono text-[11px] font-semibold transition-colors sm:text-xs ${
+                        index === 8 ? "ms-1.5" : ""
+                      } ${
+                        isSelected
+                          ? "border-teal bg-teal text-white"
+                          : "border-line bg-white text-ink hover:border-teal/50 hover:bg-teal-light"
+                      }`}
+                    >
+                      {fdi}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
-      </fieldset>
+          ))}
+        </fieldset>
 
-      <div className="flex flex-wrap items-center gap-2">
-        {selected.length === 0 ? (
-          <span className="text-sm text-muted">لم تحدد أي سن بعد.</span>
-        ) : (
-          selected.map((fdi) => (
-            <button
-              key={fdi}
-              type="button"
-              onClick={() => onToggle(fdi)}
-              className="chip border-teal/30 bg-teal-light text-teal-deep hover:border-teal"
-              aria-label={`إزالة السن ${fdi}`}
-            >
-              <span className="font-mono">{fdi}</span>
-              <span className="hidden sm:inline">{TEETH_BY_FDI[fdi]?.nameAr}</span>
-              <X className="size-3.5" aria-hidden />
+        <div className="flex flex-wrap items-center gap-2">
+          {selected.length === 0 ? (
+            <span className="text-sm text-muted">No teeth selected yet.</span>
+          ) : (
+            selected.map((fdi) => (
+              <button
+                key={fdi}
+                type="button"
+                onClick={() => onToggle(fdi)}
+                className="chip border-teal/30 bg-teal-light text-teal-deep hover:border-teal"
+                aria-label={`Remove tooth ${fdi}`}
+              >
+                <span className="font-mono">{fdi}</span>
+                <span className="hidden sm:inline">{TEETH_BY_FDI[fdi]?.nameAr}</span>
+                <X className="size-3.5" aria-hidden />
+              </button>
+            ))
+          )}
+          {selected.length > 0 && (
+            <button type="button" onClick={onClear} className="chip border-line text-muted hover:text-ink">
+              <RotateCcw className="size-3.5" aria-hidden />
+              Clear selection
             </button>
-          ))
+          )}
+        </div>
+        {error && (
+          <p id="teeth-error" role="alert" className="text-sm text-red-700">
+            {error}
+          </p>
         )}
-        {selected.length > 0 && (
-          <button type="button" onClick={onClear} className="chip border-line text-muted hover:text-ink">
-            <RotateCcw className="size-3.5" aria-hidden />
-            مسح التحديد
-          </button>
-        )}
-      </div>
-      {error && (
-        <p id="teeth-error" role="alert" className="text-sm text-red-700">
-          {error}
-        </p>
-      )}
       </div>
     </div>
   );

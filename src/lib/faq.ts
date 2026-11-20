@@ -11,32 +11,32 @@ export type PublicFaq = {
 const FALLBACK_FAQS: PublicFaq[] = [
   {
     id: "default-1",
-    question: "هل تحتاج الوجوه التجميلية إلى برد الأسنان؟",
-    answer: "يعتمد ذلك على شكل أسنانك ولونها والنتيجة المطلوبة. في حالات كثيرة يكون التحضير محدوداً جداً، وأحياناً لا يلزم. نوضح لك المقدار المتوقع لكل سن قبل البدء، ونجرب الشكل داخل فمك بنموذج مؤقت.",
+    question: "Do cosmetic veneers require shaving or grinding the teeth?",
+    answer: "It depends on your current tooth anatomy, shade, and desired outcome. In many cases preparation is minimal, and in selected indications no tooth preparation is required. We explain the exact plan before starting and verify aesthetics with a clinical mock-up first.",
     sortOrder: 1,
   },
   {
     id: "default-2",
-    question: "هل زراعة الأسنان مؤلمة؟ وهل تناسب مرضى السكر والضغط؟",
-    answer: "تُجرى الزراعة تحت تخدير موضعي، ومعظم المرضى يصفون ما بعدها بانزعاج يمكن التحكم فيه بالمسكنات المعتادة. مرضى السكر والضغط المنضبطين يمكنهم غالباً إجراء الزراعة بعد تقييم حالتهم الصحية — لذلك نطلب التاريخ المرضي عند الحجز.",
+    question: "Are dental implants painful? Are they safe for diabetic and hypertensive patients?",
+    answer: "Implants are performed under gentle local anesthesia. Most patients report mild discomfort that is easily managed with standard analgesics. Patients with controlled diabetes and blood pressure are frequently excellent candidates following clinical evaluation — which is why we request medical history upon booking.",
     sortOrder: 2,
   },
   {
     id: "default-3",
-    question: "هل يمكنني رؤية شكل ابتسامتي قبل العلاج؟",
-    answer: "نعم. نصمم الابتسامة رقمياً، ثم نضع نموذجاً تجريبياً مؤقتاً على أسنانك لترى الشكل والحجم في المرآة قبل أي خطوة نهائية.",
+    question: "Can I preview my smile before committing to treatment?",
+    answer: "Yes. We digitally design your smile and fabricate an intraoral mock-up so you can evaluate proportions, shape, and harmony directly in the mirror before any irreversible steps.",
     sortOrder: 3,
   },
   {
     id: "default-4",
-    question: "متى أعرف التكلفة؟",
-    answer: "بعد الكشف تحصل على خطة مكتوبة تشمل الخيارات المتاحة وتكلفة كل منها والمدة المتوقعة، ولا يبدأ أي إجراء قبل موافقتك.",
+    question: "When will I receive the treatment cost estimate?",
+    answer: "Following your diagnostic examination, you receive a comprehensive written plan detailing clinical options, fees, and timeline. No procedure begins without your prior consent.",
     sortOrder: 4,
   },
   {
     id: "default-5",
-    question: "هل الحجز عبر الموقع نهائي؟",
-    answer: "يُحجز الوقت الذي اخترته لك فوراً ولا يظهر لغيرك، ثم تؤكده العيادة. يمكنك متابعة حالة الطلب في أي وقت بالرقم المرجعي ورقم هاتفك.",
+    question: "Is online booking binding and instant?",
+    answer: "Your chosen time slot is reserved immediately and shielded from double-booking. Our team confirms the appointment promptly. You can check your booking status anytime using your booking reference and mobile number.",
     sortOrder: 5,
   },
 ];

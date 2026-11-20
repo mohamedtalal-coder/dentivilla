@@ -13,18 +13,16 @@ type Props = {
   preload?: boolean;
 };
 
-const toArabic = (n: number) => String(n).replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[Number(d)]);
-
 /**
- * Before/after comparison. In RTL reading order "before" sits on the right and
- * "after" on the left; the divider position is the share of the frame (from
- * the left edge) showing the "after" photo.
+ * Before/after comparison. In LTR reading order, "Before" sits on the left and
+ * "After" on the right. The divider position indicates the percentage of the frame
+ * showing the "Before" photo.
  */
 export function BeforeAfter({
   beforeSrc = "/images/smile_before.jpg",
   afterSrc = "/images/smile_after.jpg",
-  beforeAlt = "الأسنان قبل العلاج",
-  afterAlt = "الأسنان بعد العلاج",
+  beforeAlt = "Teeth before treatment",
+  afterAlt = "Teeth after treatment",
   caption,
   preload = false,
 }: Props) {
@@ -57,7 +55,7 @@ export function BeforeAfter({
     setPosition((p) => Math.min(100, Math.max(0, move(p))));
   }
 
-  const afterShare = Math.round(position);
+  const beforeShare = Math.round(position);
 
   return (
     <figure className="w-full">
@@ -81,26 +79,31 @@ export function BeforeAfter({
         }}
         onPointerCancel={() => setDragging(false)}
       >
+        {/* Base layer: After photo on right */}
         <Image src={afterSrc} alt={afterAlt} fill sizes="(min-width: 1024px) 896px, 100vw" className="object-cover" preload={preload} />
-        <div className="absolute inset-0" style={{ clipPath: `inset(0 0 0 ${position}%)` }}>
+        
+        {/* Top layer: Before photo on left clipped to position */}
+        <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}>
           <Image src={beforeSrc} alt={beforeAlt} fill sizes="(min-width: 1024px) 896px, 100vw" className="object-cover" />
         </div>
 
+        {/* Badges */}
         <span
-          className={`pointer-events-none absolute top-4 right-4 rounded-full bg-black/55 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm transition-opacity ${
-            position > 88 ? "opacity-0" : "opacity-100"
-          }`}
-        >
-          قبل
-        </span>
-        <span
-          className={`pointer-events-none absolute top-4 left-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-teal-deep backdrop-blur-sm transition-opacity ${
+          className={`pointer-events-none absolute top-4 left-4 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm transition-opacity ${
             position < 12 ? "opacity-0" : "opacity-100"
           }`}
         >
-          بعد
+          Before
+        </span>
+        <span
+          className={`pointer-events-none absolute top-4 right-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-teal-deep backdrop-blur-sm transition-opacity ${
+            position > 88 ? "opacity-0" : "opacity-100"
+          }`}
+        >
+          After
         </span>
 
+        {/* Divider bar */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-y-0 w-0.5 -translate-x-1/2 bg-white shadow-[0_0_12px_rgba(0,0,0,0.35)]"
@@ -109,12 +112,12 @@ export function BeforeAfter({
         <button
           type="button"
           role="slider"
-          aria-label="مقارنة قبل وبعد العلاج"
+          aria-label="Before and after comparison slider"
           aria-orientation="horizontal"
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-valuenow={afterShare}
-          aria-valuetext={`بعد ${toArabic(afterShare)}٪، قبل ${toArabic(100 - afterShare)}٪`}
+          aria-valuenow={beforeShare}
+          aria-valuetext={`Before ${beforeShare}%, After ${100 - beforeShare}%`}
           onKeyDown={onKeyDown}
           className="absolute top-1/2 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white text-teal-deep shadow-lift ring-1 ring-black/5 transition-transform hover:scale-105 focus-visible:ring-4 focus-visible:ring-teal/40"
           style={{ left: `clamp(24px, ${position}%, calc(100% - 24px))` }}

@@ -143,6 +143,7 @@ model Media {
   beforeOf  BeforeAfterCase[] @relation("CaseBefore")
   afterOf   BeforeAfterCase[] @relation("CaseAfter")
   siteImages SiteImage[]
+  siteImageItems SiteImageItem[]
 }
 
 model BeforeAfterCase {
@@ -166,7 +167,7 @@ model BeforeAfterCase {
 
 model Offer {
   id            String   @id @default(cuid())
-  badge         String   @default("عرض خاص")
+  badge         String   @default("Special Offer")
   titleAr       String
   descriptionAr String
   price         Int
@@ -193,13 +194,27 @@ model Faq {
 }
 
 model SiteImage {
-  id          String   @id
+  id          String          @id
   labelAr     String
   description String?
   mediaId     String?
   customUrl   String?
-  media       Media?   @relation(fields: [mediaId], references: [id], onDelete: SetNull)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  media       Media?          @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  items       SiteImageItem[]
+}
+
+model SiteImageItem {
+  id          String    @id @default(cuid())
+  siteImageId String
+  siteImage   SiteImage @relation(fields: [siteImageId], references: [id], onDelete: Cascade)
+  mediaId     String?
+  media       Media?    @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  customUrl   String?
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+
+  @@index([siteImageId, sortOrder])
 }
 

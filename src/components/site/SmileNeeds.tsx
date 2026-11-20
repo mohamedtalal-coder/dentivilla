@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { ArrowLeft, CalendarClock, ClipboardCheck, MessageCircle, Stethoscope } from "lucide-react";
+import { ArrowRight, CalendarClock, ClipboardCheck, MessageCircle, Stethoscope } from "lucide-react";
 import { BookLink } from "@/components/booking/BookLink";
 
 type Need = {
@@ -24,89 +24,92 @@ const NEEDS: Need[] = [
   {
     id: "shape",
     treatmentSlug: "veneers",
-    label: "شكل أو لون الأسنان الأمامية",
-    hint: "فراغات، كسور بسيطة، عدم تناسق",
+    label: "Shape or Shade of Front Teeth",
+    hint: "Gaps, minor chips, asymmetry",
     image: "/images/teeth/incisor.webp",
-    imageAlt: "نموذج ثلاثي الأبعاد لقاطع علوي",
-    title: "الوجوه التجميلية وتصميم الابتسامة",
-    concern: "أريد ابتسامة متناسقة، لكني قلق من برد أسناني الطبيعية.",
-    assess: "تصوير فوتوغرافي ورقمي للابتسامة، وقياس سماكة المينا، وتحليل خط الشفاه ونسب الوجه.",
+    imageAlt: "3D model of an upper central incisor",
+    title: "Porcelain Veneers & Smile Design",
+    concern: "I want a balanced, attractive smile, but I'm worried about aggressive shaving of my natural teeth.",
+    assess: "High-resolution digital photography, enamel thickness assessment, lip line, and facial proportion analysis.",
     approach:
-      "تصميم رقمي للابتسامة ثم نموذج تجريبي داخل الفم تراه قبل أي تحضير. يُحدد مقدار التحضير لكل سن على حدة، وفي حالات كثيرة يكون محدوداً جداً.",
-    visits: "عادةً ٢–٣ زيارات",
-    note: "تُقرر الحاجة للتحضير ومقداره بعد الفحص.",
+      "Digital Smile Design followed by an intraoral mockup you see and test before any preparation. Preparation is tailored per tooth and kept minimal.",
+    visits: "Typically 2–3 visits",
+    note: "The necessity and extent of preparation are determined after clinical evaluation.",
   },
   {
     id: "missing",
     treatmentSlug: "implants",
-    label: "سن مفقود أو متحرك",
-    hint: "فراغ يؤثر على المضغ أو الابتسامة",
+    label: "Missing or Mobile Tooth",
+    hint: "Gap affecting chewing or smile",
     image: "/images/teeth/implant.webp",
-    imageAlt: "نموذج ثلاثي الأبعاد لغرسة سنية مع دعامة وتاج",
-    title: "زراعة الأسنان المخطط لها رقمياً",
-    concern: "فقدت سناً وأريد بديلاً ثابتاً دون المساس بالأسنان المجاورة.",
-    assess: "أشعة مقطعية ثلاثية الأبعاد (CBCT) لتقييم كثافة العظم وموقع الأعصاب والجيوب الأنفية.",
+    imageAlt: "3D model of a dental implant with abutment and crown",
+    title: "Digitally Planned Dental Implants",
+    concern: "I lost a tooth and want a permanent, stable replacement without touching adjacent teeth.",
+    assess: "3D CBCT scan to evaluate bone density, height, nerve paths, and sinus proximity.",
     approach:
-      "تخطيط موضع الغرسة على الأشعة قبل الجراحة، وعند الحاجة دليل جراحي مطبوع. يُركّب التاج النهائي بعد التحام الغرسة بالعظم.",
-    visits: "مرحلتان على مدى أسابيع إلى أشهر",
-    note: "مدة الالتحام تختلف حسب العظم والحالة الصحية العامة.",
+      "Pre-surgical computer planning with 3D surgical guides when indicated. The final ceramic crown is fitted after osseointegration.",
+    visits: "2 main phases across several weeks to months",
+    note: "Healing and integration periods vary by bone quality and general health.",
   },
   {
     id: "color",
     treatmentSlug: "whitening",
-    label: "اصفرار أو تصبغ الأسنان",
-    hint: "تغير لون بسبب القهوة أو التدخين أو العمر",
+    label: "Yellowing or Stained Teeth",
+    hint: "Discoloration from coffee, smoking, or age",
     image: "/images/teeth/canine.webp",
-    imageAlt: "نموذج ثلاثي الأبعاد لناب علوي",
-    title: "تبييض الأسنان في العيادة",
-    concern: "أسناني فقدت لونها وأريد نتيجة طبيعية دون حساسية مزعجة.",
-    assess: "تسجيل درجة اللون الحالية، وفحص الحشوات والتيجان التي لا يغير التبييض لونها، وتقييم الحساسية.",
-    approach: "عزل اللثة ثم جلسة تبييض داخل العيادة، مع إرشادات للحفاظ على النتيجة وتقليل الحساسية بعدها.",
-    visits: "جلسة واحدة غالباً",
-    note: "النتيجة تختلف حسب نوع التصبغ وطبيعة الأسنان.",
+    imageAlt: "3D model of an upper canine",
+    title: "In-Office Laser Teeth Whitening",
+    concern: "My teeth look dull or stained and I want a brighter, natural shade without uncomfortable sensitivity.",
+    assess: "Baseline shade mapping, inspection of existing fillings/crowns, and sensitivity evaluation.",
+    approach:
+      "Gum barrier protection followed by gentle in-office laser activation, plus post-care guidance to prolong results and protect enamel.",
+    visits: "Usually 1 session (45 minutes)",
+    note: "Results vary depending on stain etiology and enamel characteristics.",
   },
   {
     id: "pain",
     treatmentSlug: "root-canal",
-    label: "ألم أو حساسية في سن",
-    hint: "ألم مع البارد أو الساخن أو عند المضغ",
+    label: "Toothache or Temperature Sensitivity",
+    hint: "Pain with hot, cold, or when biting",
     image: "/images/teeth/molar.webp",
-    imageAlt: "نموذج ثلاثي الأبعاد لضرس علوي بثلاثة جذور",
-    title: "علاج العصب تحت التكبير",
-    concern: "عندي ألم مستمر في ضرس وأخشى أن أفقده.",
-    assess: "فحص سريري وأشعة لتحديد مصدر الألم وعدد القنوات وشكلها قبل البدء.",
+    imageAlt: "3D model of an upper molar with 3 roots",
+    title: "Microscopic Root Canal Therapy",
+    concern: "I have persistent pain in a tooth and want to save it rather than pull it.",
+    assess: "Clinical vitality tests and digital radiographs to locate the source, canal anatomy, and periapical status.",
     approach:
-      "تنظيف القنوات وتطهيرها وحشوها تحت التكبير، ثم ترميم يحمي ما تبقى من السن. الهدف الحفاظ على السن الطبيعي متى أمكن.",
-    visits: "١–٢ زيارة",
-    note: "إن كان الألم شديداً، اذكر ذلك في الحجز لنعطيك أقرب موعد.",
+      "Thorough cleaning, disinfection, and warm 3D obturation under magnification, followed by structural restoration to protect remaining tooth.",
+    visits: "1–2 visits",
+    note: "If you have acute pain, mention it during booking for our earliest priority slot.",
   },
   {
     id: "alignment",
     treatmentSlug: "orthodontics",
-    label: "أسنان غير منتظمة",
-    hint: "تزاحم، فراغات، أو مشاكل في العضة",
+    label: "Misaligned or Crowded Teeth",
+    hint: "Crowding, spacing, or bite issues",
     image: "/images/teeth/premolar.webp",
-    imageAlt: "نموذج ثلاثي الأبعاد لضاحك علوي",
-    title: "تقويم الأسنان",
-    concern: "أريد تعديل ترتيب أسناني دون أن يلاحظ أحد التقويم.",
-    assess: "مسح رقمي للفم وصور وأشعة لدراسة الإطباق ومساحة الفك.",
-    approach: "مناقشة الخيارات المناسبة لحالتك — ومنها التقويم الشفاف — مع محاكاة رقمية لمسار حركة الأسنان.",
-    visits: "متابعة كل ٤–٨ أسابيع",
-    note: "مدة العلاج تُحدد بعد الدراسة ولا يمكن تقديرها عبر الموقع.",
+    imageAlt: "3D model of an upper premolar",
+    title: "Orthodontics & Clear Aligners",
+    concern: "I want straight teeth and an aligned bite with comfortable, discreet treatment.",
+    assess: "Digital 3D intraoral scan, facial photos, and cephalometric analysis to evaluate jaw arches and occlusion.",
+    approach:
+      "Custom treatment planning — including clear aligners or aesthetic brackets — with digital simulation of expected tooth movement.",
+    visits: "Checkups every 4–8 weeks",
+    note: "Total treatment duration is established following comprehensive diagnostic records.",
   },
   {
     id: "unsure",
     treatmentSlug: "consultation",
-    label: "لست متأكداً مما أحتاج",
-    hint: "فحص شامل وخطة مكتوبة",
+    label: "Not Sure Where to Start",
+    hint: "Comprehensive exam & written plan",
     image: "/images/teeth/lower-molar.webp",
-    imageAlt: "نموذج ثلاثي الأبعاد لضرس سفلي بجذرين",
-    title: "كشف واستشارة شاملة",
-    concern: "لا أعرف من أين أبدأ، وأريد صورة واضحة عن حالتي.",
-    assess: "فحص كامل للأسنان واللثة والإطباق مع الأشعة اللازمة.",
-    approach: "شرح الحالة بوضوح وخطة علاج مكتوبة بالأولويات والتكلفة والمدة قبل أي إجراء.",
-    visits: "زيارة واحدة",
-    note: "يمكنك تحديد الأسنان التي تقلقك على مخطط الفك عند الحجز.",
+    imageAlt: "3D model of a lower molar with 2 roots",
+    title: "Comprehensive Clinical Consultation",
+    concern: "I want an honest, comprehensive overview of my oral health before committing to anything.",
+    assess: "Full examination of teeth, periodontal tissues, bite relationship, and necessary diagnostic radiographs.",
+    approach:
+      "Clear explanation with a prioritized written treatment plan, transparent fees, and projected timeline before any procedure begins.",
+    visits: "1 visit",
+    note: "You can select the teeth that concern you on the 3D model during booking.",
   },
 ];
 
@@ -119,8 +122,8 @@ export function SmileNeeds({ whatsappUrl }: { whatsappUrl: string }) {
     const keys: Record<string, number> = {
       ArrowDown: 1,
       ArrowUp: -1,
-      ArrowLeft: 1, // RTL: left moves forward
-      ArrowRight: -1,
+      ArrowRight: 1,
+      ArrowLeft: -1,
     };
     let next: number | null = null;
     if (event.key in keys) next = (index + keys[event.key] + NEEDS.length) % NEEDS.length;
@@ -136,12 +139,12 @@ export function SmileNeeds({ whatsappUrl }: { whatsappUrl: string }) {
     <section id="concerns" className="section bg-ivory" aria-labelledby="concerns-title">
       <div className="container-page">
         <div className="max-w-2xl">
-          <p className="eyebrow">ابدأ من احتياجك</p>
+          <p className="eyebrow">Start From Your Needs</p>
           <h2 id="concerns-title" className="heading-lg">
-            ماذا تحتاج ابتسامتك اليوم؟
+            What Does Your Smile Need Today?
           </h2>
           <p className="lede mt-4">
-            اختر ما يشغلك، وسنوضح لك ما نفحصه وكيف يبدأ العلاج — ثم احجز الموعد المناسب مباشرة.
+            Select what concerns you, and we will explain our diagnostic steps and treatment approach — then book your visit directly online.
           </p>
         </div>
 
@@ -149,7 +152,7 @@ export function SmileNeeds({ whatsappUrl }: { whatsappUrl: string }) {
           <div
             role="tablist"
             aria-orientation="vertical"
-            aria-label="الاحتياجات الشائعة"
+            aria-label="Common dental concerns"
             className="-mx-4 flex min-w-0 snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-2 scrollbar-none sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:col-span-5 lg:grid-cols-1"
           >
             {NEEDS.map((need, index) => {
@@ -168,7 +171,7 @@ export function SmileNeeds({ whatsappUrl }: { whatsappUrl: string }) {
                   tabIndex={selected ? 0 : -1}
                   onClick={() => setActiveId(need.id)}
                   onKeyDown={(event) => onKeyDown(event, index)}
-                  className={`group flex w-[78vw] max-w-[300px] shrink-0 snap-start items-center gap-4 rounded-2xl border p-3 text-right transition-all sm:w-auto sm:max-w-none sm:min-w-0 ${
+                  className={`group flex w-[78vw] max-w-[300px] shrink-0 snap-start items-center gap-4 rounded-2xl border p-3 text-left transition-all sm:w-auto sm:max-w-none sm:min-w-0 ${
                     selected
                       ? "border-teal/50 bg-white shadow-card"
                       : "border-line bg-white/80 hover:border-line hover:bg-white sm:border-transparent sm:bg-transparent"
@@ -187,10 +190,10 @@ export function SmileNeeds({ whatsappUrl }: { whatsappUrl: string }) {
                     </span>
                     <span className="mt-0.5 block truncate text-sm text-muted">{need.hint}</span>
                   </span>
-                  <ArrowLeft
+                  <ArrowRight
                     aria-hidden
                     className={`size-4 shrink-0 transition-all ${
-                      selected ? "text-teal" : "text-neutral-300 group-hover:-translate-x-0.5"
+                      selected ? "text-teal" : "text-neutral-300 group-hover:translate-x-0.5"
                     }`}
                   />
                 </button>
@@ -216,29 +219,29 @@ export function SmileNeeds({ whatsappUrl }: { whatsappUrl: string }) {
               </div>
               <div className="p-6 sm:p-8 md:order-1">
                 <h3 className="heading-md">{active.title}</h3>
-                <blockquote className="mt-4 border-s-2 border-amber ps-4 text-[15px] leading-7 text-muted">
-                  «{active.concern}»
+                <blockquote className="mt-4 border-l-2 border-amber pl-4 text-[15px] leading-7 text-muted italic">
+                  “{active.concern}”
                 </blockquote>
 
                 <dl className="mt-6 grid gap-5">
                   <div className="flex gap-3">
                     <Stethoscope className="mt-1 size-5 shrink-0 text-teal" aria-hidden />
                     <div>
-                      <dt className="font-semibold text-teal-deep">ما نفحصه أولاً</dt>
+                      <dt className="font-semibold text-teal-deep">What We Assess First</dt>
                       <dd className="mt-1 leading-7 text-muted">{active.assess}</dd>
                     </div>
                   </div>
                   <div className="flex gap-3">
                     <ClipboardCheck className="mt-1 size-5 shrink-0 text-teal" aria-hidden />
                     <div>
-                      <dt className="font-semibold text-teal-deep">كيف نعالج</dt>
+                      <dt className="font-semibold text-teal-deep">How We Treat</dt>
                       <dd className="mt-1 leading-7 text-muted">{active.approach}</dd>
                     </div>
                   </div>
                   <div className="flex gap-3">
                     <CalendarClock className="mt-1 size-5 shrink-0 text-teal" aria-hidden />
                     <div>
-                      <dt className="font-semibold text-teal-deep">عدد الزيارات المعتاد</dt>
+                      <dt className="font-semibold text-teal-deep">Estimated Visits</dt>
                       <dd className="mt-1 leading-7 text-muted">
                         {active.visits}
                         <span className="block text-sm text-neutral-500">{active.note}</span>
@@ -249,21 +252,20 @@ export function SmileNeeds({ whatsappUrl }: { whatsappUrl: string }) {
 
                 <div className="mt-8 flex flex-wrap gap-3">
                   <BookLink intent={{ treatmentSlug: active.treatmentSlug }} className="btn-primary">
-                    احجز لهذه الحالة
-                    <ArrowLeft className="size-4" aria-hidden />
+                    Book for this Care
+                    <ArrowRight className="size-4" aria-hidden />
                   </BookLink>
                   <a
-                    href={`${whatsappUrl}?text=${encodeURIComponent(`مرحباً، أود الاستفسار عن: ${active.title}`)}`}
+                    href={`${whatsappUrl}?text=${encodeURIComponent(`Hello, I'd like to ask about: ${active.title}`)}`}
                     target="_blank"
                     rel="noreferrer"
                     className="btn-secondary"
                   >
                     <MessageCircle className="size-4" aria-hidden />
-                    اسأل عبر واتساب
+                    Ask via WhatsApp
                   </a>
                 </div>
               </div>
-
             </div>
           </div>
         </div>

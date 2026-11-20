@@ -5,7 +5,7 @@ import { fromZonedTime } from "date-fns-tz";
 import type { AppointmentStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { assertSlotAvailable, BookingError, findConflict, lockBookings } from "@/lib/booking";
+import { assertSlotAvailable, BookingError, createReference, findConflict, lockBookings } from "@/lib/booking";
 import { TIMEZONE } from "@/lib/site";
 import { deleteMediaIfUnused } from "@/lib/media";
 import {
@@ -17,12 +17,16 @@ import {
 import {
   availabilitySettingsSchema,
   caseSchema,
+  createAdminAppointmentSchema,
   faqSchema,
   offerSchema,
   patientUpdateSchema,
   siteImageSlotSchema,
+  addSiteImageItemSchema,
+  reorderSiteImageItemsSchema,
   siteSettingsSchema,
   treatmentSchema,
+  updateAppointmentTreatmentSchema,
   blockedPeriodSchema,
   extraSlotSchema,
   rescheduleSchema,
@@ -50,20 +54,20 @@ async function run(fn: () => Promise<string | void>): Promise<ActionResult> {
     return { ok: true, message: message || undefined };
   } catch (error) {
     if (error instanceof Error && error.message === "UNAUTHORIZED") {
-      return { ok: false, error: "انتهت الجلسة. سجّل الدخول مرة أخرى." };
+      return { ok: false, error: "Session expired. Please sign in again." };
     }
     if (error instanceof BookingError || error instanceof UserFacingError) {
       return { ok: false, error: error.message };
     }
     if (error && typeof error === "object" && "issues" in error) {
       const issues = (error as { issues: { message: string }[] }).issues;
-      return { ok: false, error: issues[0]?.message ?? "بيانات غير صالحة" };
+      return { ok: false, error: issues[0]?.message ?? "Invalid data" };
     }
     if (error instanceof Error && /Appointment_no_overlap|23P01/.test(error.message)) {
-      return { ok: false, error: "يتعارض هذا الوقت مع موعد آخر محجوز." };
+      return { ok: false, error: "This time conflicts with another booked appointment." };
     }
     console.error("[admin] action failed:", error instanceof Error ? error.message : "operation error");
-    return { ok: false, error: "تعذر تنفيذ العملية. حاول مرة أخرى." };
+    return { ok: false, error: "Operation failed. Please try again." };
   }
 }
 
@@ -85,13 +89,13 @@ export async function setAppointmentStatus(id: string, status: AppointmentStatus
     await prisma.$transaction(async (tx) => {
       await lockBookings(tx);
       const current = await tx.appointment.findUnique({ where: { id } });
-      if (!current) throw new UserFacingError("الموعد غير موجود");
+      if (!current) throw new UserFacingError("Appointment not found");
       if (!TRANSITIONS[current.status].includes(status)) {
-        throw new UserFacingError("لا يمكن تغيير حالة هذا الموعد بهذه الطريقة");
+        throw new UserFacingError("Cannot change appointment status in this manner");
       }
       if (status === "CONFIRMED") {
         const conflict = await findConflict(current.startsAt, current.endsAt, current.id, tx);
-        if (conflict) throw new UserFacingError(`لا يمكن التأكيد: ${conflict}`);
+        if (conflict) throw new UserFacingError(`Cannot confirm: ${conflict}`);
       }
       const note = adminNotes?.trim();
       const existingDecrypted = decryptOptional(current.adminNotes);
@@ -104,7 +108,7 @@ export async function setAppointmentStatus(id: string, status: AppointmentStatus
         },
       });
     });
-    return "تم تحديث حالة الموعد";
+    return "Appointment status updated successfully";
   });
 }
 
@@ -114,9 +118,9 @@ export async function rescheduleAppointment(id: string, startsAtIso: string) {
     await prisma.$transaction(async (tx) => {
       await lockBookings(tx);
       const current = await tx.appointment.findUnique({ where: { id: data.id }, include: { treatment: true } });
-      if (!current) throw new UserFacingError("الموعد غير موجود");
+      if (!current) throw new UserFacingError("Appointment not found");
       if (current.status !== "PENDING" && current.status !== "CONFIRMED") {
-        throw new UserFacingError("يمكن إعادة جدولة المواعيد المعلقة أو المؤكدة فقط");
+        throw new UserFacingError("Only pending or confirmed appointments can be rescheduled");
       }
       const startsAt = new Date(data.startsAt);
       await assertSlotAvailable(startsAt, current.treatment.durationMinutes, {
@@ -129,7 +133,115 @@ export async function rescheduleAppointment(id: string, startsAtIso: string) {
         data: { startsAt, endsAt: new Date(startsAt.getTime() + current.treatment.durationMinutes * 60_000) },
       });
     });
-    return "تمت إعادة الجدولة";
+    return "Appointment rescheduled successfully";
+  });
+}
+
+/** Updates the reservation type (treatment) and teeth for an existing appointment */
+export async function updateAppointmentTreatment(id: string, treatmentId: string, teeth: string[] = []) {
+  return run(async () => {
+    const data = updateAppointmentTreatmentSchema.parse({ id, treatmentId, teeth });
+    await prisma.$transaction(async (tx) => {
+      await lockBookings(tx);
+      const current = await tx.appointment.findUnique({
+        where: { id: data.id },
+        include: { treatment: true },
+      });
+      if (!current) throw new UserFacingError("Appointment not found");
+
+      const newTreatment = await tx.treatment.findUnique({ where: { id: data.treatmentId } });
+      if (!newTreatment) throw new UserFacingError("Treatment / reservation type not found");
+
+      const newEndsAt = new Date(current.startsAt.getTime() + newTreatment.durationMinutes * 60_000);
+
+      // Check conflict if appointment is active
+      if (current.status === "CONFIRMED" || current.status === "PENDING") {
+        const conflict = await findConflict(current.startsAt, newEndsAt, current.id, tx);
+        if (conflict) {
+          throw new UserFacingError(`Updated appointment time conflicts with: ${conflict}`);
+        }
+      }
+
+      await tx.appointment.update({
+        where: { id: current.id },
+        data: {
+          treatmentId: newTreatment.id,
+          teeth: data.teeth,
+          endsAt: newEndsAt,
+        },
+      });
+    });
+
+    revalidatePath("/admin");
+    revalidatePath("/admin/appointments");
+    revalidatePath(`/admin/appointments/${id}`);
+    revalidatePath("/admin/calendar");
+    return "Treatment and teeth updated successfully";
+  });
+}
+
+/** Creates a new appointment directly from the admin dashboard */
+export async function createAdminAppointment(input: unknown) {
+  return run(async () => {
+    const data = createAdminAppointmentSchema.parse(input);
+    const startsAt = new Date(data.startsAt);
+    if (isNaN(startsAt.getTime())) {
+      throw new UserFacingError("Invalid appointment date and time");
+    }
+
+    const appointment = await prisma.$transaction(async (tx) => {
+      await lockBookings(tx);
+      const treatment = await tx.treatment.findUnique({ where: { id: data.treatmentId } });
+      if (!treatment) throw new UserFacingError("Treatment / reservation type not found");
+
+      const endsAt = new Date(startsAt.getTime() + treatment.durationMinutes * 60_000);
+
+      // Check conflict
+      const conflict = await findConflict(startsAt, endsAt, "new-admin-booking", tx);
+      if (conflict) throw new UserFacingError(`Could not create appointment: ${conflict}`);
+
+      const phoneBlindIndex = computePhoneBlindIndex(data.phone);
+      const encryptedPhone = encryptField(data.phone);
+      const encryptedFullName = encryptField(data.fullName);
+      const encryptedWhatsapp = encryptOptional(data.whatsapp);
+      const encryptedNotes = encryptOptional(data.patientNotes);
+      const encryptedAdminNotes = encryptOptional(data.adminNotes ?? "Booked via Admin Dashboard");
+
+      const patient = await tx.patient.upsert({
+        where: { phoneBlindIndex },
+        update: {
+          fullName: encryptedFullName,
+          phone: encryptedPhone,
+          whatsapp: encryptedWhatsapp,
+        },
+        create: {
+          fullName: encryptedFullName,
+          phone: encryptedPhone,
+          phoneBlindIndex,
+          whatsapp: encryptedWhatsapp,
+        },
+      });
+
+      return tx.appointment.create({
+        data: {
+          reference: createReference(),
+          patientId: patient.id,
+          treatmentId: treatment.id,
+          teeth: data.teeth,
+          startsAt,
+          endsAt,
+          status: data.status,
+          patientNotes: encryptedNotes,
+          adminNotes: encryptedAdminNotes,
+        },
+      });
+    });
+
+    revalidatePath("/admin");
+    revalidatePath("/admin/appointments");
+    revalidatePath("/admin/calendar");
+    revalidatePath("/admin/patients");
+    return `Appointment created successfully with reference: ${appointment.reference}`;
   });
 }
 
@@ -137,12 +249,12 @@ export async function updatePatient(id: string, input: unknown) {
   return run(async () => {
     const data = patientUpdateSchema.parse(input);
     const existing = await prisma.patient.findUnique({ where: { id } });
-    if (!existing) throw new UserFacingError("المريض غير موجود");
+    if (!existing) throw new UserFacingError("Patient not found");
 
     const newBlindIndex = computePhoneBlindIndex(data.phone);
     const phoneTaken = await prisma.patient.findUnique({ where: { phoneBlindIndex: newBlindIndex } });
     if (phoneTaken && phoneTaken.id !== id) {
-      throw new UserFacingError("رقم الهاتف هذا مسجل بالفعل لمريض آخر.");
+      throw new UserFacingError("This phone number is already registered to another patient.");
     }
 
     await prisma.patient.update({
@@ -157,15 +269,15 @@ export async function updatePatient(id: string, input: unknown) {
 
     revalidatePath("/admin/patients");
     revalidatePath(`/admin/patients/${id}`);
-    return "تم تحديث بيانات المريض بنجاح";
+    return "Patient details updated successfully";
   });
 }
 
 export async function savePatientNotes(id: string, notes: string) {
   return run(async () => {
-    if (notes.length > 2000) throw new UserFacingError("الملاحظات طويلة جداً");
+    if (notes.length > 2000) throw new UserFacingError("Notes are too long");
     await prisma.patient.update({ where: { id }, data: { notes: null } });
-    return "تم حفظ الملاحظات";
+    return "Notes saved successfully";
   });
 }
 
@@ -173,7 +285,7 @@ export async function saveAvailabilitySettings(input: unknown) {
   return run(async () => {
     const data = availabilitySettingsSchema.parse(input);
     await prisma.availabilitySettings.update({ where: { id: "default" }, data });
-    return "تم حفظ الإعدادات";
+    return "Settings saved successfully";
   });
 }
 
@@ -182,7 +294,7 @@ export async function saveWorkingHours(input: unknown) {
     const data = workingHoursSchema.parse(input);
     await prisma.workingHours.upsert({ where: { weekday: data.weekday }, update: data, create: data });
     revalidatePath("/", "layout"); // footer shows the hours
-    return "تم حفظ ساعات اليوم";
+    return "Working hours saved successfully";
   });
 }
 
@@ -196,15 +308,15 @@ export async function addBlockedPeriod(input: unknown) {
     });
     await prisma.blockedPeriod.create({ data: { startsAt, endsAt, reason: data.reason } });
     return held
-      ? `تم الحجب. تنبيه: توجد ${held} مواعيد قائمة داخل هذه الفترة — راجعها وأعد جدولتها.`
-      : "تم حجب الفترة";
+      ? `Blocked period saved. Warning: ${held} active appointment(s) fall within this period — please review and reschedule them.`
+      : "Blocked period saved successfully";
   });
 }
 
 export async function removeBlockedPeriod(id: string) {
   return run(async () => {
     await prisma.blockedPeriod.delete({ where: { id } });
-    return "تم حذف الحجب";
+    return "Blocked period removed successfully";
   });
 }
 
@@ -214,14 +326,14 @@ export async function addExtraSlot(input: unknown) {
     await prisma.extraSlot.create({
       data: { startsAt: cairoLocal(data.startsAt), endsAt: cairoLocal(data.endsAt), note: data.note || null },
     });
-    return "تمت إضافة الوقت";
+    return "Extra slot added successfully";
   });
 }
 
 export async function removeExtraSlot(id: string) {
   return run(async () => {
     await prisma.extraSlot.delete({ where: { id } });
-    return "تم حذف الوقت الإضافي";
+    return "Extra slot removed successfully";
   });
 }
 
@@ -232,7 +344,7 @@ export async function saveSiteSettings(input: unknown) {
     const data = siteSettingsSchema.parse(input);
     await prisma.siteSettings.upsert({ where: { id: "default" }, update: data, create: { id: "default", ...data } });
     revalidatePath("/", "layout"); // footer, contact page and WhatsApp buttons everywhere
-    return "تم حفظ بيانات التواصل";
+    return "Contact details saved successfully";
   });
 }
 
@@ -248,14 +360,14 @@ export async function createCase(input: unknown) {
   return run(async () => {
     const data = caseSchema.parse(input);
     const media = await prisma.media.count({ where: { id: { in: [data.beforeMediaId, data.afterMediaId] } } });
-    if (media !== 2) throw new UserFacingError("الصور المرفوعة غير موجودة. أعد رفعها.");
+    if (media !== 2) throw new UserFacingError("Uploaded images not found. Please re-upload.");
     const last = await prisma.beforeAfterCase.aggregate({ _max: { sortOrder: true } });
     const count = await prisma.beforeAfterCase.count({ where: { featured: true } });
     await prisma.beforeAfterCase.create({
       data: { ...data, sortOrder: (last._max.sortOrder ?? 0) + 1, featured: count === 0 && data.published },
     });
     revalidateCases();
-    return data.published ? "تمت إضافة الحالة ونشرها" : "تم حفظ الحالة كمسودة";
+    return data.published ? "Case added and published successfully" : "Case saved as draft";
   });
 }
 
@@ -263,30 +375,30 @@ export async function updateCase(id: string, input: unknown) {
   return run(async () => {
     const data = caseSchema.parse(input);
     const current = await prisma.beforeAfterCase.findUnique({ where: { id } });
-    if (!current) throw new UserFacingError("الحالة غير موجودة");
+    if (!current) throw new UserFacingError("Case not found");
     await prisma.beforeAfterCase.update({
       where: { id },
       data: { ...data, featured: data.published ? current.featured : false },
     });
     await deleteMediaIfUnused([current.beforeMediaId, current.afterMediaId]);
     revalidateCases();
-    return "تم حفظ التعديلات";
+    return "Changes saved successfully";
   });
 }
 
 export async function setCasePublished(id: string, published: boolean) {
   return run(async () => {
     const current = await prisma.beforeAfterCase.findUnique({ where: { id } });
-    if (!current) throw new UserFacingError("الحالة غير موجودة");
+    if (!current) throw new UserFacingError("Case not found");
     if (published && !current.consentOnFile) {
-      throw new UserFacingError("أكّد وجود موافقة المريض من «تعديل» قبل النشر");
+      throw new UserFacingError("Please confirm patient consent before publishing");
     }
     await prisma.beforeAfterCase.update({
       where: { id },
       data: { published, featured: published ? current.featured : false },
     });
     revalidateCases();
-    return published ? "تم النشر" : "تم إخفاء الحالة من الموقع";
+    return published ? "Case published" : "Case hidden from website";
   });
 }
 
@@ -294,13 +406,13 @@ export async function setCasePublished(id: string, published: boolean) {
 export async function setCaseFeatured(id: string) {
   return run(async () => {
     const current = await prisma.beforeAfterCase.findUnique({ where: { id } });
-    if (!current?.published) throw new UserFacingError("انشر الحالة أولاً");
+    if (!current?.published) throw new UserFacingError("Please publish the case first");
     await prisma.$transaction([
       prisma.beforeAfterCase.updateMany({ where: { featured: true }, data: { featured: false } }),
       prisma.beforeAfterCase.update({ where: { id }, data: { featured: true } }),
     ]);
     revalidateCases();
-    return "ستظهر هذه الحالة في الصفحة الرئيسية";
+    return "This case is now featured on the homepage";
   });
 }
 
@@ -322,14 +434,14 @@ export async function moveCase(id: string, direction: "up" | "down") {
 export async function deleteCase(id: string) {
   return run(async () => {
     const current = await prisma.beforeAfterCase.delete({ where: { id } }).catch(() => null);
-    if (!current) throw new UserFacingError("الحالة غير موجودة");
+    if (!current) throw new UserFacingError("Case not found");
     await deleteMediaIfUnused([current.beforeMediaId, current.afterMediaId]);
     if (current.featured) {
       const next = await prisma.beforeAfterCase.findFirst({ where: { published: true }, orderBy: { sortOrder: "asc" } });
       if (next) await prisma.beforeAfterCase.update({ where: { id: next.id }, data: { featured: true } });
     }
     revalidateCases();
-    return "تم حذف الحالة وصورها";
+    return "Case and associated images deleted successfully";
   });
 }
 
@@ -352,7 +464,7 @@ export async function createOffer(input: unknown) {
       },
     });
     revalidateOffers();
-    return "تمت إضافة العرض بنجاح";
+    return "Offer added successfully";
   });
 }
 
@@ -360,7 +472,7 @@ export async function updateOffer(id: string, input: unknown) {
   return run(async () => {
     const data = offerSchema.parse(input);
     const current = await prisma.offer.findUnique({ where: { id } });
-    if (!current) throw new UserFacingError("العرض غير موجود");
+    if (!current) throw new UserFacingError("Offer not found");
     await prisma.offer.update({
       where: { id },
       data: {
@@ -369,29 +481,29 @@ export async function updateOffer(id: string, input: unknown) {
       },
     });
     revalidateOffers();
-    return "تم تعديل العرض بنجاح";
+    return "Offer updated successfully";
   });
 }
 
 export async function toggleOfferActive(id: string, active: boolean) {
   return run(async () => {
     const current = await prisma.offer.findUnique({ where: { id } });
-    if (!current) throw new UserFacingError("العرض غير موجود");
+    if (!current) throw new UserFacingError("Offer not found");
     await prisma.offer.update({
       where: { id },
       data: { active },
     });
     revalidateOffers();
-    return active ? "تم تفعيل العرض" : "تم تعطيل العرض";
+    return active ? "Offer activated" : "Offer deactivated";
   });
 }
 
 export async function deleteOffer(id: string) {
   return run(async () => {
     const current = await prisma.offer.delete({ where: { id } }).catch(() => null);
-    if (!current) throw new UserFacingError("العرض غير موجود");
+    if (!current) throw new UserFacingError("Offer not found");
     revalidateOffers();
-    return "تم حذف العرض";
+    return "Offer deleted successfully";
   });
 }
 
@@ -429,7 +541,7 @@ export async function createFaq(input: unknown) {
       },
     });
     revalidateFaqs();
-    return "تمت إضافة السؤال بنجاح";
+    return "FAQ added successfully";
   });
 }
 
@@ -437,35 +549,35 @@ export async function updateFaq(id: string, input: unknown) {
   return run(async () => {
     const data = faqSchema.parse(input);
     const current = await prisma.faq.findUnique({ where: { id } });
-    if (!current) throw new UserFacingError("السؤال غير موجود");
+    if (!current) throw new UserFacingError("FAQ not found");
     await prisma.faq.update({
       where: { id },
       data,
     });
     revalidateFaqs();
-    return "تم تعديل السؤال بنجاح";
+    return "FAQ updated successfully";
   });
 }
 
 export async function toggleFaqPublished(id: string, published: boolean) {
   return run(async () => {
     const current = await prisma.faq.findUnique({ where: { id } });
-    if (!current) throw new UserFacingError("السؤال غير موجود");
+    if (!current) throw new UserFacingError("FAQ not found");
     await prisma.faq.update({
       where: { id },
       data: { published },
     });
     revalidateFaqs();
-    return published ? "تم نشر السؤال" : "تم إخفاء السؤال";
+    return published ? "FAQ published" : "FAQ hidden";
   });
 }
 
 export async function deleteFaq(id: string) {
   return run(async () => {
     const current = await prisma.faq.delete({ where: { id } }).catch(() => null);
-    if (!current) throw new UserFacingError("السؤال غير موجود");
+    if (!current) throw new UserFacingError("FAQ not found");
     revalidateFaqs();
-    return "تم حذف السؤال";
+    return "FAQ deleted successfully";
   });
 }
 
@@ -495,7 +607,7 @@ export async function createTreatment(input: unknown) {
   return run(async () => {
     const data = treatmentSchema.parse(input);
     const existing = await prisma.treatment.findUnique({ where: { slug: data.slug } });
-    if (existing) throw new UserFacingError("الاسم اللاتيني (Slug) مستخدم بالفعل لعلاج آخر");
+    if (existing) throw new UserFacingError("Slug is already in use by another treatment");
     const count = await prisma.treatment.count();
     await prisma.treatment.create({
       data: {
@@ -504,7 +616,7 @@ export async function createTreatment(input: unknown) {
       },
     });
     revalidateTreatments();
-    return "تمت إضافة العلاج بنجاح";
+    return "Treatment added successfully";
   });
 }
 
@@ -514,14 +626,14 @@ export async function updateTreatment(id: string, input: unknown) {
     const existingSlug = await prisma.treatment.findFirst({
       where: { slug: data.slug, NOT: { id } },
     });
-    if (existingSlug) throw new UserFacingError("الاسم اللاتيني (Slug) مستخدم بالفعل لعلاج آخر");
+    if (existingSlug) throw new UserFacingError("Slug is already in use by another treatment");
     const current = await prisma.treatment.update({
       where: { id },
       data,
     }).catch(() => null);
-    if (!current) throw new UserFacingError("العلاج غير موجود");
+    if (!current) throw new UserFacingError("Treatment not found");
     revalidateTreatments();
-    return "تم تعديل العلاج بنجاح";
+    return "Treatment updated successfully";
   });
 }
 
@@ -529,12 +641,12 @@ export async function deleteTreatment(id: string) {
   return run(async () => {
     const appointmentsCount = await prisma.appointment.count({ where: { treatmentId: id } });
     if (appointmentsCount > 0) {
-      throw new UserFacingError(`لا يمكن حذف هذا العلاج لوجود ${appointmentsCount} موعد مرتبط به في السجلات.`);
+      throw new UserFacingError(`Cannot delete treatment because ${appointmentsCount} appointment(s) are associated with it in the database.`);
     }
     const current = await prisma.treatment.delete({ where: { id } }).catch(() => null);
-    if (!current) throw new UserFacingError("العلاج غير موجود");
+    if (!current) throw new UserFacingError("Treatment not found");
     revalidateTreatments();
-    return "تم حذف العلاج بنجاح";
+    return "Treatment deleted successfully";
   });
 }
 
@@ -580,33 +692,152 @@ export async function updateSiteImageSlot(input: unknown) {
       },
     });
     revalidateSiteImages();
-    return "تم تحديث صورة الموقع بنجاح";
+    return "Site image updated successfully";
+  });
+}
+
+export async function addSiteImageItem(input: unknown) {
+  return run(async () => {
+    const { slotKey, mediaId, customUrl } = addSiteImageItemSchema.parse(input);
+    const slotDef = CORE_IMAGE_SLOTS.find((s) => s.key === slotKey);
+    const labelAr = slotDef?.labelAr ?? slotKey;
+    const description = slotDef?.locationAr;
+
+    // ensure parent SiteImage exists
+    await prisma.siteImage.upsert({
+      where: { id: slotKey },
+      update: {},
+      create: {
+        id: slotKey,
+        labelAr,
+        description,
+        mediaId: mediaId || null,
+        customUrl: customUrl || null,
+      },
+    });
+
+    const maxSort = await prisma.siteImageItem.findFirst({
+      where: { siteImageId: slotKey },
+      orderBy: { sortOrder: "desc" },
+      select: { sortOrder: true },
+    });
+    const nextOrder = (maxSort?.sortOrder ?? -1) + 1;
+
+    await prisma.siteImageItem.create({
+      data: {
+        siteImageId: slotKey,
+        mediaId: mediaId || null,
+        customUrl: customUrl || null,
+        sortOrder: nextOrder,
+      },
+    });
+
+    // Also update parent SiteImage.mediaId if it was null
+    const parent = await prisma.siteImage.findUnique({ where: { id: slotKey } });
+    if (!parent?.mediaId && mediaId) {
+      await prisma.siteImage.update({
+        where: { id: slotKey },
+        data: { mediaId, customUrl: null },
+      });
+    }
+
+    revalidateSiteImages();
+    return "Image added to carousel successfully";
+  });
+}
+
+export async function deleteSiteImageItem(itemId: string) {
+  return run(async () => {
+    const item = await prisma.siteImageItem.findUnique({ where: { id: itemId } });
+    if (!item) throw new UserFacingError("Item not found.");
+
+    const slotKey = item.siteImageId;
+    await prisma.siteImageItem.delete({ where: { id: itemId } });
+    if (item.mediaId) {
+      await deleteMediaIfUnused([item.mediaId]);
+    }
+
+    // Refresh parent SiteImage primary mediaId
+    const firstRemaining = await prisma.siteImageItem.findFirst({
+      where: { siteImageId: slotKey },
+      orderBy: { sortOrder: "asc" },
+    });
+    await prisma.siteImage.update({
+      where: { id: slotKey },
+      data: {
+        mediaId: firstRemaining?.mediaId ?? null,
+        customUrl: firstRemaining?.customUrl ?? null,
+      },
+    });
+
+    revalidateSiteImages();
+    return "Image removed from carousel";
+  });
+}
+
+export async function reorderSiteImageItems(input: unknown) {
+  return run(async () => {
+    const { slotKey, itemIds } = reorderSiteImageItemsSchema.parse(input);
+    await prisma.$transaction(
+      itemIds.map((id, index) =>
+        prisma.siteImageItem.update({
+          where: { id },
+          data: { sortOrder: index },
+        })
+      )
+    );
+
+    const firstRemaining = await prisma.siteImageItem.findFirst({
+      where: { siteImageId: slotKey },
+      orderBy: { sortOrder: "asc" },
+    });
+    if (firstRemaining) {
+      await prisma.siteImage.update({
+        where: { id: slotKey },
+        data: {
+          mediaId: firstRemaining.mediaId ?? null,
+          customUrl: firstRemaining.customUrl ?? null,
+        },
+      });
+    }
+
+    revalidateSiteImages();
+    return "Image order saved successfully";
   });
 }
 
 export async function resetSiteImageSlot(key: string) {
   return run(async () => {
-    const existing = await prisma.siteImage.findUnique({ where: { id: key } });
+    const existing = await prisma.siteImage.findUnique({
+      where: { id: key },
+      include: { items: true },
+    });
     if (existing) {
+      const mediaIds: string[] = [];
+      if (existing.mediaId) mediaIds.push(existing.mediaId);
+      for (const item of existing.items) {
+        if (item.mediaId) mediaIds.push(item.mediaId);
+      }
       await prisma.siteImage.delete({ where: { id: key } });
-      if (existing.mediaId) {
-        await deleteMediaIfUnused([existing.mediaId]);
+      if (mediaIds.length > 0) {
+        await deleteMediaIfUnused(mediaIds);
       }
     }
     revalidateSiteImages();
-    return "تمت استعادة الصورة الافتراضية";
+    return "Default image restored successfully";
   });
 }
 
 export async function deleteMedia(id: string) {
   return run(async () => {
     const usedInCase = await prisma.beforeAfterCase.count({ where: { OR: [{ beforeMediaId: id }, { afterMediaId: id }] } });
-    if (usedInCase > 0) throw new UserFacingError("لا يمكن حذف الصورة لأنها مستخدمة في حالات قبل وبعد.");
+    if (usedInCase > 0) throw new UserFacingError("Cannot delete image because it is used in Before/After cases.");
     const usedInSite = await prisma.siteImage.count({ where: { mediaId: id } });
-    if (usedInSite > 0) throw new UserFacingError("لا يمكن حذف الصورة لأنها مستخدمة كصورة رئيسية للموقع.");
+    const usedInSiteItem = await prisma.siteImageItem.count({ where: { mediaId: id } });
+    if (usedInSite > 0 || usedInSiteItem > 0) throw new UserFacingError("Cannot delete image because it is used in site image slots.");
     await prisma.media.delete({ where: { id } }).catch(() => null);
     revalidateSiteImages();
-    return "تم حذف الصورة من مكتبة الوسائط";
+    return "Image deleted from media library";
   });
 }
 

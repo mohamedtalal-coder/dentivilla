@@ -4,8 +4,8 @@ import { getContactInfo } from "@/lib/site-settings";
 import { getBookingTreatments } from "@/lib/treatments";
 
 export const metadata: Metadata = {
-  title: "حجز موعد",
-  description: "احجز موعد كشف أو علاج في عيادة Dentivilla مع تحديد السن على نموذج الفك ثلاثي الأبعاد واختيار وقت متاح فعلياً.",
+  title: "Book an Appointment",
+  description: "Book a consultation or dental procedure at Dentivilla Clinic in Cairo with 3D tooth selection and real-time appointment availability.",
 };
 
 export default async function BookingPage({

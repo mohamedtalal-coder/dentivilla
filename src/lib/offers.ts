@@ -33,9 +33,9 @@ export async function getPublicOffers(): Promise<PublicOffer[]> {
     return [
       {
         id: "default-whitening",
-        badge: "عرض White Friday",
-        titleAr: "تبييض الأسنان في العيادة — جلسة واحدة",
-        descriptionAr: "يشمل تسجيل درجة اللون قبل وبعد الجلسة وإرشادات العناية.",
+        badge: "Special Offer",
+        titleAr: "In-Clinic Laser Teeth Whitening — Single Session",
+        descriptionAr: "Includes pre & post shade analysis, sensitivity prevention, and home maintenance guide.",
         price: 2000,
         originalPrice: 2800,
         treatmentSlug: "whitening",

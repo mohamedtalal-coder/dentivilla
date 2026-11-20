@@ -10,7 +10,7 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const treatment = await prisma.treatment.findUnique({ where: { slug } });
-  return { title: treatment?.nameAr ?? "العلاج", description: treatment?.summaryAr };
+  return { title: treatment?.nameAr ?? "Treatment", description: treatment?.summaryAr };
 }
 
 export default async function TreatmentPage({ params }: Props) {
@@ -20,44 +20,44 @@ export default async function TreatmentPage({ params }: Props) {
 
   return (
     <div className="container-page max-w-4xl pt-28 pb-20 md:pt-36">
-      <nav aria-label="مسار التنقل" className="mb-6 text-sm">
+      <nav aria-label="Breadcrumb" className="mb-6 text-sm">
         <Link href="/treatments" className="inline-flex items-center gap-1.5 text-teal-mid hover:text-teal-deep">
-          <ArrowRight className="size-4" aria-hidden />
-          كل العلاجات
+          <ArrowLeft className="size-4" aria-hidden />
+          All Treatments
         </Link>
       </nav>
-      <p className="eyebrow">العلاجات</p>
+      <p className="eyebrow">Treatments</p>
       <h1 className="heading-xl">{treatment.nameAr}</h1>
       <p className="lede mt-4">{treatment.summaryAr}</p>
 
       <article className="card-soft mt-10 rounded-[2rem] p-6 sm:p-10">
-        <h2 className="heading-md">عن الإجراء</h2>
+        <h2 className="heading-md">About the Procedure</h2>
         <p className="mt-4 leading-9 whitespace-pre-line text-ink/85">{treatment.descriptionAr}</p>
         <dl className="mt-8 grid gap-4 border-t border-line pt-6 sm:grid-cols-2">
           <div className="flex gap-3 rounded-2xl bg-ivory p-4">
             <Sparkles className="mt-0.5 size-5 text-teal" aria-hidden />
             <div>
-              <dt className="text-sm text-muted">خطة العلاج</dt>
-              <dd className="font-semibold">تُحدد بدقة بعد الكشف السريري</dd>
+              <dt className="text-sm text-muted">Treatment Plan</dt>
+              <dd className="font-semibold">Tailored precisely after clinical examination</dd>
             </div>
           </div>
           <div className="flex gap-3 rounded-2xl bg-ivory p-4">
             <Crosshair className="mt-0.5 size-5 text-teal" aria-hidden />
             <div>
-              <dt className="text-sm text-muted">عند الحجز</dt>
+              <dt className="text-sm text-muted">When Booking</dt>
               <dd className="font-semibold">
-                {treatment.requiresTeeth ? "تحدد السن المعنية على نموذج الفك" : "لا يلزم تحديد سن"}
+                {treatment.requiresTeeth ? "Select affected teeth on 3D jaw model" : "No tooth selection required"}
               </dd>
             </div>
           </div>
         </dl>
         <div className="mt-8 flex flex-wrap gap-3">
           <BookLink intent={{ treatmentSlug: treatment.slug }} className="btn-primary">
-            احجز هذا العلاج
-            <ArrowLeft className="size-4" aria-hidden />
+            Book This Treatment
+            <ArrowRight className="size-4" aria-hidden />
           </BookLink>
           <Link href="/treatments" className="btn-secondary">
-            علاجات أخرى
+            Other Treatments
           </Link>
         </div>
       </article>

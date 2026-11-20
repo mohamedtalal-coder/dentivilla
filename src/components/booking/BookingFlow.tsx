@@ -23,11 +23,11 @@ export type BookingTreatment = {
 
 type StepId = "treatment" | "teeth" | "time" | "details" | "review";
 const STEP_LABEL: Record<StepId, string> = {
-  treatment: "العلاج",
-  teeth: "الأسنان",
-  time: "الموعد",
-  details: "بياناتك",
-  review: "المراجعة",
+  treatment: "Treatment",
+  teeth: "Teeth",
+  time: "Date & Time",
+  details: "Your Details",
+  review: "Review",
 };
 
 type Details = {
@@ -41,7 +41,6 @@ type Details = {
 
 type Errors = Partial<Record<"treatment" | "teeth" | "slot" | keyof Details | "form", string>>;
 
-const DIGITS = new Intl.NumberFormat("ar-EG");
 const isFdi = (value: string) => Boolean(TEETH_BY_FDI[value]);
 
 export function BookingFlow({
@@ -123,18 +122,18 @@ export function BookingFlow({
 
   function validate(current: StepId): Errors {
     const next: Errors = {};
-    if (current === "treatment" && !treatment) next.treatment = "اختر نوع الزيارة للمتابعة.";
+    if (current === "treatment" && !treatment) next.treatment = "Please choose a treatment to proceed.";
     if (current === "teeth" && treatment?.requiresTeeth && teeth.length === 0)
-      next.teeth = "حدد سناً واحداً على الأقل — أو اختر «كشف واستشارة شاملة» إن لم تكن متأكداً.";
-    if (current === "time" && !slot) next.slot = "اختر يوماً ثم وقتاً متاحاً.";
+      next.teeth = "Please select at least one tooth — or select 'Comprehensive Consultation' if you are unsure.";
+    if (current === "time" && !slot) next.slot = "Please select a date and an available time slot.";
     if (current === "details") {
-      if (details.fullName.trim().length < 3) next.fullName = "اكتب اسمك كما تحب أن نناديك (٣ أحرف على الأقل).";
-      if (!normalizeEgyptianMobile(details.phone)) next.phone = "أدخل رقم موبايل مصري صحيحاً، مثل 01012345678.";
+      if (details.fullName.trim().length < 3) next.fullName = "Please enter your full name (at least 3 characters).";
+      if (!normalizeEgyptianMobile(details.phone)) next.phone = "Enter a valid Egyptian mobile number (e.g. 01012345678).";
       if (details.whatsapp.trim() && !normalizeEgyptianMobile(details.whatsapp))
-        next.whatsapp = "رقم الواتساب غير صحيح — اتركه فارغاً لاستخدام رقم الهاتف.";
-      if (details.notes.length > 500) next.notes = "الملاحظات أطول من ٥٠٠ حرف.";
+        next.whatsapp = "Invalid WhatsApp number — leave empty to use your mobile number.";
+      if (details.notes.length > 500) next.notes = "Notes exceed 500 characters.";
       if (!details.noConditions && details.conditions.length === 0)
-        next.conditions = "حدد أي حالة صحية لديك، أو اختر «لا أعاني من أي مما سبق».";
+        next.conditions = "Please select any health conditions you have, or choose 'None of the above'.";
     }
     return next;
   }
@@ -194,7 +193,7 @@ export function BookingFlow({
       }
       setErrors({ form: result.error });
     } catch {
-      setErrors({ form: "تعذر الاتصال بالخادم. تحقق من الإنترنت ثم أعد المحاولة." });
+      setErrors({ form: "Could not connect to the server. Please check your internet connection and try again." });
     } finally {
       setPending(false);
     }
@@ -222,12 +221,12 @@ export function BookingFlow({
     <div ref={rootRef} className="scroll-mt-28" aria-labelledby={headingId}>
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div className="max-w-2xl">
-          <p className="eyebrow">حجز موعد</p>
+          <p className="eyebrow">Online Booking</p>
           <Heading id={headingId} className={variant === "page" ? "heading-xl" : "heading-lg"}>
-            احجز زيارتك في دقيقتين
+            Book Your Visit in 2 Minutes
           </Heading>
           <p className="lede mt-3">
-            بدون إنشاء حساب. يُحجز الوقت الذي تختاره فوراً، ثم تؤكده العيادة وتتواصل معك.
+            No account required. Your selected time is instantly reserved, then confirmed by our clinic team.
           </p>
         </div>
       </div>
@@ -271,7 +270,7 @@ export function BookingFlow({
                               : "bg-neutral-200 text-neutral-500"
                         }`}
                       >
-                        {state === "done" ? <Check className="size-3.5" aria-hidden /> : DIGITS.format(index + 1)}
+                        {state === "done" ? <Check className="size-3.5" aria-hidden /> : index + 1}
                       </span>
                       {STEP_LABEL[id]}
                     </button>
@@ -284,8 +283,8 @@ export function BookingFlow({
               <div key={step} className="animate-fade-in">
                 {step === "treatment" && (
                   <fieldset aria-describedby={errors.treatment ? "treatment-error" : undefined}>
-                    <legend className="heading-md">ما سبب زيارتك؟</legend>
-                    <p className="mt-1 text-sm text-muted">تحدد مدة الموعد حسب نوع الزيارة.</p>
+                    <legend className="heading-md">What is the reason for your visit?</legend>
+                    <p className="mt-1 text-sm text-muted">Appointment duration is customized based on the procedure.</p>
                     <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3" role="radiogroup">
                       {treatments.map((item) => {
                         const selected = item.id === treatmentId;
@@ -300,7 +299,7 @@ export function BookingFlow({
                               setSlot(null);
                               setErrors({});
                             }}
-                            className={`flex h-full flex-col rounded-2xl border p-4 text-right transition-all ${
+                            className={`flex h-full flex-col rounded-2xl border p-4 text-left transition-all ${
                               selected
                                 ? "border-teal bg-teal-light/50 ring-2 ring-teal/20"
                                 : "border-line bg-white hover:border-teal/40"
@@ -331,9 +330,9 @@ export function BookingFlow({
 
                 {step === "teeth" && (
                   <div>
-                    <h3 className="heading-md">أي سن يحتاج إلى العلاج؟</h3>
+                    <h3 className="heading-md">Which teeth need attention?</h3>
                     <p className="mt-1 mb-5 text-sm text-muted">
-                      اختر سناً أو أكثر على النموذج — يساعدنا ذلك على تجهيز الفحص المناسب قبل وصولك.
+                      Select one or more teeth on the 3D model — this helps us prepare the right diagnostic setup before you arrive.
                     </p>
                     <ToothSelector
                       selected={teeth}
@@ -346,9 +345,9 @@ export function BookingFlow({
 
                 {step === "time" && treatment && (
                   <div>
-                    <h3 className="heading-md">اختر اليوم والوقت</h3>
+                    <h3 className="heading-md">Choose Date & Time</h3>
                     <p className="mt-1 mb-5 text-sm text-muted">
-                      الأوقات المتاحة محسوبة وفق جدول مواعيد العيادة الفعلي (بتوقيت القاهرة).
+                      Available appointments are calculated from live clinic availability (Cairo Time).
                     </p>
                     <AvailabilityCalendar
                       treatmentId={treatment.id}
@@ -368,43 +367,43 @@ export function BookingFlow({
 
                 {step === "review" && treatment && slot && (
                   <div>
-                    <h3 className="heading-md">راجع طلبك</h3>
+                    <h3 className="heading-md">Review Your Request</h3>
                     <dl className="mt-5 divide-y divide-line rounded-2xl border border-line">
-                      <ReviewRow label="الزيارة" value={treatment.nameAr} onEdit={() => goTo("treatment")} />
+                      <ReviewRow label="Treatment" value={treatment.nameAr} onEdit={() => goTo("treatment")} />
                       {steps.includes("teeth") && (
                         <ReviewRow
-                          label="الأسنان"
-                          value={teeth.map((t) => `${t} (${TEETH_BY_FDI[t]?.nameAr})`).join("، ")}
+                          label="Teeth"
+                          value={teeth.map((t) => `${t} (${TEETH_BY_FDI[t]?.nameAr})`).join(", ")}
                           onEdit={() => goTo("teeth")}
                         />
                       )}
                       <ReviewRow
-                        label="الموعد"
+                        label="Date & Time"
                         value={`${formatDayLabel(date ?? slot.startsAt.slice(0, 10))} — ${slot.label}`}
                         onEdit={() => goTo("time")}
                       />
                       <ReviewRow
-                        label="الاسم والهاتف"
+                        label="Name & Mobile"
                         value={`${details.fullName} · ${normalizeEgyptianMobile(details.phone) ?? details.phone}`}
                         onEdit={() => goTo("details")}
                       />
                       <ReviewRow
-                        label="التاريخ المرضي"
+                        label="Medical History"
                         value={
                           details.noConditions
-                            ? "لا يوجد"
-                            : details.conditions.map((c) => MEDICAL_CONDITION_LABEL[c]).join("، ")
+                            ? "None"
+                            : details.conditions.map((c) => MEDICAL_CONDITION_LABEL[c] || c).join(", ")
                         }
                         onEdit={() => goTo("details")}
                       />
                       {details.notes.trim() && (
-                        <ReviewRow label="ملاحظات" value={details.notes} onEdit={() => goTo("details")} />
+                        <ReviewRow label="Notes" value={details.notes} onEdit={() => goTo("details")} />
                       )}
                     </dl>
                     <p className="mt-4 text-xs leading-6 text-muted">
-                      بالضغط على «تأكيد الحجز»، تُحجز هذه الفترة باسمك وتوافق على قيام العيادة بالتواصل معك لتأكيد الموعد ومعالجة بياناتك وفق{" "}
+                      By clicking &ldquo;Confirm Booking&rdquo;, this time slot is reserved for you and you agree to our clinic contacting you to confirm your appointment according to our{" "}
                       <Link href="/privacy" target="_blank" className="font-semibold text-teal-deep underline underline-offset-4 hover:text-teal">
-                        سياسة الخصوصية وحماية البيانات
+                        Privacy & Data Protection Policy
                       </Link>.
                     </p>
                     {errors.form && (
@@ -419,21 +418,21 @@ export function BookingFlow({
               <div className="mt-8 flex items-center justify-between gap-3 border-t border-line pt-6">
                 {stepIndex > 0 ? (
                   <button type="button" onClick={goBack} className="btn-secondary" disabled={pending}>
-                    <ArrowRight className="size-4" aria-hidden />
-                    رجوع
+                    <ArrowLeft className="size-4" aria-hidden />
+                    Back
                   </button>
                 ) : (
                   <span />
                 )}
                 {step === "review" ? (
                   <button type="button" onClick={submit} className="btn-primary" disabled={pending}>
-                    {pending ? "جارٍ الحجز…" : "تأكيد الحجز"}
+                    {pending ? "Reserving Slot…" : "Confirm Booking"}
                     {!pending && <Check className="size-4" aria-hidden />}
                   </button>
                 ) : (
                   <button type="button" onClick={goNext} className="btn-primary">
-                    التالي
-                    <ArrowLeft className="size-4" aria-hidden />
+                    Next
+                    <ArrowRight className="size-4" aria-hidden />
                   </button>
                 )}
               </div>
@@ -453,7 +452,7 @@ function ReviewRow({ label, value, onEdit }: { label: string; value: string; onE
         <dd className="mt-0.5 break-words font-medium text-ink">{value}</dd>
       </div>
       <button type="button" onClick={onEdit} className="shrink-0 text-sm text-teal-mid hover:underline">
-        تعديل
+        Edit
       </button>
     </div>
   );
@@ -488,16 +487,17 @@ function DetailsStep({
   return (
     <div className="grid gap-8">
       <div>
-        <h3 className="heading-md">بيانات التواصل</h3>
+        <h3 className="heading-md">Contact Information</h3>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="bk-name" className="field-label">
-              الاسم الكامل
+              Full Name
             </label>
             <input
               id="bk-name"
               className="field"
               autoComplete="name"
+              placeholder="e.g. John Doe"
               value={details.fullName}
               onChange={(e) => setField("fullName", e.target.value)}
               aria-invalid={Boolean(errors.fullName)}
@@ -508,11 +508,11 @@ function DetailsStep({
           </div>
           <div>
             <label htmlFor="bk-phone" className="field-label">
-              رقم الموبايل
+              Mobile Number
             </label>
             <input
               id="bk-phone"
-              className="field text-left"
+              className="field"
               dir="ltr"
               type="tel"
               inputMode="tel"
@@ -527,21 +527,21 @@ function DetailsStep({
               <FieldError id="bk-phone-error" message={errors.phone} />
             ) : (
               <p id="bk-phone-hint" className="mt-1.5 text-xs text-muted">
-                ستحتاجه مع الرقم المرجعي لمتابعة طلبك.
+                Required with your reference code to check your booking.
               </p>
             )}
           </div>
           <div>
             <label htmlFor="bk-wa" className="field-label">
-              واتساب <span className="font-normal text-muted">(اختياري)</span>
+              WhatsApp <span className="font-normal text-muted">(Optional)</span>
             </label>
             <input
               id="bk-wa"
-              className="field text-left"
+              className="field"
               dir="ltr"
               type="tel"
               inputMode="tel"
-              placeholder="نفس رقم الموبايل إن تُرك فارغاً"
+              placeholder="Defaults to mobile number if empty"
               value={details.whatsapp}
               onChange={(e) => setField("whatsapp", e.target.value)}
               aria-invalid={Boolean(errors.whatsapp)}
@@ -551,12 +551,12 @@ function DetailsStep({
           </div>
           <div>
             <label htmlFor="bk-notes" className="field-label">
-              وصف مختصر للشكوى <span className="font-normal text-muted">(اختياري)</span>
+              Brief Concern / Symptoms <span className="font-normal text-muted">(Optional)</span>
             </label>
             <input
               id="bk-notes"
               className="field"
-              placeholder="مثال: ألم مع البارد منذ أسبوع"
+              placeholder="e.g. Cold sensitivity in molar for a week"
               value={details.notes}
               onChange={(e) => setField("notes", e.target.value)}
               aria-invalid={Boolean(errors.notes)}
@@ -569,9 +569,9 @@ function DetailsStep({
       </div>
 
       <fieldset aria-describedby={errors.conditions ? "bk-conditions-error" : "bk-conditions-hint"}>
-        <legend className="heading-md">التاريخ المرضي</legend>
+        <legend className="heading-md">Medical History</legend>
         <p id="bk-conditions-hint" className="mt-1 text-sm text-muted">
-          يساعد الطبيب على اختيار التخدير والأدوية المناسبة. تبقى هذه المعلومات سرية.
+          Helps the doctor select safe anesthesia and medications. Kept strictly confidential.
         </p>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {MEDICAL_CONDITIONS.map((condition) => {
@@ -589,7 +589,7 @@ function DetailsStep({
                   checked={checked}
                   onChange={() => toggleCondition(condition.id)}
                 />
-                {condition.ar}
+                {condition.label}
               </label>
             );
           })}
@@ -608,7 +608,7 @@ function DetailsStep({
               if (e.target.checked) setField("conditions", []);
             }}
           />
-          لا أعاني من أي مما سبق
+          I do not have any of the above conditions
         </label>
         {errors.conditions && (
           <p id="bk-conditions-error" role="alert" tabIndex={-1} className="mt-2 text-sm text-red-700">
@@ -635,11 +635,12 @@ function Confirmation({
   teeth: string[];
   onAgain: () => void;
 }) {
-  const when = new Intl.DateTimeFormat("ar-EG", {
+  const when = new Intl.DateTimeFormat("en-US", {
     timeZone: "Africa/Cairo",
     weekday: "long",
     day: "numeric",
     month: "long",
+    year: "numeric",
     hour: "numeric",
     minute: "2-digit",
   }).format(new Date(startsAt));
@@ -647,34 +648,34 @@ function Confirmation({
   return (
     <div className="grid place-items-center px-6 py-14 text-center" role="status">
       <CheckCircle2 className="size-14 text-teal" aria-hidden />
-      <h3 className="heading-md mt-4">تم استلام طلبك وحجز الوقت لك</h3>
+      <h3 className="heading-md mt-4">Booking Received & Slot Reserved</h3>
       <p className="mt-2 max-w-md leading-7 text-muted">
-        ستتواصل معك العيادة لتأكيد الموعد. احتفظ بالرقم المرجعي لمتابعة حالة الطلب.
+        Our clinic team will contact you to confirm your appointment. Please keep your reference code to check your status anytime.
       </p>
-      <div className="mt-6 w-full max-w-sm rounded-2xl border border-line bg-ivory p-5 text-right">
-        <p className="text-xs text-muted">الرقم المرجعي</p>
+      <div className="mt-6 w-full max-w-sm rounded-2xl border border-line bg-ivory p-5 text-left">
+        <p className="text-xs text-muted">Reference Code</p>
         <p className="mt-1 font-mono text-2xl font-bold tracking-wider text-teal-deep" dir="ltr">
           {reference}
         </p>
-        <p className="mt-3 text-sm text-ink">{treatment}</p>
-        <p className="text-sm text-muted">{when}</p>
-        {teeth.length > 0 && <p className="mt-1 font-mono text-xs text-muted">FDI: {teeth.join("، ")}</p>}
+        <p className="mt-3 text-sm font-semibold text-ink">{treatment}</p>
+        <p className="text-sm text-muted">{when} (Cairo Time)</p>
+        {teeth.length > 0 && <p className="mt-1 font-mono text-xs text-muted">FDI Teeth: {teeth.join(", ")}</p>}
       </div>
       <div className="mt-6 flex flex-wrap justify-center gap-3">
         <Link href={`/booking/status?ref=${encodeURIComponent(reference)}`} className="btn-primary">
-          متابعة حالة الطلب
+          Check Booking Status
         </Link>
         <a
-          href={`${whatsappUrl}?text=${encodeURIComponent(`مرحباً، رقم طلبي ${reference}`)}`}
+          href={`${whatsappUrl}?text=${encodeURIComponent(`Hello, my booking reference is ${reference}`)}`}
           target="_blank"
           rel="noreferrer"
           className="btn-secondary"
         >
           <MessageCircle className="size-4" aria-hidden />
-          راسل العيادة
+          Message Clinic
         </a>
         <button type="button" onClick={onAgain} className="btn px-4 text-muted hover:text-ink">
-          حجز موعد آخر
+          Book Another Appointment
         </button>
       </div>
     </div>

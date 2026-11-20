@@ -2,7 +2,6 @@ import { auth, signOut } from "@/auth";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { Logo } from "@/components/brand/Logo";
 
-
 export default async function AdminLayout({
   children,
 }: {
@@ -23,8 +22,8 @@ export default async function AdminLayout({
                 await signOut({ redirectTo: "/admin/login" });
               }}
             >
-              <button className="mt-6 text-sm text-red-800" type="submit">
-                خروج
+              <button className="mt-6 text-sm text-red-800 hover:underline" type="submit">
+                Sign out
               </button>
             </form>
           </aside>

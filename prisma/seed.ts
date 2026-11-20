@@ -9,80 +9,80 @@ const TIMEZONE = "Africa/Cairo";
 const treatments = [
   {
     slug: "veneers",
-    nameAr: "الوجوه التجميلية",
-    summaryAr: "قشور رقيقة تُصمَّم لإعادة تناسق اللون والشكل على الأسنان الظاهرة.",
+    nameAr: "Porcelain Veneers",
+    summaryAr: "Ultra-thin custom porcelain laminates crafted to restore symmetry, shape, and shade to visible teeth.",
     descriptionAr:
-      "تُستخدم الوجوه التجميلية لتحسين شكل الأسنان الظاهرة في الابتسامة. تبدأ الخطة بفحص وتخطيط رقمي للابتسامة، ثم تجهيز مدروس للسطح وتجربة الشكل قبل التثبيت النهائي. المحتوى هنا تعريفي، والخطة الفعلية تُحدد بعد الكشف.",
+      "Porcelain veneers are ultra-thin ceramic laminates designed to enhance the visible teeth in your smile. The journey begins with high-magnification clinical examination and Digital Smile Design, followed by minimal surface preparation and an intraoral preview mockup before permanent bonding. Information here is educational; the exact plan is determined during clinical consultation.",
     durationMinutes: 60,
     requiresTeeth: true,
     sortOrder: 1,
   },
   {
     slug: "smile-makeover",
-    nameAr: "تصميم الابتسامة",
-    summaryAr: "خطة متكاملة تجمع أكثر من إجراء للوصول إلى ابتسامة متوازنة مع ملامح الوجه.",
+    nameAr: "Digital Smile Design",
+    summaryAr: "A comprehensive aesthetic pathway harmonizing dental alignment and color with your facial features.",
     descriptionAr:
-      "تصميم الابتسامة ليس إجراءً واحداً، بل مسار يضم تقييماً للون والإطباق واللثة ونسب الوجه. قد يشمل تبييضاً أو وجوهاً أو ترميمات حسب الحالة. نبدأ دائماً بجلسة استشارة وتوثيق قبل أي خطوة علاجية.",
+      "A smile makeover is not a single procedure, but an integrated treatment journey evaluating shade, occlusion, gingival architecture, and facial proportions. It may include whitening, veneers, or aesthetic restorations tailored to your goals. We always start with an in-depth consultation and digital simulation before any procedure.",
     durationMinutes: 45,
     requiresTeeth: false,
     sortOrder: 2,
   },
   {
     slug: "implants",
-    nameAr: "زراعة الأسنان",
-    summaryAr: "تعويض السن المفقود بغرسة تدعم تاجاً ثابتاً بعد التخطيط الشعاعي.",
+    nameAr: "Dental Implants",
+    summaryAr: "Permanent tooth replacement with biocompatible titanium fixtures supporting natural-looking crowns.",
     descriptionAr:
-      "زراعة الأسنان خيار لتعويض الفقد مع الحفاظ على الأسنان المجاورة. يتطلب الأمر تقييماً للعظم واللثة وصحة عامة مناسبة. تُعرض الخطة بعد الفحص، وقد تشمل مرحلة التئام قبل التركيب النهائي.",
+      "Dental implants restore missing teeth without compromising adjacent natural teeth. Treatment requires 3D bone and gum assessment with CBCT imaging. Your customized treatment plan is presented after examination, followed by an osseointegration period before fitting the final crown.",
     durationMinutes: 60,
     requiresTeeth: true,
     sortOrder: 3,
   },
   {
     slug: "orthodontics",
-    nameAr: "تقويم الأسنان",
-    summaryAr: "تصحيح اصطفاف الأسنان والإطباق بمسار زمني يُحدد بعد الدراسة.",
+    nameAr: "Orthodontics & Clear Aligners",
+    summaryAr: "Correcting tooth alignment and bite function with custom digital treatment planning.",
     descriptionAr:
-      "يهدف التقويم إلى تحسين الاصطفاف والوظيفة وليس المظهر فقط. بعد الفحص والصور تُناقش الخيارات المتاحة للحالة. المدة والأجهزة تختلف من شخص لآخر ولا تُحدد عبر الموقع.",
+      "Orthodontic care enhances function, bite stability, and facial balance in addition to smile aesthetics. Following digital scans and radiographs, suitable options (including clear aligners) are discussed. Duration varies per patient.",
     durationMinutes: 45,
     requiresTeeth: false,
     sortOrder: 4,
   },
   {
     slug: "root-canal",
-    nameAr: "علاج العصب",
-    summaryAr: "معالجة لب السن الملتهب أو المصاب للحفاظ على السن متى كان ذلك ممكناً.",
+    nameAr: "Root Canal Treatment",
+    summaryAr: "Microsurgical treatment of inflamed or infected pulp to save and preserve your natural tooth.",
     descriptionAr:
-      "علاج العصب يُجرى عند التهاب اللب أو موت الأنسجة داخل السن. يشمل تنظيف القنوات وحشوها ثم ترميم السن لحماية ما تبقى من البنية. الحاجة للإجراء تُؤكد بالفحص والأشعة.",
+      "Root canal therapy is performed when the dental pulp becomes inflamed or necrotic. It involves gentle microscopic cleaning, disinfection, and warm 3D sealing of the root canals, followed by a protective crown or restoration to safeguard remaining tooth structure.",
     durationMinutes: 60,
     requiresTeeth: true,
     sortOrder: 5,
   },
   {
     slug: "restorative",
-    nameAr: "طب الأسنان الترميمي",
-    summaryAr: "ترميم التسوس والكسور والحشوات بما يعيد الشكل والوظيفة بهدوء.",
+    nameAr: "Restorative Dentistry",
+    summaryAr: "Conservative treatment of cavities, chips, and worn restorations to restore natural strength and aesthetics.",
     descriptionAr:
-      "الترميم يغطي الحشوات والتيجان والعلاج المحافظ للأنسجة المتضررة. الهدف الإبقاء على أكبر قدر ممكن من السن الطبيعي مع إطباق مريح. تُختار المادة والخطة حسب حجم الضرر.",
+      "Restorative dentistry encompasses composite restorations, inlays, onlays, and crowns to renew damaged tooth tissues. Our priority is conserving maximum natural tooth structure while ensuring balanced, comfortable occlusion.",
     durationMinutes: 45,
     requiresTeeth: true,
     sortOrder: 6,
   },
   {
     slug: "whitening",
-    nameAr: "تبييض الأسنان بالليزر",
-    summaryAr: "تفتيح وتبييض آمن ومتقدم بجلسة واحدة باستخدام الليزر البارد لحماية المينا.",
+    nameAr: "Laser Teeth Whitening",
+    summaryAr: "Safe, advanced in-office laser whitening in a single session protecting enamel and gums.",
     descriptionAr:
-      "تبييض الأسنان بالليزر في جلسة واحدة بأحدث أجهزة الليزر البارد الآمن لحماية عاج الأسنان واللثة في عيادة Dentivilla، مع تحقيق نتائج فورية طبيعية ومستدامة.",
+      "Single-session in-office laser teeth whitening using advanced cold-laser technology to safeguard enamel and gingival tissues at Dentivilla, achieving immediate, radiant, and durable results.",
     durationMinutes: 45,
     requiresTeeth: false,
     sortOrder: 7,
   },
   {
     slug: "consultation",
-    nameAr: "كشف واستشارة شاملة",
-    summaryAr: "فحص إكلينيكي وتشخيص مجهري وتصوير لتحديد خطة علاجية مخصصة.",
+    nameAr: "Comprehensive Consultation",
+    summaryAr: "Clinical exam, digital imaging, and high-magnification diagnostic assessment with a transparent written plan.",
     descriptionAr:
-      "جلسة تشخيصية متأنية تبدأ بالاستماع لك وتحديد التطلعات، تليها الفحوصات والأشعة ثلاثية الأبعاد لبناء خطة علاجية واضحة ومسبقة.",
+      "An attentive diagnostic session that begins by listening to your concerns and goals, followed by clinical examination and 3D imaging to formulate a clear, upfront treatment plan with transparent timelines and costs.",
     durationMinutes: 30,
     requiresTeeth: false,
     sortOrder: 8,
@@ -100,7 +100,7 @@ async function main() {
       "ADMIN_PASSWORD must be set to a real password (8+ characters, not the default) for production.",
     );
   }
-  const name = process.env.ADMIN_NAME ?? "د. محمد ياسر الجبالي";
+  const name = process.env.ADMIN_NAME ?? "Dr. Mohamed Yasser El Gebaly";
   const passwordHash = await bcrypt.hash(password, 12);
 
   await prisma.user.upsert({
@@ -147,16 +147,16 @@ async function main() {
     });
   }
 
-  // Demo records are for local development only — never in a real clinic database.
+  // Demo records for local development only
   if (!isProduction && (await prisma.patient.count()) === 0) {
     const demoPhone = "01011112222";
     const patient = await prisma.patient.create({
       data: {
-        fullName: encryptField("مريض تجريبي"),
+        fullName: encryptField("Demo Patient"),
         phone: encryptField(demoPhone),
         phoneBlindIndex: computePhoneBlindIndex(demoPhone),
         whatsapp: encryptOptional(demoPhone),
-        notes: encryptOptional("سجل تجريبي لاختبار لوحة الإدارة فقط."),
+        notes: encryptOptional("Test booking for admin dashboard preview only."),
       },
     });
     const treatment = await prisma.treatment.findUniqueOrThrow({
@@ -175,7 +175,7 @@ async function main() {
         startsAt: startCairo,
         endsAt: new Date(startCairo.getTime() + treatment.durationMinutes * 60 * 1000),
         status: "PENDING",
-        patientNotes: encryptOptional("طلب تجريبي للمراجعة."),
+        patientNotes: encryptOptional("Sample booking request for review."),
       },
     });
   }
@@ -184,9 +184,9 @@ async function main() {
     await prisma.offer.createMany({
       data: [
         {
-          badge: "عرض White Friday",
-          titleAr: "تبييض الأسنان بالليزر — جلسة واحدة",
-          descriptionAr: "يشمل تسجيل درجة اللون قبل وبعد الجلسة، وتلميع الأسنان، وإرشادات العناية لحماية المينا.",
+          badge: "Special Offer",
+          titleAr: "Laser Teeth Whitening — Single Session",
+          descriptionAr: "Includes shade evaluation before and after, dental polishing, and enamel protection care.",
           price: 2000,
           originalPrice: 2800,
           treatmentSlug: "whitening",
@@ -194,9 +194,9 @@ async function main() {
           active: true,
         },
         {
-          badge: "باقة الابتسامة",
-          titleAr: "كشف واستشارة شاملة مع تخطيط الابتسامة",
-          descriptionAr: "فحص مجهري وتصوير رقمي للأسنان، مع مناقشة خيارات العلاج وخطة مكتوبة بالتكلفة قبل أي إجراء.",
+          badge: "Smile Package",
+          titleAr: "Comprehensive Consultation & Smile Design Planning",
+          descriptionAr: "High-magnification clinical exam, 3D imaging, and a written transparent treatment plan before any procedure.",
           price: 500,
           originalPrice: 900,
           treatmentSlug: "consultation",
@@ -204,9 +204,9 @@ async function main() {
           active: true,
         },
         {
-          badge: "لفترة محدودة",
-          titleAr: "تنظيف الأسنان وإزالة الجير بالموجات الصوتية",
-          descriptionAr: "تنظيف عميق ولطيف بالموجات فوق الصوتية وتلميع للأسنان واستعادة انتعاش اللثة.",
+          badge: "Limited Time",
+          titleAr: "Ultrasonic Teeth Cleaning & Scaling",
+          descriptionAr: "Gentle and thorough ultrasonic calculus removal, tooth polishing, and gum rejuvenation.",
           price: 800,
           originalPrice: 1200,
           treatmentSlug: "restorative",
@@ -221,37 +221,37 @@ async function main() {
     await prisma.faq.createMany({
       data: [
         {
-          question: "هل تحتاج الوجوه التجميلية إلى برد الأسنان؟",
+          question: "Do porcelain veneers require extensive tooth shaving?",
           answer:
-            "يعتمد ذلك على شكل أسنانك ولونها والنتيجة المطلوبة. في حالات كثيرة يكون التحضير محدوداً جداً، وأحياناً لا يلزم. نوضح لك المقدار المتوقع لكل سن قبل البدء، ونجرب الشكل داخل فمك بنموذج مؤقت.",
+            "It depends on the position, shade, and alignment of your natural teeth. In many conservative cases, minimal preparation is needed, and sometimes none at all. We determine the exact plan beforehand and test the smile in your mouth with an intraoral mockup before touching any tooth.",
           sortOrder: 1,
           published: true,
         },
         {
-          question: "هل زراعة الأسنان مؤلمة؟ وهل تناسب مرضى السكر والضغط؟",
+          question: "Are dental implants painful? Are they safe for patients with diabetes or hypertension?",
           answer:
-            "تُجرى الزراعة تحت تخدير موضعي، ومعظم المرضى يصفون ما بعدها بانزعاج يمكن التحكم فيه بالمسكنات المعتادة. مرضى السكر والضغط المنضبطين يمكنهم غالباً إجراء الزراعة بعد تقييم حالتهم الصحية — لذلك نطلب التاريخ المرضي عند الحجز.",
+            "Implants are placed under comfortable local anesthesia, and patients typically describe recovery as mild discomfort well-managed with routine pain relievers. Patients with well-controlled diabetes or hypertension can usually undergo implant placement safely after clinical health assessment.",
           sortOrder: 2,
           published: true,
         },
         {
-          question: "هل يمكنني رؤية شكل ابتسامتي قبل العلاج؟",
+          question: "Can I preview my smile before treatment starts?",
           answer:
-            "نعم. نصمم الابتسامة رقمياً، ثم نضع نموذجاً تجريبياً مؤقتاً على أسنانك لترى الشكل والحجم في المرآة قبل أي خطوة نهائية.",
+            "Yes. We design your smile digitally, then place a temporary aesthetic mockup on your teeth so you can evaluate the contour, proportion, and shade in the mirror before any permanent step.",
           sortOrder: 3,
           published: true,
         },
         {
-          question: "متى أعرف التكلفة؟",
+          question: "When will I know the total cost?",
           answer:
-            "بعد الكشف تحصل على خطة مكتوبة تشمل الخيارات المتاحة وتكلفة كل منها والمدة المتوقعة، ولا يبدأ أي إجراء قبل موافقتك.",
+            "Immediately following your clinical examination, you receive a written treatment plan outlining all suitable options, timelines, and exact fees. Nothing begins without your informed consent.",
           sortOrder: 4,
           published: true,
         },
         {
-          question: "هل الحجز عبر الموقع نهائي؟",
+          question: "Is online booking instant and confirmed?",
           answer:
-            "يُحجز الوقت الذي اخترته لك فوراً ولا يظهر لغيرك، ثم تؤكده العيادة. يمكنك متابعة حالة الطلب في أي وقت بالرقم المرجعي ورقم هاتفك.",
+            "Your selected time slot is instantly reserved in our schedule so nobody else can take it. Our clinic team then confirms the appointment with you. You can check the status of your booking anytime using your reference code and mobile number.",
           sortOrder: 5,
           published: true,
         },
@@ -261,13 +261,15 @@ async function main() {
 
   await prisma.siteSettings.upsert({
     where: { id: "default" },
-    update: {},
+    update: {
+      address: "Medical Center 3, Makram Ebeid Street, Nasr City, Cairo, Egypt",
+    },
     create: {
       id: "default",
       phone: "01132081093",
       whatsapp: "01132081093",
       email: "contact@dentivilla.com",
-      address: "Medical Center 3 (مديكال سنتر ٣)، شارع مكرم عبيد، مدينة نصر، القاهرة",
+      address: "Medical Center 3, Makram Ebeid Street, Nasr City, Cairo, Egypt",
       mapsUrl:
         "https://www.google.com/maps/search/?api=1&query=" +
         encodeURIComponent("Medical Center 3, Makram Ebeid, Nasr City, Cairo"),
@@ -317,9 +319,9 @@ async function main() {
       await prisma.beforeAfterCase.createMany({
         data: [
           {
-            titleAr: "تصميم وتجميل الابتسامة",
+            titleAr: "Digital Smile Design & Harmonization",
             descriptionAr:
-              "إعادة تناسق اللون ومحاذاة الأسنان مع الحفاظ الكامل على بنيتها الطبيعية وتوازن خط الابتسامة.",
+              "Restoring symmetry and shade while conserving natural tooth vitality and balanced smile line.",
             treatmentSlug: "smile-makeover",
             beforeMediaId: media1.id,
             afterMediaId: media2.id,
@@ -329,9 +331,9 @@ async function main() {
             sortOrder: 1,
           },
           {
-            titleAr: "تبييض الأسنان بالليزر واستعادة الإشراقة",
+            titleAr: "In-Office Laser Teeth Whitening",
             descriptionAr:
-              "تفتيح لون الأسنان بجلسة واحدة آمنة وحماية طبقة المينا من أي تحسس، مع نتيجة فورية وطبيعية.",
+              "Brightening tooth shade in a single safe session with zero sensitivity and immediate results.",
             treatmentSlug: "whitening",
             beforeMediaId: media3.id,
             afterMediaId: media4.id,
@@ -341,9 +343,9 @@ async function main() {
             sortOrder: 2,
           },
           {
-            titleAr: "الوجوه التجميلية التحفظية (Veneers)",
+            titleAr: "Conservative Porcelain Veneers",
             descriptionAr:
-              "قشور خزفية رقيقة لتعديل أبعاد وتناسق الأسنان الأمامية بأقل قدر ممكن من التحضير.",
+              "Ultra-thin ceramic veneers refining the proportions and symmetry of anterior teeth with minimal preparation.",
             treatmentSlug: "veneers",
             beforeMediaId: media1.id,
             afterMediaId: media2.id,

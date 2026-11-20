@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { ArrowLeft } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { BookLink } from "@/components/booking/BookLink";
 import { BeforeAfter } from "@/components/site/BeforeAfter";
 import { getPublishedCases } from "@/lib/cases";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
-  title: "قبل وبعد",
-  description: "حالات قبل وبعد العلاج في عيادة Dentivilla.",
+  title: "Before & After Gallery",
+  description: "Real before and after clinical treatment results at Dentivilla Clinic in Cairo.",
 };
 
 export default async function CasesPage() {
@@ -23,9 +23,9 @@ export default async function CasesPage() {
   return (
     <div className="container-page pt-28 pb-20 md:pt-36">
       <div className="mx-auto max-w-3xl text-center">
-        <p className="eyebrow">قبل وبعد</p>
-        <h1 className="heading-xl">فرقٌ يُرى، وطبيعةٌ لا تختفي.</h1>
-        <p className="lede mt-4">اسحب المؤشر — أو استخدم الأسهم في لوحة المفاتيح — لمقارنة الحالة قبل العلاج وبعده.</p>
+        <p className="eyebrow">Before & After</p>
+        <h1 className="heading-xl">A Visible Difference, A Natural Smile.</h1>
+        <p className="lede mt-4">Slide the divider — or use the arrow keys on your keyboard — to compare before and after treatment.</p>
       </div>
 
       {cases.length > 0 ? (
@@ -43,8 +43,8 @@ export default async function CasesPage() {
               <BeforeAfter
                 beforeSrc={item.beforeSrc}
                 afterSrc={item.afterSrc}
-                beforeAlt={`${item.title} — قبل العلاج`}
-                afterAlt={`${item.title} — بعد العلاج`}
+                beforeAlt={`${item.title} — Before treatment`}
+                afterAlt={`${item.title} — After treatment`}
                 preload={index === 0}
               />
               {item.description && <p className="mt-6 leading-8 text-muted">{item.description}</p>}
@@ -53,29 +53,31 @@ export default async function CasesPage() {
                   intent={{ treatmentSlug: item.treatmentSlug }}
                   className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-teal-mid hover:text-teal-deep"
                 >
-                  احجز استشارة لعلاج مشابه
-                  <ArrowLeft className="size-4" aria-hidden />
+                  Book consultation for similar care
+                  <ArrowRight className="size-4" aria-hidden />
                 </BookLink>
               )}
             </article>
           ))}
-          <p className="text-center text-sm text-muted">تُنشر الصور بموافقة المرضى. النتائج تختلف من حالة لأخرى وتُناقش بعد الفحص.</p>
+          <p className="text-center text-sm text-muted">
+            Photographs published with patient consent. Actual clinical results vary and are determined following in-person examination.
+          </p>
         </div>
       ) : (
         <article className="card-soft mx-auto mt-12 max-w-5xl rounded-[2rem] p-5 sm:p-8">
           <BeforeAfter preload />
           <p className="mt-6 leading-8 text-muted">
-            صور توضيحية. النتيجة الفعلية تختلف من حالة لأخرى وتُناقش بعد الفحص.
+            Illustrative sample. Actual results vary by individual patient and are evaluated clinically.
           </p>
         </article>
       )}
 
       <section className="mx-auto mt-16 max-w-xl text-center">
-        <h2 className="text-xl font-bold text-teal-deep">هل ترغب في تقييم ابتسامتك؟</h2>
-        <p className="mt-2 text-muted">احجز كشفاً، وسنعرض عليك الخيارات المناسبة لحالتك قبل أي إجراء.</p>
+        <h2 className="text-xl font-bold text-teal-deep">Looking to Evaluate Your Smile?</h2>
+        <p className="mt-2 text-muted">Book a consultation, and we will outline the optimal options for your teeth before any procedure begins.</p>
         <BookLink intent={{ treatmentSlug: "smile-makeover" }} className="btn-primary mt-6">
-          احجز استشارة تجميل
-          <ArrowLeft className="size-4" aria-hidden />
+          Book Aesthetic Consultation
+          <ArrowRight className="size-4" aria-hidden />
         </BookLink>
       </section>
     </div>

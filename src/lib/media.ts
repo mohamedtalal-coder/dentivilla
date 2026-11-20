@@ -13,19 +13,19 @@ export class MediaError extends Error {}
  * MAX_EDGE and stores it as WebP. Returns the new media id and size.
  */
 export async function storeImage(buffer: Buffer) {
-  if (buffer.byteLength > MAX_UPLOAD_BYTES) throw new MediaError("الصورة أكبر من ١٥ ميجابايت.");
+  if (buffer.byteLength > MAX_UPLOAD_BYTES) throw new MediaError("Image size exceeds 15 MB limit.");
 
   let meta: Metadata;
   try {
     meta = await sharp(buffer).metadata();
   } catch {
-    throw new MediaError("الملف ليس صورة صالحة.");
+    throw new MediaError("Uploaded file is not a valid image.");
   }
   if (!meta.format || !ACCEPTED_FORMATS.has(meta.format)) {
-    throw new MediaError("الصيغ المدعومة: JPG وPNG وWebP وHEIC.");
+    throw new MediaError("Supported formats: JPG, PNG, WebP, and HEIC.");
   }
   if ((meta.width ?? 0) < 400 || (meta.height ?? 0) < 300) {
-    throw new MediaError("الصورة صغيرة جداً — الحد الأدنى ٤٠٠×٣٠٠ بكسل.");
+    throw new MediaError("Image is too small — minimum resolution is 400x300 pixels.");
   }
 
   const { data, info } = await sharp(buffer)
@@ -48,6 +48,7 @@ export async function deleteMediaIfUnused(ids: string[]) {
   for (const id of ids) {
     const usedInCase = await prisma.beforeAfterCase.count({ where: { OR: [{ beforeMediaId: id }, { afterMediaId: id }] } });
     const usedInSite = await prisma.siteImage.count({ where: { mediaId: id } });
-    if (!usedInCase && !usedInSite) await prisma.media.delete({ where: { id } }).catch(() => undefined);
+    const usedInSiteItem = await prisma.siteImageItem.count({ where: { mediaId: id } });
+    if (!usedInCase && !usedInSite && !usedInSiteItem) await prisma.media.delete({ where: { id } }).catch(() => undefined);
   }
 }

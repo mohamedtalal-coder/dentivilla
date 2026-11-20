@@ -11,13 +11,13 @@ export async function GET(request: Request) {
   const month = searchParams.get("month") ?? "";
 
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) {
-    return NextResponse.json({ error: "شهر غير صالح" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid month format" }, { status: 400 });
   }
   const treatment = treatmentId
     ? await prisma.treatment.findUnique({ where: { id: treatmentId }, select: { durationMinutes: true } })
     : null;
   if (!treatment) {
-    return NextResponse.json({ error: "نوع الزيارة غير موجود" }, { status: 400 });
+    return NextResponse.json({ error: "Treatment not found" }, { status: 400 });
   }
 
   const result = await monthAvailability(month, treatment.durationMinutes);

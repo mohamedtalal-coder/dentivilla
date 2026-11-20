@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, CalendarCheck, Lock, Phone, Search, Shield, User, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarCheck, Lock, Phone, Search, Shield, User, X } from "lucide-react";
 import { requireAdminSession } from "@/lib/admin-auth";
 import { formatCairoDateTime } from "@/lib/datetime";
 import { decryptField } from "@/lib/encryption";
@@ -56,14 +56,14 @@ export default async function PatientsPage({
       {/* Page Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-teal-deep">سجلات المرضى</h1>
+          <h1 className="text-3xl font-bold text-teal-deep">Patient Records</h1>
           <p className="mt-1 text-sm text-muted">
-            إدارة سجلات المرضى والبحث بالاسم أو رقم الهاتف، مع حماية خصوصية البيانات.
+            Manage patient profiles and search by name or phone number, with AES-256 privacy protection.
           </p>
         </div>
         <span className="inline-flex items-center gap-1.5 rounded-full border border-teal/20 bg-teal-light px-3 py-1 text-xs font-semibold text-teal-deep">
           <Lock className="size-3" aria-hidden />
-          منطقة مصرح بها فقط
+          Authorized Access Only
         </span>
       </div>
 
@@ -71,10 +71,10 @@ export default async function PatientsPage({
       <div className="flex items-start gap-3 rounded-2xl border border-teal/20 bg-teal-light/50 p-4 text-sm text-teal-deep">
         <Shield className="mt-0.5 size-5 shrink-0 text-teal" aria-hidden />
         <div>
-          <p className="font-bold">حماية خصوصية بيانات المرضى</p>
+          <p className="font-bold">Patient Data Privacy & Security</p>
           <p className="mt-0.5 text-xs leading-5 text-muted">
-            تقتصر بيانات المريض المحفوظة نظامياً على الاسم ورقم الهاتف والحجوزات المرتبطة به فقط. لا يتم تخزين أي ملاحظات
-            أو بيانات إضافية.
+            Patient data stored is strictly limited to name, mobile phone number, and linked clinical appointments.
+            All phone numbers and identifiable fields are encrypted at rest with AES-256-GCM.
           </p>
         </div>
       </div>
@@ -83,17 +83,17 @@ export default async function PatientsPage({
       <div className="card-soft rounded-2xl p-4 sm:p-5">
         <form method="GET" action="/admin/patients" className="flex flex-wrap items-center gap-3">
           <div className="relative min-w-[260px] flex-1">
-            <Search className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden />
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden />
             <input
               type="text"
               name="q"
               defaultValue={query}
-              placeholder="ابحث باسم المريض أو رقم الهاتف..."
-              className="field pe-10 ps-4 text-sm"
+              placeholder="Search by patient name or phone number..."
+              className="field ps-10 pe-4 text-sm"
             />
           </div>
           <button type="submit" className="btn-primary px-6 py-2.5 text-sm">
-            <span>بحث</span>
+            <span>Search</span>
           </button>
           {query && (
             <Link
@@ -101,14 +101,14 @@ export default async function PatientsPage({
               className="btn-secondary inline-flex items-center gap-1.5 px-4 py-2.5 text-sm"
             >
               <X className="size-4" aria-hidden />
-              <span>إلغاء البحث</span>
+              <span>Clear Search</span>
             </Link>
           )}
         </form>
 
         <div className="mt-3 flex items-center justify-between text-xs text-muted">
           <span>
-            {query ? `نتائج البحث عن "${query}": ${patients.length} مريض` : `إجمالي المرضى المسجلين: ${totalCount}`}
+            {query ? `Search results for "${query}": ${patients.length} patient(s)` : `Total registered patients: ${totalCount}`}
           </span>
         </div>
       </div>
@@ -117,14 +117,14 @@ export default async function PatientsPage({
       <div className="card-soft overflow-hidden rounded-[24px]">
         {patients.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px] text-right text-sm">
+            <table className="w-full min-w-[700px] text-left text-sm">
               <thead className="border-b border-line bg-ivory text-xs font-bold text-teal-deep uppercase">
                 <tr>
-                  <th className="p-4">اسم المريض</th>
-                  <th className="p-4">رقم الهاتف</th>
-                  <th className="p-4 text-center">عدد الحجوزات</th>
-                  <th className="p-4">آخر موعد</th>
-                  <th className="p-4 text-center">الإجراءات</th>
+                  <th className="p-4">Patient Name</th>
+                  <th className="p-4">Phone Number</th>
+                  <th className="p-4 text-center">Appointments</th>
+                  <th className="p-4">Latest Appointment</th>
+                  <th className="p-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line/60">
@@ -160,16 +160,16 @@ export default async function PatientsPage({
                             </span>
                           </div>
                         ) : (
-                          <span>لا توجد مواعيد</span>
+                          <span>No appointments</span>
                         )}
                       </td>
                       <td className="p-4 text-center">
                         <Link
                           href={`/admin/patients/${patient.id}`}
-                          className="btn-secondary px-3.5 py-1.5 text-xs font-semibold hover:border-teal"
+                          className="btn-secondary px-3.5 py-1.5 text-xs font-semibold hover:border-teal inline-flex items-center gap-1.5"
                         >
-                          <span>عرض وتعديل</span>
-                          <ArrowLeft className="size-3.5" aria-hidden />
+                          <span>View & Edit</span>
+                          <ArrowRight className="size-3.5" aria-hidden />
                         </Link>
                       </td>
                     </tr>
@@ -182,12 +182,12 @@ export default async function PatientsPage({
           <div className="py-16 text-center text-muted">
             <User className="mx-auto size-12 text-neutral-300" aria-hidden />
             <p className="mt-3 text-base font-semibold text-ink">
-              {query ? `لم يتم العثور على أي مريض يطابق "${query}"` : "لا يوجد مرضى مسجلون حالياً"}
+              {query ? `No patients found matching "${query}"` : "No patients registered yet"}
             </p>
             {query && (
               <div className="mt-4">
                 <Link href="/admin/patients" className="btn-secondary text-xs">
-                  مسح البحث وعرض كل المرضى
+                  Clear search and view all patients
                 </Link>
               </div>
             )}

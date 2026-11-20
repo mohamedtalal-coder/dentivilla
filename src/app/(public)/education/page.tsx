@@ -2,25 +2,37 @@ import type { Metadata } from "next";
 import { JawExplorer } from "@/components/dental/JawExplorer";
 
 export const metadata: Metadata = {
-  title: "تعرّف على أسنانك",
-  description: "نموذج ثلاثي الأبعاد تفاعلي للفكين مع ترقيم FDI لكل سن ووظيفته.",
+  title: "Explore Your Teeth & Anatomy",
+  description: "Interactive 3D dental anatomy model featuring FDI tooth numbering, quadrants, and clinical functions.",
 };
 
 const topics = [
-  { title: "القواطع", text: "تظهر في خط الابتسامة وتقطع الطعام. شكلها ولونها وعلاقتها باللثة أساس أي تجميل أمامي." },
-  { title: "الأنياب", text: "أطول الجذور في الفم، تدعم زاوية الفم وتوجّه حركة الفك أثناء المضغ." },
-  { title: "الضواحك والأضراس", text: "مسؤولة عن الطحن وتحمّل أكبر قوة إطباق؛ الترميم أو الزراعة هنا يُخطط حسب العظم والعضة." },
-  { title: "اللثة والعظم", text: "صحة الأنسجة الداعمة شرط لأي علاج تجميلي ثابت، والالتهاب يُعالج أولاً." },
+  {
+    title: "Incisors",
+    text: "Define the frontal smile line and shear food. Their shape, shade, and gingival harmony are essential to aesthetic dentistry.",
+  },
+  {
+    title: "Canines",
+    text: "Feature the longest roots in the human dentition, supporting facial contours and guiding lateral mandibular movements.",
+  },
+  {
+    title: "Premolars & Molars",
+    text: "Handle heavy chewing loads and maintain vertical bite height; restorative and implant treatments are planned around bone volume and occlusion.",
+  },
+  {
+    title: "Gums & Supporting Bone",
+    text: "A healthy periodontal foundation is a mandatory prerequisite for long-lasting aesthetic and implant outcomes; inflammation is addressed first.",
+  },
 ];
 
 export default function EducationPage() {
   return (
     <div className="container-page pt-28 pb-20 md:pt-36">
       <div className="max-w-2xl">
-        <p className="eyebrow">تعرّف على أسنانك</p>
-        <h1 className="heading-xl">٣٢ سناً، ولكل منها دور.</h1>
+        <p className="eyebrow">Explore Your Teeth</p>
+        <h1 className="heading-xl">32 Teeth, Each with a Unique Role.</h1>
         <p className="lede mt-4">
-          نموذج ثلاثي الأبعاد للفكين بأبعاد تشريحية متوسطة. اختر أي سن لمعرفة اسمه ورقمه الدولي ووظيفته.
+          An interactive 3D dental model with average anatomical dimensions. Click any tooth to see its international FDI number, name, and functional role.
         </p>
       </div>
       <div className="mt-10">

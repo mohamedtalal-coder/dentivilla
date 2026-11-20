@@ -28,7 +28,7 @@ export function PatientEditForm({ patient }: Props) {
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="patient-name" className="field-label">
-            اسم المريض الكامل
+            Patient Full Name
           </label>
           <input
             id="patient-name"
@@ -39,14 +39,14 @@ export function PatientEditForm({ patient }: Props) {
               setFullName(e.target.value);
               clear();
             }}
-            placeholder="مثال: أحمد محمود"
+            placeholder="e.g. John Doe"
             className="field"
           />
         </div>
 
         <div>
           <label htmlFor="patient-phone" className="field-label">
-            رقم الهاتف
+            Phone Number
           </label>
           <input
             id="patient-phone"
@@ -59,16 +59,16 @@ export function PatientEditForm({ patient }: Props) {
               clear();
             }}
             placeholder="01012345678"
-            className="field text-right font-mono"
+            className="field text-left font-mono"
           />
-          <p className="mt-1 text-xs text-muted">رقم موبايل مصري مكون من 11 رقماً (01xxxxxxxxx).</p>
+          <p className="mt-1 text-xs text-muted">11-digit Egyptian mobile number (01xxxxxxxxx).</p>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line/60 pt-4">
         <button type="submit" className="btn-primary" disabled={pending}>
           <UserCheck className="size-4" aria-hidden />
-          <span>{pending ? "جارٍ الحفظ…" : "حفظ بيانات المريض"}</span>
+          <span>{pending ? "Saving…" : "Save Patient Details"}</span>
         </button>
         <ActionFeedback result={result} />
       </div>

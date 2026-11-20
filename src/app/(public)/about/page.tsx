@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { ArrowLeft, FileCheck, Microscope, Phone, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, FileCheck, Microscope, Phone, ShieldCheck, Sparkles } from "lucide-react";
 import { BookLink } from "@/components/booking/BookLink";
 import { DoctorPortrait } from "@/components/site/DoctorPortrait";
 import { getHoursSummary } from "@/lib/clinic-hours";
@@ -9,15 +9,31 @@ import { getSiteImages } from "@/lib/site-images";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "عن العيادة",
-  description: `تعرّف على رؤية عيادة Dentivilla وفلسفة الرعاية القائمة على الدقة والراحة بالقاهرة.`,
+  title: "About the Doctor",
+  description: `Learn about Dentivilla's vision, Dr. Mohamed Yasser El Gebaly, and our philosophy of conservative, high-precision dental care in Cairo.`,
 };
 
 const commitments = [
-  { icon: Microscope, title: "تشخيص رقمي مكبّر", text: "تصوير ثلاثي الأبعاد وفحص مجهري يحدد بدقة مصدر المشكلة قبل البدء بأي تدخل." },
-  { icon: FileCheck, title: "خطة واضحة ومسبقة", text: "شفافية تامة في خطوات العلاج ومدته وتكلفته المحددة دون أي تكاليف خفية أو مفاجآت." },
-  { icon: Sparkles, title: "علاج لطيف بلا ألم", text: "استخدام أحدث بروتوكولات التخدير الموضعي وتقنيات الراحة لتجربة مطمئنة بلا توتر." },
-  { icon: ShieldCheck, title: "تعقيم بمواصفات أوروبية", text: "بروتوكول تعقيم صارم وأدوات فردية تضمن سلامتك التامة في كل زيارة." },
+  {
+    icon: Microscope,
+    title: "Magnified Digital Diagnostics",
+    text: "3D CBCT imaging and microscopic examination precisely determine the source of dental concerns before starting any intervention.",
+  },
+  {
+    icon: FileCheck,
+    title: "Upfront Written Plan",
+    text: "Complete transparency regarding treatment steps, timeline, and exact fees without hidden costs or surprises.",
+  },
+  {
+    icon: Sparkles,
+    title: "Gentle, Pain-Free Care",
+    text: "Advanced local anesthesia protocols and anxiety-free patient care ensure a comfortable, tranquil appointment.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "European Sterilization Standards",
+    text: "Stringent infection-control protocols and individually sealed sterilized packs ensure your complete safety on every visit.",
+  },
 ];
 
 export default async function AboutPage() {
@@ -30,25 +46,26 @@ export default async function AboutPage() {
     <div className="container-page pt-28 pb-20 md:pt-36">
       <section className="grid items-center gap-12 lg:grid-cols-12">
         <div className="lg:col-span-7">
-          <p className="eyebrow">رؤيتنا الطبية</p>
+          <p className="eyebrow">Our Clinical Vision</p>
           <h1 className="heading-xl">{site.doctor.name}</h1>
-          <p className="mt-2 text-xl text-amber-dark">رؤية طبية تجمع بين الدقة، الأمان، وراحة المريض.</p>
-          <p className="lede mt-6">
-            يقود {site.doctor.name} عيادة Dentivilla برؤية قائمة على الرعاية الفردية الصادقة وتبني نهج طب الأسنان المحافظ؛
-            حيث نضع الحفاظ على بنية السن الطبيعية وراحة المريض على رأس كل قرار علاجي.
+          <p className="mt-2 text-xl font-medium text-amber-dark">{site.doctor.title}</p>
+          <p className="lede mt-6 font-medium text-ink/90">
+            Experienced in veneers, crowns, bridges, root canal treatments, dental implants, orthodontics, oral surgery, and comprehensive dental care.
           </p>
           <p className="lede mt-4">
-            نعتمد على الفحص الرقمي والأشعة ثلاثية الأبعاد (CBCT) للوصول إلى أدق تشخيص، ونحرص على مناقشة خطة مكتوبة
-            وواضحة معك قبل البدء، لتكون مطمئناً لكل خطوة وتكلفتها دون استعجال.
+            Combining a comprehensive approach to dentistry with precision, attention to detail, and personalized treatment planning to deliver long-lasting results and naturally beautiful smiles.
+          </p>
+          <p className="mt-4 leading-8 text-muted">
+            We rely on digital diagnostics and 3D CBCT imaging to reach an exact assessment, and we make sure to discuss a written, comprehensive plan with you before starting, so you feel completely confident in every step.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <BookLink intent={{ treatmentSlug: "consultation" }} className="btn-primary">
-              احجز استشارة
-              <ArrowLeft className="size-4" aria-hidden />
+              Book a Consultation
+              <ArrowRight className="size-4" aria-hidden />
             </BookLink>
             <a href={`tel:${contact.phone}`} className="btn-secondary">
               <Phone className="size-4" aria-hidden />
-              <span dir="ltr">{contact.phoneDisplay}</span>
+              <span>{contact.phoneDisplay}</span>
             </a>
           </div>
         </div>
@@ -58,9 +75,9 @@ export default async function AboutPage() {
       </section>
 
       <section className="mt-24" aria-labelledby="standards-title">
-        <p className="eyebrow">معاييرنا</p>
+        <p className="eyebrow">Our Standards</p>
         <h2 id="standards-title" className="heading-lg">
-          التزاماتنا الطبية في كل جلسة
+          Our Clinical Commitments in Every Session
         </h2>
         <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {commitments.map(({ icon: Icon, title, text }) => (
@@ -78,24 +95,23 @@ export default async function AboutPage() {
       <section className="mt-24 overflow-hidden rounded-[2rem] bg-teal-deep text-white" aria-labelledby="philosophy-title">
         <div className="grid items-stretch lg:grid-cols-12">
           <div className="p-8 sm:p-12 lg:col-span-7">
-            <p className="eyebrow eyebrow-light">فلسفة العيادة</p>
+            <p className="eyebrow eyebrow-light">Clinic Philosophy</p>
             <h2 id="philosophy-title" className="text-3xl leading-tight font-bold sm:text-4xl">
-              «الاستماع أولاً، ثم تبدأ الرعاية»
+              &ldquo;Listening First, Then Care Begins&rdquo;
             </h2>
             <p className="mt-5 leading-8 text-teal-light/85">
-              الابتسامة ليست قالباً مكرراً. لكل مريض ملامحه وتاريخه الصحي وتوقعاته؛ لذلك نمنح الوقت الكامل للاستماع، ونشرح
-              تفاصيل الخطة قبل أن نلمس أياً من أسنانك.
+              A smile is never a repetitive mold. Every patient has unique facial contours, dental history, and personal expectations; that is why we dedicate ample time to listen attentively and discuss every detail of your treatment before touching any tooth.
             </p>
             <dl className="mt-8 grid gap-6 border-t border-white/10 pt-6 text-sm sm:grid-cols-2">
               <div>
-                <dt className="font-semibold text-gold-soft">العنوان</dt>
+                <dt className="font-semibold text-gold-soft">Address</dt>
                 <dd className="mt-1 text-teal-light/85">{contact.address}</dd>
               </div>
               <div>
-                <dt className="font-semibold text-gold-soft">ساعات العمل</dt>
+                <dt className="font-semibold text-gold-soft">Working Hours</dt>
                 {hours.map((row) => (
                   <dd key={row.days} className="mt-1 text-teal-light/85">
-                    {row.days}: {row.hours ?? "مغلق"}
+                    {row.days}: {row.hours ?? "Closed"}
                   </dd>
                 ))}
               </div>

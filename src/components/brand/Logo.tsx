@@ -21,7 +21,7 @@ export function Logo({
         </span>
         {!compact && (
           <span className={`hidden text-xs sm:block ${light ? "text-teal-light/75" : "text-muted"}`}>
-            Dentivilla · تجميل وجراحة الأسنان
+            Dentivilla · Aesthetic & Restorative Dentistry
           </span>
         )}
       </span>

@@ -4,12 +4,12 @@ import { normalizeEgyptianMobile } from "@/lib/phone";
 import { site } from "@/lib/site";
 
 export const SOCIAL_NETWORKS = [
-  { key: "instagram", label: "Instagram", labelAr: "إنستغرام", hosts: ["instagram.com"] },
-  { key: "facebook", label: "Facebook", labelAr: "فيسبوك", hosts: ["facebook.com", "fb.com", "fb.me"] },
-  { key: "tiktok", label: "TikTok", labelAr: "تيك توك", hosts: ["tiktok.com"] },
-  { key: "youtube", label: "YouTube", labelAr: "يوتيوب", hosts: ["youtube.com", "youtu.be"] },
-  { key: "x", label: "X", labelAr: "إكس", hosts: ["x.com", "twitter.com"] },
-  { key: "snapchat", label: "Snapchat", labelAr: "سناب شات", hosts: ["snapchat.com"] },
+  { key: "instagram", label: "Instagram", labelAr: "Instagram", hosts: ["instagram.com"] },
+  { key: "facebook", label: "Facebook", labelAr: "Facebook", hosts: ["facebook.com", "fb.com", "fb.me"] },
+  { key: "tiktok", label: "TikTok", labelAr: "TikTok", hosts: ["tiktok.com"] },
+  { key: "youtube", label: "YouTube", labelAr: "YouTube", hosts: ["youtube.com", "youtu.be"] },
+  { key: "x", label: "X", labelAr: "X (Twitter)", hosts: ["x.com", "twitter.com"] },
+  { key: "snapchat", label: "Snapchat", labelAr: "Snapchat", hosts: ["snapchat.com"] },
 ] as const;
 
 export type SocialKey = (typeof SOCIAL_NETWORKS)[number]["key"];

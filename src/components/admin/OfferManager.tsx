@@ -30,7 +30,7 @@ type FormData = {
 };
 
 const emptyForm: FormData = {
-  badge: "عرض خاص",
+  badge: "Special Offer",
   titleAr: "",
   descriptionAr: "",
   price: "",
@@ -99,7 +99,7 @@ export function OfferManager({
   }
 
   function handleDelete(id: string, title: string) {
-    if (!confirm(`هل أنت متأكد من حذف عرض «${title}»؟`)) return;
+    if (!confirm(`Are you sure you want to delete offer "${title}"?`)) return;
     run(() => deleteOffer(id));
   }
 
@@ -112,12 +112,12 @@ export function OfferManager({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-sm text-muted">
-            العروض المفعّلة تظهر تلقائياً في شريط العروض المتحرك (Carousel) في الصفحة الرئيسية.
+            Active offers automatically appear in the promotional carousel on the homepage.
           </p>
         </div>
         <button type="button" onClick={openCreate} className="btn-primary">
           <Plus className="size-4" aria-hidden />
-          إضافة عرض جديد
+          Add New Offer
         </button>
       </div>
 
@@ -126,11 +126,11 @@ export function OfferManager({
       {offers.length === 0 ? (
         <div className="card-soft rounded-[28px] p-12 text-center">
           <Tag className="mx-auto size-12 text-teal/40" />
-          <h2 className="mt-4 text-xl font-bold text-teal-deep">لا توجد عروض حالياً</h2>
-          <p className="mt-2 text-sm text-muted">أضف عروض وخصومات العيادة لتظهر لزوار موقعك في الصفحة الرئيسية.</p>
+          <h2 className="mt-4 text-xl font-bold text-teal-deep">No offers currently</h2>
+          <p className="mt-2 text-sm text-muted">Add clinic promotions and special packages to showcase them to homepage visitors.</p>
           <button type="button" onClick={openCreate} className="btn-primary mx-auto mt-6">
             <Plus className="size-4" aria-hidden />
-            إضافة أول عرض
+            Add First Offer
           </button>
         </div>
       ) : (
@@ -155,7 +155,7 @@ export function OfferManager({
                     </span>
                     {treatment && (
                       <span className="chip border-teal/20 bg-teal-light text-xs font-medium text-teal-deep">
-                        علاج: {treatment.nameAr}
+                        Treatment: {treatment.nameAr}
                       </span>
                     )}
                     <span
@@ -165,11 +165,11 @@ export function OfferManager({
                     >
                       {offer.active ? (
                         <>
-                          <CheckCircle className="size-3 text-teal" /> مفعّل ويظهر في الموقع
+                          <CheckCircle className="size-3 text-teal" /> Active & displayed on site
                         </>
                       ) : (
                         <>
-                          <EyeOff className="size-3" /> معطّل
+                          <EyeOff className="size-3" /> Deactivated
                         </>
                       )}
                     </span>
@@ -180,11 +180,11 @@ export function OfferManager({
 
                   <div className="mt-1 flex items-baseline gap-3">
                     <p className="text-xl font-bold text-teal-deep">
-                      {offer.price} <span className="text-xs font-normal">ج.م</span>
+                      {offer.price} <span className="text-xs font-normal">EGP</span>
                     </p>
                     {offer.originalPrice && offer.originalPrice > offer.price && (
                       <p className="text-sm text-neutral-400 line-through">
-                        {offer.originalPrice} ج.م
+                        {offer.originalPrice} EGP
                       </p>
                     )}
                   </div>
@@ -196,8 +196,8 @@ export function OfferManager({
                       type="button"
                       disabled={pending || index === 0}
                       onClick={() => run(() => moveOffer(offer.id, "up"))}
-                      title="تحريك لأعلى"
-                      aria-label="تحريك لأعلى"
+                      title="Move up"
+                      aria-label="Move up"
                       className="rounded-lg p-1.5 text-muted hover:bg-ivory hover:text-teal-deep disabled:opacity-30"
                     >
                       <ArrowUp className="size-4" />
@@ -206,8 +206,8 @@ export function OfferManager({
                       type="button"
                       disabled={pending || index === offers.length - 1}
                       onClick={() => run(() => moveOffer(offer.id, "down"))}
-                      title="تحريك لأسفل"
-                      aria-label="تحريك لأسفل"
+                      title="Move down"
+                      aria-label="Move down"
                       className="rounded-lg p-1.5 text-muted hover:bg-ivory hover:text-teal-deep disabled:opacity-30"
                     >
                       <ArrowDown className="size-4" />
@@ -218,11 +218,11 @@ export function OfferManager({
                     type="button"
                     disabled={pending}
                     onClick={() => handleToggle(offer.id, offer.active)}
-                    title={offer.active ? "تعطيل العرض" : "تفعيل العرض"}
+                    title={offer.active ? "Deactivate offer" : "Activate offer"}
                     className={`btn-secondary p-2.5 text-xs ${offer.active ? "hover:border-amber hover:text-amber-dark" : "hover:border-teal hover:text-teal"}`}
                   >
                     {offer.active ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                    <span className="hidden md:inline">{offer.active ? "تعطيل" : "تفعيل"}</span>
+                    <span className="hidden md:inline">{offer.active ? "Deactivate" : "Activate"}</span>
                   </button>
 
                   <button
@@ -230,10 +230,10 @@ export function OfferManager({
                     disabled={pending}
                     onClick={() => openEdit(offer)}
                     className="btn-secondary p-2.5 text-xs"
-                    title="تعديل"
+                    title="Edit"
                   >
                     <Pencil className="size-4" />
-                    <span className="hidden md:inline">تعديل</span>
+                    <span className="hidden md:inline">Edit</span>
                   </button>
 
                   <button
@@ -241,7 +241,7 @@ export function OfferManager({
                     disabled={pending}
                     onClick={() => handleDelete(offer.id, offer.titleAr)}
                     className="rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs text-red-700 transition-colors hover:bg-red-100 disabled:opacity-50"
-                    title="حذف العرض"
+                    title="Delete offer"
                   >
                     <Trash2 className="size-4" />
                   </button>
@@ -263,29 +263,29 @@ export function OfferManager({
             <button
               type="button"
               onClick={closeModal}
-              className="absolute top-5 left-5 rounded-full p-1.5 text-muted hover:bg-neutral-100 hover:text-ink"
-              aria-label="إغلاق"
+              className="absolute top-5 right-5 rounded-full p-1.5 text-muted hover:bg-neutral-100 hover:text-ink"
+              aria-label="Close"
             >
               <X className="size-5" />
             </button>
 
             <h2 className="text-xl font-bold text-teal-deep">
-              {editingId ? "تعديل العرض" : "إضافة عرض جديد"}
+              {editingId ? "Edit Offer" : "Add New Offer"}
             </h2>
             <p className="mt-1 text-sm text-muted">
-              املأ تفاصيل العرض ليظهر بشكل جذاب في الصفحة الرئيسية.
+              Fill in the offer details to display attractively in the homepage promotions.
             </p>
 
             <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
               <div>
                 <label className="field-label" htmlFor="offer-badge">
-                  وسام أو شارة العرض <span className="text-red-500">*</span>
+                  Offer Badge or Tag <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="offer-badge"
                   required
                   type="text"
-                  placeholder="مثال: عرض White Friday / خصم خاص / لفترة محدودة"
+                  placeholder="e.g. Special Offer / Limited Time / Season Discount"
                   value={form.badge}
                   onChange={(e) => setForm({ ...form, badge: e.target.value })}
                   className="field-input text-sm"
@@ -294,13 +294,13 @@ export function OfferManager({
 
               <div>
                 <label className="field-label" htmlFor="offer-title">
-                  عنوان العرض <span className="text-red-500">*</span>
+                  Offer Title <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="offer-title"
                   required
                   type="text"
-                  placeholder="مثال: تبييض الأسنان بالليزر — جلسة واحدة"
+                  placeholder="e.g. In-Clinic Laser Teeth Whitening — Single Session"
                   value={form.titleAr}
                   onChange={(e) => setForm({ ...form, titleAr: e.target.value })}
                   className="field-input text-sm"
@@ -309,13 +309,13 @@ export function OfferManager({
 
               <div>
                 <label className="field-label" htmlFor="offer-desc">
-                  تفاصيل ووصف العرض <span className="text-red-500">*</span>
+                  Offer Description & Details <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   id="offer-desc"
                   required
                   rows={3}
-                  placeholder="ما الذي يشمله العرض؟ مثال: يشمل فحص الأسنان، تسجيل درجة اللون، وتلميع المينا..."
+                  placeholder="What is included? e.g. Full examination, shade analysis, enamel polishing..."
                   value={form.descriptionAr}
                   onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })}
                   className="field-input text-sm leading-6"
@@ -325,7 +325,7 @@ export function OfferManager({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="field-label" htmlFor="offer-price">
-                    سعر العرض (ج.م) <span className="text-red-500">*</span>
+                    Offer Price (EGP) <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="offer-price"
@@ -340,7 +340,7 @@ export function OfferManager({
                 </div>
                 <div>
                   <label className="field-label" htmlFor="offer-original-price">
-                    السعر قبل الخصم (اختياري)
+                    Original Price Before Discount (Optional)
                   </label>
                   <input
                     id="offer-original-price"
@@ -356,7 +356,7 @@ export function OfferManager({
 
               <div>
                 <label className="field-label" htmlFor="offer-treatment">
-                  العلاج المرتبط عند الحجز (اختياري)
+                  Linked Treatment upon Booking (Optional)
                 </label>
                 <select
                   id="offer-treatment"
@@ -364,7 +364,7 @@ export function OfferManager({
                   onChange={(e) => setForm({ ...form, treatmentSlug: e.target.value })}
                   className="field-input text-sm"
                 >
-                  <option value="">بدون تحديد علاج معين (استشارة عامة)</option>
+                  <option value="">No specific treatment (General Consultation)</option>
                   {treatments.map((t) => (
                     <option key={t.slug} value={t.slug}>
                       {t.nameAr}
@@ -372,7 +372,7 @@ export function OfferManager({
                   ))}
                 </select>
                 <p className="mt-1 text-xs text-muted">
-                  عند الضغط على «احجز العرض»، سيتم فتح حجز هذا العلاج تلقائياً للمريض.
+                  When the patient clicks "Book Offer", this treatment will be pre-selected in the booking wizard.
                 </p>
               </div>
 
@@ -385,7 +385,7 @@ export function OfferManager({
                   className="size-4 rounded border-line text-teal-deep focus:ring-teal"
                 />
                 <label htmlFor="offer-active" className="text-sm font-medium text-teal-deep cursor-pointer">
-                  تفعيل العرض فوراً وإظهاره في الصفحة الرئيسية
+                  Activate offer immediately and display on homepage
                 </label>
               </div>
 
@@ -398,7 +398,7 @@ export function OfferManager({
                   disabled={pending}
                   className="btn-secondary px-5 py-2.5 text-sm"
                 >
-                  إلغاء
+                  Cancel
                 </button>
                 <button
                   type="submit"
@@ -406,7 +406,7 @@ export function OfferManager({
                   className="btn-primary px-6 py-2.5 text-sm"
                 >
                   {pending && <Loader2 className="size-4 animate-spin" aria-hidden />}
-                  {editingId ? "حفظ التعديلات" : "إضافة العرض"}
+                  {editingId ? "Save Changes" : "Add Offer"}
                 </button>
               </div>
             </form>

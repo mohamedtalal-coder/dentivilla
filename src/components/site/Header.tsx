@@ -7,11 +7,11 @@ import { CalendarCheck, Menu, X } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 
 const navLinks = [
-  { href: "/", label: "الرئيسية" },
-  { href: "/treatments", label: "العلاجات" },
-  { href: "/about", label: "عن الطبيب" },
-  { href: "/cases", label: "قبل وبعد" },
-  { href: "/contact", label: "تواصل معنا" },
+  { href: "/", label: "Home" },
+  { href: "/treatments", label: "Treatments" },
+  { href: "/about", label: "About Doctor" },
+  { href: "/cases", label: "Before & After" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export function Header({ logoUrl }: { logoUrl?: string } = {}) {
@@ -38,12 +38,12 @@ export function Header({ logoUrl }: { logoUrl?: string } = {}) {
   return (
     <header className="fixed inset-x-0 top-3 z-50 px-3 sm:top-4 sm:px-6">
       <nav
-        aria-label="التنقل الرئيسي"
+        aria-label="Main Navigation"
         className={`mx-auto flex max-w-7xl items-center justify-between gap-4 rounded-full border bg-white/90 py-2 ps-3 pe-2 backdrop-blur-md transition-shadow sm:ps-5 ${
           scrolled ? "border-line shadow-card" : "border-white/60"
         }`}
       >
-        <Link href="/" className="shrink-0 rounded-full" aria-label="Dentivilla — الصفحة الرئيسية">
+        <Link href="/" className="shrink-0 rounded-full" aria-label="Dentivilla — Home">
           <Logo src={logoUrl} />
         </Link>
 
@@ -66,12 +66,12 @@ export function Header({ logoUrl }: { logoUrl?: string } = {}) {
             href="/booking/status"
             className="hidden sm:inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold text-neutral-600 transition-colors hover:bg-teal-light hover:text-teal-deep"
           >
-            متابعة طلب الحجز
+            Check Status
           </Link>
           <Link href="/booking" className="btn-primary px-4 py-2.5 whitespace-nowrap sm:px-5">
             <CalendarCheck className="size-4" aria-hidden />
-            <span className="sm:hidden">احجز</span>
-            <span className="hidden sm:inline">احجز موعداً</span>
+            <span className="sm:hidden">Book</span>
+            <span className="hidden sm:inline">Book Appointment</span>
           </Link>
           <button
             type="button"
@@ -79,7 +79,7 @@ export function Header({ logoUrl }: { logoUrl?: string } = {}) {
             onClick={() => setOpen((prev) => !prev)}
             aria-expanded={open}
             aria-controls="mobile-nav"
-            aria-label={open ? "إغلاق القائمة" : "فتح القائمة"}
+            aria-label={open ? "Close menu" : "Open menu"}
           >
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
@@ -109,7 +109,7 @@ export function Header({ logoUrl }: { logoUrl?: string } = {}) {
                 onClick={() => setOpen(false)}
                 className="block rounded-2xl px-4 py-3 text-sm text-muted hover:bg-teal-light"
               >
-                متابعة طلب حجز سابق
+                Check Existing Booking
               </Link>
             </li>
           </ul>

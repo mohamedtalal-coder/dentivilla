@@ -24,7 +24,7 @@ export default async function CasesAdminPage() {
 
   return (
     <div className="grid gap-6">
-      <h1 className="text-3xl font-bold text-teal-deep">حالات قبل وبعد</h1>
+      <h1 className="text-3xl font-bold text-teal-deep">Before & After Cases</h1>
       <CaseManager cases={cases} treatments={treatments} />
     </div>
   );

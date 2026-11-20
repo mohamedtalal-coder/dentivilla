@@ -8,12 +8,12 @@ import type { PublicSlot } from "@/lib/booking-types";
 
 const ACTIONS: Record<AppointmentStatus, { status: AppointmentStatus; label: string; tone: "primary" | "danger" | "neutral" }[]> = {
   PENDING: [
-    { status: "CONFIRMED", label: "تأكيد الموعد", tone: "primary" },
-    { status: "REJECTED", label: "رفض الطلب", tone: "danger" },
+    { status: "CONFIRMED", label: "Confirm Appointment", tone: "primary" },
+    { status: "REJECTED", label: "Decline Request", tone: "danger" },
   ],
   CONFIRMED: [
-    { status: "COMPLETED", label: "تمت الزيارة", tone: "primary" },
-    { status: "CANCELLED", label: "إلغاء الموعد", tone: "danger" },
+    { status: "COMPLETED", label: "Mark Completed", tone: "primary" },
+    { status: "CANCELLED", label: "Cancel Appointment", tone: "danger" },
   ],
   REJECTED: [],
   CANCELLED: [],
@@ -57,7 +57,7 @@ export function AppointmentActions({
       {actions.length > 0 && (
         <section className="grid gap-3">
           <label htmlFor="admin-note" className="field-label">
-            ملاحظة داخلية مع الإجراء (اختياري)
+            Internal admin note with this action (optional)
           </label>
           <textarea id="admin-note" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="field" />
           <div className="flex flex-wrap items-center gap-2">
@@ -67,7 +67,7 @@ export function AppointmentActions({
                 type="button"
                 disabled={statusAction.pending}
                 onClick={() => {
-                  if (action.tone === "danger" && !window.confirm(`${action.label}؟`)) return;
+                  if (action.tone === "danger" && !window.confirm(`${action.label}?`)) return;
                   statusAction.run(() => setAppointmentStatus(id, action.status, notes), () => setNotes(""));
                 }}
                 className={
@@ -86,20 +86,20 @@ export function AppointmentActions({
 
       {canReschedule && (
         <section className="rounded-2xl bg-ivory p-4">
-          <h2 className="font-semibold text-teal-deep">إعادة جدولة</h2>
-          <p className="mt-1 text-sm text-muted">تظهر الأوقات المتاحة فعلياً حسب ساعات العمل والحجوزات والفترات المحجوبة.</p>
+          <h2 className="font-semibold text-teal-deep">Reschedule Appointment</h2>
+          <p className="mt-1 text-sm text-muted">Displays live bookable slots based on clinic working hours, bookings, and blocked periods.</p>
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
             className="field mt-3 w-auto"
-            aria-label="تاريخ الموعد الجديد"
+            aria-label="New appointment date"
           />
           <div className="mt-3 flex flex-wrap gap-2" aria-live="polite">
-            {loadingSlots && <span className="text-sm text-muted">جارٍ تحميل الأوقات…</span>}
-            {!loadingSlots && date && slotsState.failed && <span className="text-sm text-red-700">تعذر تحميل الأوقات.</span>}
+            {loadingSlots && <span className="text-sm text-muted">Loading slots…</span>}
+            {!loadingSlots && date && slotsState.failed && <span className="text-sm text-red-700">Failed to load slots.</span>}
             {!loadingSlots && date && !slotsState.failed && slotsState.slots.length === 0 && (
-              <span className="text-sm text-muted">لا توجد أوقات متاحة في هذا اليوم.</span>
+              <span className="text-sm text-muted">No slots available on this day.</span>
             )}
             {!loadingSlots &&
               slotsState.slots.map((slot) => (
@@ -109,7 +109,7 @@ export function AppointmentActions({
                   disabled={reschedule.pending}
                   className="rounded-full border border-line bg-white px-3.5 py-1.5 font-mono text-sm hover:border-teal"
                   onClick={() => {
-                    if (window.confirm(`نقل الموعد إلى ${slot.label}؟`)) {
+                    if (window.confirm(`Move appointment to ${slot.label}?`)) {
                       reschedule.run(() => rescheduleAppointment(id, slot.startsAt), () => setDate(""));
                     }
                   }}

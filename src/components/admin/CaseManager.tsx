@@ -45,7 +45,7 @@ function ImagePicker({
   async function upload(file: File) {
     setError("");
     if (file.size > 15 * 1024 * 1024) {
-      setError("الصورة أكبر من ١٥ ميجابايت.");
+      setError("Image size exceeds 15 MB limit.");
       return;
     }
     setBusy(true);
@@ -54,10 +54,10 @@ function ImagePicker({
       body.set("file", file);
       const res = await fetch("/api/admin/media", { method: "POST", body });
       const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload.error ?? "تعذر رفع الصورة.");
+      if (!res.ok) throw new Error(payload.error ?? "Failed to upload image.");
       onChange({ id: payload.id, url: payload.url });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "تعذر رفع الصورة.");
+      setError(err instanceof Error ? err.message : "Failed to upload image.");
     } finally {
       setBusy(false);
     }
@@ -83,13 +83,13 @@ function ImagePicker({
         ) : (
           <span className="grid justify-items-center gap-2 p-4 text-center text-sm text-muted">
             <ImagePlus className="size-7 text-teal" aria-hidden />
-            اضغط أو اسحب صورة هنا
-            <span className="text-xs">JPG / PNG / WebP / HEIC — حتى ١٥ ميجابايت</span>
+            Click or drag image here
+            <span className="text-xs">JPG / PNG / WebP / HEIC — up to 15 MB</span>
           </span>
         )}
         {busy && (
           <span className="absolute inset-0 grid place-items-center bg-white/70">
-            <Loader2 className="size-6 animate-spin text-teal" aria-label="جارٍ الرفع" />
+            <Loader2 className="size-6 animate-spin text-teal" aria-label="Uploading" />
           </span>
         )}
         <input
@@ -104,10 +104,10 @@ function ImagePicker({
         />
       </label>
       <div className="mt-1.5 flex min-h-5 items-center justify-between text-xs">
-        {error ? <span role="alert" className="text-red-700">{error}</span> : <span className="text-muted">{value ? "تم الرفع" : ""}</span>}
+        {error ? <span role="alert" className="text-red-700">{error}</span> : <span className="text-muted">{value ? "Uploaded" : ""}</span>}
         {value && (
           <button type="button" onClick={() => onChange(null)} className="inline-flex items-center gap-1 text-muted hover:text-red-700">
-            <X className="size-3.5" aria-hidden /> إزالة
+            <X className="size-3.5" aria-hidden /> Remove
           </button>
         )}
       </div>
@@ -164,27 +164,27 @@ function CaseForm({
       }}
     >
       <div className="grid gap-4 sm:grid-cols-2">
-        <ImagePicker label="صورة «قبل»" value={before} onChange={setBefore} />
-        <ImagePicker label="صورة «بعد»" value={after} onChange={setAfter} />
+        <ImagePicker label="Before Photo" value={before} onChange={setBefore} />
+        <ImagePicker label="After Photo" value={after} onChange={setAfter} />
       </div>
       {before && after && (
         <div>
-          <span className="field-label">معاينة كما ستظهر للزوار</span>
+          <span className="field-label">Interactive Preview</span>
           <div className="max-w-xl">
             <BeforeAfter beforeSrc={before.url} afterSrc={after.url} />
           </div>
-          <p className="mt-2 text-xs text-muted">لأفضل نتيجة: صورتان بنفس الزاوية والإضاءة والتأطير.</p>
+          <p className="mt-2 text-xs text-muted">For optimal comparison: use two photos with consistent angle, illumination, and framing.</p>
         </div>
       )}
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="text-sm">
-          <span className="field-label">عنوان الحالة</span>
-          <input name="titleAr" required minLength={3} maxLength={120} defaultValue={initial?.titleAr} className="field" placeholder="مثال: وجوه تجميلية للأسنان الأمامية" />
+          <span className="field-label">Case Title</span>
+          <input name="titleAr" required minLength={3} maxLength={120} defaultValue={initial?.titleAr} className="field" placeholder="e.g. Anterior Cosmetic Ceramic Veneers" />
         </label>
         <label className="text-sm">
-          <span className="field-label">نوع العلاج</span>
+          <span className="field-label">Treatment Category</span>
           <select name="treatmentSlug" defaultValue={initial?.treatmentSlug ?? ""} className="field">
-            <option value="">— غير محدد —</option>
+            <option value="">— Unspecified —</option>
             {treatments.map((t) => (
               <option key={t.slug} value={t.slug}>
                 {t.nameAr}
@@ -193,7 +193,7 @@ function CaseForm({
           </select>
         </label>
         <label className="text-sm sm:col-span-2">
-          <span className="field-label">وصف مختصر (اختياري)</span>
+          <span className="field-label">Brief Clinical Description (Optional)</span>
           <textarea name="descriptionAr" rows={2} maxLength={600} defaultValue={initial?.descriptionAr ?? ""} className="field" />
         </label>
       </div>
@@ -201,8 +201,8 @@ function CaseForm({
         <label className="flex items-start gap-3">
           <input type="checkbox" className="mt-1 size-4 accent-teal" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
           <span>
-            <span className="font-semibold">لدي موافقة كتابية من المريض على نشر هذه الصور</span>
-            <span className="block text-xs text-muted">مطلوبة للنشر. أخفِ أي ملامح تكشف هوية المريض إن لم تشملها الموافقة.</span>
+            <span className="font-semibold">Patient written consent on file for publication</span>
+            <span className="block text-xs text-muted">Required for publishing. Obscure identifiable facial features if not covered by consent.</span>
           </span>
         </label>
         <label className="flex items-center gap-3">
@@ -213,16 +213,16 @@ function CaseForm({
             disabled={!consent}
             onChange={(e) => setPublished(e.target.checked)}
           />
-          <span className={consent ? "" : "text-neutral-400"}>نشر الحالة على الموقع</span>
+          <span className={consent ? "" : "text-neutral-400"}>Publish case on website</span>
         </label>
       </div>
       <div className="flex flex-wrap items-center gap-4">
         <button type="submit" className="btn-primary" disabled={pending || !before || !after}>
-          {pending ? "جارٍ الحفظ…" : initial ? "حفظ التعديلات" : "إضافة الحالة"}
+          {pending ? "Saving…" : initial ? "Save Changes" : "Add Case"}
         </button>
         {onDone && initial && (
           <button type="button" className="btn-secondary" onClick={onDone}>
-            إلغاء
+            Cancel
           </button>
         )}
         <ActionFeedback result={result} />
@@ -252,50 +252,50 @@ function CaseRow({
         <div className="flex shrink-0 gap-1.5">
           {[item.beforeMediaId, item.afterMediaId].map((id, i) => (
             // eslint-disable-next-line @next/next/no-img-element -- small admin thumbnails
-            <img key={id} src={mediaUrl(id)} alt={i === 0 ? "قبل" : "بعد"} className="h-16 w-20 rounded-lg object-cover ring-1 ring-black/5" />
+            <img key={id} src={mediaUrl(id)} alt={i === 0 ? "Before" : "After"} className="h-16 w-20 rounded-lg object-cover ring-1 ring-black/5" />
           ))}
         </div>
         <div className="min-w-0 flex-1">
           <p className="font-semibold text-teal-deep">{item.titleAr}</p>
           <div className="mt-1 flex flex-wrap gap-1.5 text-xs">
             <span className={`chip ${item.published ? "border-teal/30 bg-teal-light text-teal-deep" : "border-line bg-ivory text-muted"}`}>
-              {item.published ? "منشورة" : "مسودة"}
+              {item.published ? "Published" : "Draft"}
             </span>
-            {item.featured && <span className="chip border-amber/40 bg-amber-light text-amber-dark">في الصفحة الرئيسية</span>}
-            {!item.consentOnFile && <span className="chip border-red-200 bg-red-50 text-red-800">بدون موافقة مسجلة</span>}
+            {item.featured && <span className="chip border-amber/40 bg-amber-light text-amber-dark">Featured on Homepage</span>}
+            {!item.consentOnFile && <span className="chip border-red-200 bg-red-50 text-red-800">No Consent on File</span>}
             {treatmentName && <span className="chip border-line text-muted">{treatmentName}</span>}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-1">
-          <IconButton label="أعلى" disabled={index === 0 || action.pending} onClick={() => action.run(() => moveCase(item.id, "up"))}>
+          <IconButton label="Move up" disabled={index === 0 || action.pending} onClick={() => action.run(() => moveCase(item.id, "up"))}>
             <ArrowUp className="size-4" />
           </IconButton>
-          <IconButton label="أسفل" disabled={index === total - 1 || action.pending} onClick={() => action.run(() => moveCase(item.id, "down"))}>
+          <IconButton label="Move down" disabled={index === total - 1 || action.pending} onClick={() => action.run(() => moveCase(item.id, "down"))}>
             <ArrowDown className="size-4" />
           </IconButton>
           <IconButton
-            label={item.published ? "إخفاء من الموقع" : "نشر"}
+            label={item.published ? "Hide from website" : "Publish"}
             disabled={action.pending}
             onClick={() => action.run(() => setCasePublished(item.id, !item.published))}
           >
             {item.published ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
           </IconButton>
           <IconButton
-            label="عرض في الصفحة الرئيسية"
+            label="Feature on Homepage"
             disabled={!item.published || item.featured || action.pending}
             onClick={() => action.run(() => setCaseFeatured(item.id))}
           >
             <Star className={`size-4 ${item.featured ? "fill-amber text-amber" : ""}`} />
           </IconButton>
-          <IconButton label="تعديل" onClick={() => setEditing((v) => !v)}>
+          <IconButton label="Edit" onClick={() => setEditing((v) => !v)}>
             <Pencil className="size-4" />
           </IconButton>
           <IconButton
-            label="حذف"
+            label="Delete"
             tone="danger"
             disabled={action.pending}
             onClick={() => {
-              if (window.confirm(`حذف «${item.titleAr}» وصورها نهائياً؟`)) action.run(() => deleteCase(item.id));
+              if (window.confirm(`Permanently delete "${item.titleAr}" and its photos?`)) action.run(() => deleteCase(item.id));
             }}
           >
             <Trash2 className="size-4" />
@@ -349,18 +349,18 @@ export function CaseManager({ cases, treatments }: { cases: AdminCase[]; treatme
   return (
     <div className="grid gap-6">
       <section className="card-soft rounded-3xl p-5 sm:p-6">
-        <h2 className="heading-md">إضافة حالة قبل وبعد</h2>
+        <h2 className="heading-md">Add Before & After Case</h2>
         <p className="mt-1 mb-5 text-sm text-muted">
-          تُضغط الصور تلقائياً، وتُحذف منها البيانات المخفية (مثل الموقع الجغرافي) قبل الحفظ.
+          Images are automatically optimized and private metadata (such as GPS coordinates) is stripped prior to saving.
         </p>
         <CaseForm treatments={treatments} />
       </section>
 
       <section>
-        <h2 className="heading-md mb-3">الحالات ({cases.length})</h2>
+        <h2 className="heading-md mb-3">All Cases ({cases.length})</h2>
         {cases.length === 0 ? (
           <p className="card-soft rounded-3xl p-6 text-sm text-muted">
-            لا توجد حالات بعد. حتى تضيف حالة منشورة، يعرض الموقع صوراً توضيحية.
+            No clinical cases added yet. Default examples are displayed on the public site until cases are published.
           </p>
         ) : (
           <ul className="grid gap-3">

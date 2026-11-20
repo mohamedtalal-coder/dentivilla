@@ -6,10 +6,9 @@ import type { PublicSlot } from "@/lib/booking-types";
 
 type MonthAvailability = { today: string; lastDate: string; days: Record<string, number> };
 
-const WEEKDAYS = ["سبت", "أحد", "اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة"];
-const MONTH_FMT = new Intl.DateTimeFormat("ar-EG", { month: "long", year: "numeric", timeZone: "UTC" });
-const DAY_FMT = new Intl.DateTimeFormat("ar-EG", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
-const DIGITS = new Intl.NumberFormat("ar-EG");
+const WEEKDAYS = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
+const MONTH_FMT = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+const DAY_FMT = new Intl.DateTimeFormat("en-US", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
 
 const ymdToUtc = (ymd: string) => {
   const [y, m, d] = ymd.split("-").map(Number);
@@ -106,11 +105,19 @@ export function AvailabilityCalendar({
   const canPrev = Boolean(monthData && month > monthKey(monthData.today));
   const canNext = Boolean(monthData && month < monthKey(monthData.lastDate));
   const grouped = useMemo(() => {
-    const morning = slots.filter((s) => Number(s.label.slice(0, 2)) < 12);
-    const evening = slots.filter((s) => Number(s.label.slice(0, 2)) >= 12);
+    const morning = slots.filter((s) => {
+      const match = s.label.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+      if (match && match[3]) return match[3].toUpperCase() === "AM";
+      return Number(s.label.slice(0, 2)) < 12;
+    });
+    const evening = slots.filter((s) => {
+      const match = s.label.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+      if (match && match[3]) return match[3].toUpperCase() === "PM";
+      return Number(s.label.slice(0, 2)) >= 12;
+    });
     return [
-      { label: "صباحاً", items: morning },
-      { label: "بعد الظهر والمساء", items: evening },
+      { label: "Morning", items: morning },
+      { label: "Afternoon & Evening", items: evening },
     ].filter((group) => group.items.length);
   }, [slots]);
 
@@ -123,9 +130,9 @@ export function AvailabilityCalendar({
             onClick={() => setMonth(addMonths(month, -1))}
             disabled={!canPrev}
             className="grid size-9 place-items-center rounded-full text-teal-deep hover:bg-teal-light disabled:opacity-30"
-            aria-label="الشهر السابق"
+            aria-label="Previous month"
           >
-            <ChevronRight className="size-5" />
+            <ChevronLeft className="size-5" />
           </button>
           <p className="font-semibold text-teal-deep" aria-live="polite">
             {MONTH_FMT.format(ymdToUtc(`${month}-01`))}
@@ -135,9 +142,9 @@ export function AvailabilityCalendar({
             onClick={() => setMonth(addMonths(month, 1))}
             disabled={!canNext}
             className="grid size-9 place-items-center rounded-full text-teal-deep hover:bg-teal-light disabled:opacity-30"
-            aria-label="الشهر التالي"
+            aria-label="Next month"
           >
-            <ChevronLeft className="size-5" />
+            <ChevronRight className="size-5" />
           </button>
         </div>
 
@@ -151,15 +158,15 @@ export function AvailabilityCalendar({
 
         {monthState.failed && !monthLoading ? (
           <div className="grid place-items-center gap-3 py-10 text-sm text-muted">
-            تعذر تحميل المواعيد المتاحة.
+            Could not load available dates.
             <button type="button" className="btn-secondary px-4 py-2" onClick={() => setRetry((n) => n + 1)}>
-              <RefreshCw className="size-4" aria-hidden /> إعادة المحاولة
+              <RefreshCw className="size-4" aria-hidden /> Retry
             </button>
           </div>
         ) : (
           <div
             role="grid"
-            aria-label="اختر يوماً"
+            aria-label="Select date"
             aria-busy={monthLoading}
             className={`grid grid-cols-7 gap-1 transition-opacity ${monthLoading ? "opacity-50" : ""}`}
           >
@@ -179,7 +186,7 @@ export function AvailabilityCalendar({
                       role="gridcell"
                       disabled={!available}
                       aria-selected={isSelected}
-                      aria-label={`${formatDayLabel(ymd)}${available ? ` — أوقات متاحة: ${DIGITS.format(count)}` : " — لا أوقات متاحة"}`}
+                      aria-label={`${formatDayLabel(ymd)}${available ? ` — ${count} slots available` : " — No slots"}`}
                       onClick={() => {
                         onDateChange(ymd);
                         onSlotChange(null);
@@ -192,7 +199,7 @@ export function AvailabilityCalendar({
                             : "cursor-not-allowed text-neutral-300"
                       } ${isToday && !isSelected ? "ring-1 ring-amber" : ""}`}
                     >
-                      {DIGITS.format(Number(ymd.slice(8)))}
+                      {Number(ymd.slice(8))}
                       {available && !isSelected && (
                         <span className="absolute bottom-1.5 left-1/2 size-1 -translate-x-1/2 rounded-full bg-teal" />
                       )}
@@ -204,15 +211,15 @@ export function AvailabilityCalendar({
           </div>
         )}
         <p className="mt-3 flex items-center gap-2 text-xs text-muted">
-          <span className="size-2.5 rounded bg-teal-light ring-1 ring-teal/30" /> يوم فيه مواعيد متاحة
+          <span className="size-2.5 rounded bg-teal-light ring-1 ring-teal/30" /> Date with available appointments
         </p>
       </div>
 
       <div className="rounded-[1.5rem] border border-line bg-white p-4 sm:p-5">
-        <p className="font-semibold text-teal-deep">{date ? formatDayLabel(date) : "اختر يوماً من التقويم"}</p>
+        <p className="font-semibold text-teal-deep">{date ? formatDayLabel(date) : "Select a date from calendar"}</p>
         <div className="mt-4" aria-live="polite" aria-busy={slotsLoading}>
           {!date ? (
-            <p className="text-sm text-muted">ستظهر هنا الأوقات المتاحة حسب مدة العلاج وجدول الطبيب.</p>
+            <p className="text-sm text-muted">Available appointment slots will appear here based on procedure duration and clinic hours.</p>
           ) : slotsLoading ? (
             <div className="grid grid-cols-3 gap-2">
               {Array.from({ length: 6 }, (_, i) => (
@@ -221,16 +228,16 @@ export function AvailabilityCalendar({
             </div>
           ) : slotState.failed ? (
             <button type="button" className="btn-secondary px-4 py-2" onClick={() => setRetry((n) => n + 1)}>
-              <RefreshCw className="size-4" aria-hidden /> إعادة تحميل الأوقات
+              <RefreshCw className="size-4" aria-hidden /> Reload times
             </button>
           ) : slots.length === 0 ? (
-            <p className="text-sm text-muted">لم تعد هناك أوقات متاحة في هذا اليوم. اختر يوماً آخر.</p>
+            <p className="text-sm text-muted">No appointments remaining on this day. Please pick another date.</p>
           ) : (
             <div className="grid gap-4">
               {grouped.map((group) => (
                 <div key={group.label}>
                   <p className="mb-2 text-xs text-muted">{group.label}</p>
-                  <div role="radiogroup" aria-label={`الأوقات ${group.label}`} className="grid grid-cols-3 gap-2">
+                  <div role="radiogroup" aria-label={`${group.label} slots`} className="grid grid-cols-3 gap-2">
                     {group.items.map((item) => {
                       const isSelected = slot?.startsAt === item.startsAt;
                       return (

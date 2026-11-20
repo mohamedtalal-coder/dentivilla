@@ -32,8 +32,8 @@
   --color-spruce-deep: #081b19;
   --color-spruce-dark: #093937;
 
-  --font-sans: var(--font-readex), system-ui, sans-serif;
-  --font-mono: var(--font-jakarta), ui-monospace, monospace;
+  --font-sans: var(--font-jakarta), var(--font-readex), system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   --shadow-card: 0 1px 2px rgb(12 79 77 / 0.04), 0 8px 24px -12px rgb(12 79 77 / 0.12);
   --shadow-lift: 0 2px 4px rgb(12 79 77 / 0.05), 0 24px 48px -20px rgb(12 79 77 / 0.25);
@@ -68,7 +68,7 @@ html {
 }
 
 body {
-  font-family: var(--font-readex), "Readex Pro", system-ui, sans-serif;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", system-ui, sans-serif;
   background-color: var(--color-alabaster);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
@@ -112,7 +112,7 @@ body {
   }
 
   .eyebrow {
-    @apply mb-3 inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-amber-dark;
+    @apply mb-3 inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-amber-dark uppercase;
   }
   .eyebrow::before {
     content: "";

@@ -10,11 +10,13 @@ export async function Faq() {
     <section className="section" aria-labelledby="faq-title">
       <div className="container-page grid gap-10 lg:grid-cols-12">
         <div className="lg:col-span-4">
-          <p className="eyebrow">أسئلة شائعة</p>
+          <p className="eyebrow">Frequently Asked Questions</p>
           <h2 id="faq-title" className="heading-lg">
-            قبل أن تبدأ
+            Before You Begin
           </h2>
-          <p className="lede mt-4">إجابات مباشرة عن أكثر ما يسأل عنه المرضى في الزيارة الأولى.</p>
+          <p className="lede mt-4">
+            Direct answers to the most common questions patients ask before their first visit.
+          </p>
         </div>
         <div className="grid gap-3 lg:col-span-8">
           {items.map((item, index) => (

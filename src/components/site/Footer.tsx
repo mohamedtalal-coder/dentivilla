@@ -7,16 +7,16 @@ import { site } from "@/lib/site";
 import { getContactInfo } from "@/lib/site-settings";
 
 const pageLinks = [
-  { href: "/", label: "الرئيسية" },
-  { href: "/treatments", label: "العلاجات" },
-  { href: "/about", label: "عن الطبيب" },
-  { href: "/cases", label: "معرض الحالات" },
-  { href: "/contact", label: "تواصل معنا" },
+  { href: "/", label: "Home" },
+  { href: "/treatments", label: "Treatments" },
+  { href: "/about", label: "About Doctor" },
+  { href: "/cases", label: "Before & After" },
+  { href: "/contact", label: "Contact Us" },
 ];
 
 export async function Footer({ logoUrl }: { logoUrl?: string } = {}) {
   const [hours, contact] = await Promise.all([getHoursSummary(), getContactInfo()]);
-  const year = new Intl.DateTimeFormat("ar-EG", { year: "numeric", timeZone: "Africa/Cairo" }).format(new Date());
+  const year = new Date().getFullYear();
 
   return (
     <footer className="bg-teal-deep text-white" id="contact">
@@ -28,24 +28,24 @@ export async function Footer({ logoUrl }: { logoUrl?: string } = {}) {
             </span>
             <div>
               <p className="font-bold">{site.doctor.name}</p>
-              <p className="text-sm text-teal-light/75">Dentivilla — تجميل وجراحة الأسنان</p>
+              <p className="text-sm text-teal-light/75">{site.doctor.subtitle}</p>
             </div>
           </div>
           <p className="mt-5 max-w-sm text-sm leading-7 text-teal-light/75">
-            تشخيص متأنٍ وخطة مكتوبة قبل أي إجراء، مع الحفاظ على أكبر قدر ممكن من بنية السن الطبيعية.
+            Personalized care and a transparent written plan before every procedure, dedicated to preserving your natural tooth structure.
           </p>
           <Link href="/booking" className="btn-gold mt-6">
-            احجز موعداً
+            Book an Appointment
           </Link>
           {contact.socials.length > 0 && (
-            <ul className="mt-6 flex flex-wrap gap-2" aria-label="حساباتنا على مواقع التواصل">
+            <ul className="mt-6 flex flex-wrap gap-2" aria-label="Social media channels">
               {contact.socials.map((social) => (
                 <li key={social.key}>
                   <a
                     href={social.url}
                     target="_blank"
                     rel="noreferrer"
-                    aria-label={social.labelAr}
+                    aria-label={social.label}
                     title={social.label}
                     className="grid size-10 place-items-center rounded-full bg-white/10 text-white transition-colors hover:bg-amber"
                   >
@@ -57,8 +57,8 @@ export async function Footer({ logoUrl }: { logoUrl?: string } = {}) {
           )}
         </div>
 
-        <nav aria-label="صفحات الموقع" className="lg:col-span-2">
-          <h2 className="text-sm font-semibold text-gold-soft">الموقع</h2>
+        <nav aria-label="Navigation" className="lg:col-span-2">
+          <h2 className="text-sm font-semibold text-gold-soft">Pages</h2>
           <ul className="mt-4 grid gap-2.5 text-sm text-teal-light/85">
             {pageLinks.map((link) => (
               <li key={link.href}>
@@ -69,31 +69,31 @@ export async function Footer({ logoUrl }: { logoUrl?: string } = {}) {
             ))}
             <li>
               <Link href="/booking/status" className="transition-colors hover:text-white">
-                متابعة طلب حجز
+                Check Booking
               </Link>
             </li>
             <li>
               <Link href="/privacy" className="transition-colors hover:text-white">
-                سياسة الخصوصية
+                Privacy Policy
               </Link>
             </li>
           </ul>
         </nav>
 
         <div className="lg:col-span-3">
-          <h2 className="text-sm font-semibold text-gold-soft">ساعات العمل</h2>
+          <h2 className="text-sm font-semibold text-gold-soft">Working Hours</h2>
           <dl className="mt-4 grid gap-2.5 text-sm">
             {hours.map((row) => (
               <div key={row.days} className="flex items-baseline justify-between gap-4 border-b border-white/10 pb-2.5">
                 <dt className="text-teal-light/85">{row.days}</dt>
-                <dd className={row.hours ? "font-medium" : "text-gold-soft"}>{row.hours ?? "مغلق"}</dd>
+                <dd className={row.hours ? "font-medium" : "text-gold-soft"}>{row.hours ?? "Closed"}</dd>
               </div>
             ))}
           </dl>
         </div>
 
         <div className="lg:col-span-3">
-          <h2 className="text-sm font-semibold text-gold-soft">العيادة</h2>
+          <h2 className="text-sm font-semibold text-gold-soft">Clinic Info</h2>
           <ul className="mt-4 grid gap-4 text-sm text-teal-light/85">
             <li className="flex gap-3">
               <MapPin className="mt-0.5 size-4 shrink-0 text-gold-soft" aria-hidden />
@@ -103,20 +103,20 @@ export async function Footer({ logoUrl }: { logoUrl?: string } = {}) {
             </li>
             <li className="flex gap-3">
               <Phone className="mt-0.5 size-4 shrink-0 text-gold-soft" aria-hidden />
-              <a href={`tel:${contact.phone}`} dir="ltr" className="font-mono hover:text-white">
+              <a href={`tel:${contact.phone}`} className="font-mono hover:text-white">
                 {contact.phoneDisplay}
               </a>
             </li>
             <li className="flex gap-3">
               <MessageCircle className="mt-0.5 size-4 shrink-0 text-gold-soft" aria-hidden />
               <a href={contact.whatsappUrl} target="_blank" rel="noreferrer" className="hover:text-white">
-                واتساب العيادة
+                Chat on WhatsApp
               </a>
             </li>
             {contact.email && (
               <li className="flex gap-3">
                 <Mail className="mt-0.5 size-4 shrink-0 text-gold-soft" aria-hidden />
-                <a href={`mailto:${contact.email}`} dir="ltr" className="hover:text-white">
+                <a href={`mailto:${contact.email}`} className="hover:text-white">
                   {contact.email}
                 </a>
               </li>
@@ -127,14 +127,14 @@ export async function Footer({ logoUrl }: { logoUrl?: string } = {}) {
       <div className="border-t border-white/10">
         <div className="container-page flex flex-col items-center justify-between gap-3 py-6 text-xs text-teal-light/60 sm:flex-row">
           <p>
-            © {year} Dentivilla — {site.doctor.name}
+            © {year} Dentivilla — {site.doctor.name}. All rights reserved.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <Link href="/privacy" className="transition-colors hover:text-white underline-offset-4 hover:underline">
-              سياسة الخصوصية وحماية البيانات
+              Privacy & Data Protection Policy
             </Link>
             <span aria-hidden>•</span>
-            <p>المعلومات على الموقع تعريفية ولا تغني عن الكشف الطبي.</p>
+            <p>Information on this website is educational and does not replace in-person clinical examination.</p>
           </div>
         </div>
       </div>

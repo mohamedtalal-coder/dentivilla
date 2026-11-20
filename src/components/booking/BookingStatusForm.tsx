@@ -28,7 +28,7 @@ export function BookingStatusForm({ initialReference = "" }: { initialReference?
     try {
       setResult(await lookupBooking({ reference, phone }));
     } catch {
-      setResult({ ok: false, error: "تعذر الاتصال بالخادم. حاول مرة أخرى." });
+      setResult({ ok: false, error: "Unable to connect to server. Please try again." });
     } finally {
       setPending(false);
     }
@@ -39,13 +39,13 @@ export function BookingStatusForm({ initialReference = "" }: { initialReference?
       <form onSubmit={onSubmit} className="card-soft grid gap-4 rounded-[1.75rem] p-6 sm:p-8" noValidate>
         <div>
           <label htmlFor="lookup-ref" className="field-label">
-            الرقم المرجعي
+            Reference Code
           </label>
           <input
             id="lookup-ref"
             value={reference}
             onChange={(e) => setReference(e.target.value)}
-            className="field text-left font-mono uppercase"
+            className="field font-mono uppercase"
             dir="ltr"
             placeholder="DV-XXXXXX"
             autoComplete="off"
@@ -54,13 +54,13 @@ export function BookingStatusForm({ initialReference = "" }: { initialReference?
         </div>
         <div>
           <label htmlFor="lookup-phone" className="field-label">
-            رقم الموبايل المستخدم في الحجز
+            Mobile Number Used When Booking
           </label>
           <input
             id="lookup-phone"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="field text-left"
+            className="field"
             dir="ltr"
             type="tel"
             inputMode="tel"
@@ -71,7 +71,7 @@ export function BookingStatusForm({ initialReference = "" }: { initialReference?
         </div>
         <button type="submit" className="btn-primary mt-2 w-full sm:w-auto" disabled={pending}>
           <Search className="size-4" aria-hidden />
-          {pending ? "جارٍ البحث…" : "عرض حالة الطلب"}
+          {pending ? "Searching…" : "Check Booking Status"}
         </button>
         {result && !result.ok && (
           <p role="alert" className="text-sm text-red-700">
@@ -92,11 +92,11 @@ export function BookingStatusForm({ initialReference = "" }: { initialReference?
           </div>
           <dl className="mt-5 grid gap-3 text-sm">
             <div className="flex gap-3">
-              <dt className="w-20 shrink-0 text-muted">الزيارة</dt>
+              <dt className="w-24 shrink-0 text-muted">Treatment</dt>
               <dd className="font-medium">{result.appointment.treatment}</dd>
             </div>
             <div className="flex gap-3">
-              <dt className="w-20 shrink-0 text-muted">الموعد</dt>
+              <dt className="w-24 shrink-0 text-muted">Date & Time</dt>
               <dd className="flex items-center gap-2 font-medium">
                 <CalendarClock className="size-4 text-teal" aria-hidden />
                 {formatCairoDateTime(new Date(result.appointment.startsAt))}
@@ -104,7 +104,7 @@ export function BookingStatusForm({ initialReference = "" }: { initialReference?
             </div>
             {result.appointment.teeth.length > 0 && (
               <div className="flex gap-3">
-                <dt className="w-20 shrink-0 text-muted">الأسنان</dt>
+                <dt className="w-24 shrink-0 text-muted">Teeth</dt>
                 <dd>{formatTeeth(result.appointment.teeth)}</dd>
               </div>
             )}

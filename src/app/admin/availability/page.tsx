@@ -15,7 +15,7 @@ export default async function AvailabilityPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-teal-deep">التوافر</h1>
+      <h1 className="text-3xl font-bold text-teal-deep">Clinic Availability</h1>
       <AvailabilityForms
         settings={settings}
         hours={hours.map((item) => ({

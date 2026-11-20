@@ -11,19 +11,19 @@ export type SiteSettingsValues = Record<
 >;
 
 const CONTACT_FIELDS: { name: keyof SiteSettingsValues; label: string; placeholder: string; dir?: "ltr"; type?: string }[] = [
-  { name: "phone", label: "هاتف العيادة", placeholder: "01XXXXXXXXX", dir: "ltr", type: "tel" },
-  { name: "whatsapp", label: "رقم واتساب", placeholder: "01XXXXXXXXX", dir: "ltr", type: "tel" },
-  { name: "email", label: "البريد الإلكتروني", placeholder: "contact@example.com", dir: "ltr", type: "email" },
-  { name: "mapsUrl", label: "رابط خرائط Google", placeholder: "https://maps.app.goo.gl/…", dir: "ltr" },
+  { name: "phone", label: "Clinic Phone", placeholder: "01XXXXXXXXX", dir: "ltr", type: "tel" },
+  { name: "whatsapp", label: "WhatsApp Number", placeholder: "01XXXXXXXXX", dir: "ltr", type: "tel" },
+  { name: "email", label: "Email Address", placeholder: "contact@example.com", dir: "ltr", type: "email" },
+  { name: "mapsUrl", label: "Google Maps URL", placeholder: "https://maps.app.goo.gl/…", dir: "ltr" },
 ];
 
 const SOCIAL_FIELDS: { name: SocialKey; label: string; placeholder: string }[] = [
-  { name: "instagram", label: "إنستغرام", placeholder: "https://instagram.com/…" },
-  { name: "facebook", label: "فيسبوك", placeholder: "https://facebook.com/…" },
-  { name: "tiktok", label: "تيك توك", placeholder: "https://tiktok.com/@…" },
-  { name: "youtube", label: "يوتيوب", placeholder: "https://youtube.com/@…" },
-  { name: "x", label: "إكس (تويتر)", placeholder: "https://x.com/…" },
-  { name: "snapchat", label: "سناب شات", placeholder: "https://snapchat.com/add/…" },
+  { name: "instagram", label: "Instagram", placeholder: "https://instagram.com/…" },
+  { name: "facebook", label: "Facebook", placeholder: "https://facebook.com/…" },
+  { name: "tiktok", label: "TikTok", placeholder: "https://tiktok.com/@…" },
+  { name: "youtube", label: "YouTube", placeholder: "https://youtube.com/@…" },
+  { name: "x", label: "X (Twitter)", placeholder: "https://x.com/…" },
+  { name: "snapchat", label: "Snapchat", placeholder: "https://snapchat.com/add/…" },
 ];
 
 export function SiteSettingsForm({ values }: { values: SiteSettingsValues }) {
@@ -39,8 +39,8 @@ export function SiteSettingsForm({ values }: { values: SiteSettingsValues }) {
       }}
     >
       <section className="card-soft rounded-3xl p-5 sm:p-6">
-        <h2 className="heading-md">بيانات التواصل</h2>
-        <p className="mt-1 text-sm text-muted">تظهر في تذييل الموقع وصفحة التواصل وأزرار واتساب. اترك الحقل فارغاً لاستخدام القيمة الافتراضية.</p>
+        <h2 className="heading-md">Contact Information</h2>
+        <p className="mt-1 text-sm text-muted">Appears in the website footer, contact page, and WhatsApp buttons. Leave blank to use defaults.</p>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           {CONTACT_FIELDS.map((field) => (
             <label key={field.name} className="text-sm">
@@ -56,15 +56,15 @@ export function SiteSettingsForm({ values }: { values: SiteSettingsValues }) {
             </label>
           ))}
           <label className="text-sm sm:col-span-2">
-            <span className="field-label">العنوان</span>
+            <span className="field-label">Clinic Address</span>
             <input name="address" defaultValue={values.address} maxLength={200} className="field" />
           </label>
         </div>
       </section>
 
       <section className="card-soft rounded-3xl p-5 sm:p-6">
-        <h2 className="heading-md">حسابات التواصل الاجتماعي</h2>
-        <p className="mt-1 text-sm text-muted">الصق رابط الحساب كاملاً. الحسابات الفارغة لا تظهر في الموقع.</p>
+        <h2 className="heading-md">Social Media Profiles</h2>
+        <p className="mt-1 text-sm text-muted">Paste complete URLs. Blank fields will not be displayed on the website.</p>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           {SOCIAL_FIELDS.map((field) => (
             <label key={field.name} className="text-sm">
@@ -87,7 +87,7 @@ export function SiteSettingsForm({ values }: { values: SiteSettingsValues }) {
 
       <div className="flex flex-wrap items-center gap-4">
         <button type="submit" className="btn-primary" disabled={pending}>
-          {pending ? "جارٍ الحفظ…" : "حفظ التغييرات"}
+          {pending ? "Saving…" : "Save Changes"}
         </button>
         <ActionFeedback result={result} />
       </div>

@@ -2,17 +2,17 @@ import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Readex_Pro } from "next/font/google";
 import "./globals.css";
 
-const readex = Readex_Pro({
-  variable: "--font-readex",
-  subsets: ["arabic", "latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-});
-
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const readex = Readex_Pro({
+  variable: "--font-readex",
+  subsets: ["arabic", "latin"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -28,25 +28,25 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Dentivilla | د. محمد ياسر الجبالي — تجميل وجراحة الأسنان",
+    default: "Dentivilla | Dr. Mohamed Yasser El Gebaly — Aesthetic & Restorative Dentistry",
     template: "%s | Dentivilla",
   },
   description:
-    "عيادة Dentivilla — د. محمد ياسر الجبالي، تجميل وزراعة الأسنان بالقاهرة، مع حجز إلكتروني ونموذج فك ثلاثي الأبعاد لتحديد السن.",
-  openGraph: { locale: "ar_EG", type: "website", siteName: "Dentivilla" },
+    "Dentivilla Dental Clinic — Dr. Mohamed Yasser El Gebaly. General, aesthetic, and restorative dentistry in Cairo. Online appointment booking and interactive 3D dental model.",
+  openGraph: { locale: "en_US", type: "website", siteName: "Dentivilla" },
 };
 
 export const viewport: Viewport = { themeColor: "#0c4f4d" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" className={`${readex.variable} ${jakarta.variable} antialiased`}>
+    <html lang="en" dir="ltr" className={`${jakarta.variable} ${readex.variable} antialiased`}>
       <body className="font-sans">
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:right-3 focus:z-[100] focus:rounded-full focus:bg-teal-deep focus:px-4 focus:py-2 focus:text-white"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-full focus:bg-teal-deep focus:px-4 focus:py-2 focus:text-white"
         >
-          تخطَّ إلى المحتوى
+          Skip to content
         </a>
         {children}
       </body>

@@ -19,11 +19,11 @@ export function cairoDateTime(ymd: string, hhmm: string) {
 }
 
 export function formatCairoTime(date: Date) {
-  return format(toZonedTime(date, TIMEZONE), "HH:mm");
+  return format(toZonedTime(date, TIMEZONE), "hh:mm a");
 }
 
 export function formatCairoDate(date: Date) {
-  return new Intl.DateTimeFormat("ar-EG", {
+  return new Intl.DateTimeFormat("en-US", {
     timeZone: TIMEZONE,
     weekday: "long",
     day: "numeric",
@@ -33,11 +33,11 @@ export function formatCairoDate(date: Date) {
 }
 
 export function formatCairoDateTime(date: Date) {
-  return new Intl.DateTimeFormat("ar-EG", {
+  return new Intl.DateTimeFormat("en-US", {
     timeZone: TIMEZONE,
-    weekday: "long",
+    weekday: "short",
     day: "numeric",
-    month: "long",
+    month: "short",
     hour: "numeric",
     minute: "2-digit",
   }).format(date);

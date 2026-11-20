@@ -4,53 +4,54 @@ export type ToothType = "incisor" | "canine" | "premolar" | "molar";
 
 export type Tooth = {
   fdi: string;
-  nameAr: string;
+  nameAr: string; // kept as nameAr for compatibility with Prisma schema & components
+  nameEn: string;
   type: ToothType;
   arch: ToothArch;
   side: ToothSide;
   roleAr: string;
 };
 
-const names: Record<string, string> = {
-  "11": "القاطع المركزي العلوي الأيمن",
-  "12": "القاطع الجانبي العلوي الأيمن",
-  "13": "الناب العلوي الأيمن",
-  "14": "الضاحك الأول العلوي الأيمن",
-  "15": "الضاحك الثاني العلوي الأيمن",
-  "16": "الرحى الأولى العلوية اليمنى",
-  "17": "الرحى الثانية العلوية اليمنى",
-  "18": "الرحى الثالثة العلوية اليمنى",
-  "21": "القاطع المركزي العلوي الأيسر",
-  "22": "القاطع الجانبي العلوي الأيسر",
-  "23": "الناب العلوي الأيسر",
-  "24": "الضاحك الأول العلوي الأيسر",
-  "25": "الضاحك الثاني العلوي الأيسر",
-  "26": "الرحى الأولى العلوية اليسرى",
-  "27": "الرحى الثانية العلوية اليسرى",
-  "28": "الرحى الثالثة العلوية اليسرى",
-  "31": "القاطع المركزي السفلي الأيسر",
-  "32": "القاطع الجانبي السفلي الأيسر",
-  "33": "الناب السفلي الأيسر",
-  "34": "الضاحك الأول السفلي الأيسر",
-  "35": "الضاحك الثاني السفلي الأيسر",
-  "36": "الرحى الأولى السفلية اليسرى",
-  "37": "الرحى الثانية السفلية اليسرى",
-  "38": "الرحى الثالثة السفلية اليسرى",
-  "41": "القاطع المركزي السفلي الأيمن",
-  "42": "القاطع الجانبي السفلي الأيمن",
-  "43": "الناب السفلي الأيمن",
-  "44": "الضاحك الأول السفلي الأيمن",
-  "45": "الضاحك الثاني السفلي الأيمن",
-  "46": "الرحى الأولى السفلية اليمنى",
-  "47": "الرحى الثانية السفلية اليمنى",
-  "48": "الرحى الثالثة السفلية اليمنى",
+const names: Record<string, { en: string }> = {
+  "11": { en: "Upper Right Central Incisor" },
+  "12": { en: "Upper Right Lateral Incisor" },
+  "13": { en: "Upper Right Canine" },
+  "14": { en: "Upper Right First Premolar" },
+  "15": { en: "Upper Right Second Premolar" },
+  "16": { en: "Upper Right First Molar" },
+  "17": { en: "Upper Right Second Molar" },
+  "18": { en: "Upper Right Third Molar (Wisdom Tooth)" },
+  "21": { en: "Upper Left Central Incisor" },
+  "22": { en: "Upper Left Lateral Incisor" },
+  "23": { en: "Upper Left Canine" },
+  "24": { en: "Upper Left First Premolar" },
+  "25": { en: "Upper Left Second Premolar" },
+  "26": { en: "Upper Left First Molar" },
+  "27": { en: "Upper Left Second Molar" },
+  "28": { en: "Upper Left Third Molar (Wisdom Tooth)" },
+  "31": { en: "Lower Left Central Incisor" },
+  "32": { en: "Lower Left Lateral Incisor" },
+  "33": { en: "Lower Left Canine" },
+  "34": { en: "Lower Left First Premolar" },
+  "35": { en: "Lower Left Second Premolar" },
+  "36": { en: "Lower Left First Molar" },
+  "37": { en: "Lower Left Second Molar" },
+  "38": { en: "Lower Left Third Molar (Wisdom Tooth)" },
+  "41": { en: "Lower Right Central Incisor" },
+  "42": { en: "Lower Right Lateral Incisor" },
+  "43": { en: "Lower Right Canine" },
+  "44": { en: "Lower Right First Premolar" },
+  "45": { en: "Lower Right Second Premolar" },
+  "46": { en: "Lower Right First Molar" },
+  "47": { en: "Lower Right Second Molar" },
+  "48": { en: "Lower Right Third Molar (Wisdom Tooth)" },
 };
 
 const roles: Record<ToothType, string> = {
-  incisor: "قطع الطعام وإظهار خط الابتسامة.",
-  canine: "تمزيق الطعام ودعم زاوية الفم.",
-  premolar: "طحن أولي ومساهمة في الإطباق.",
-  molar: "المضغ الرئيسي ودعم ارتفاع العضة.",
+  incisor: "Cuts food and defines the frontal smile aesthetics and lip support.",
+  canine: "Tears food, guides mandibular movements, and supports mouth corners.",
+  premolar: "Initial crushing of food and maintains balanced occlusal contact.",
+  molar: "Primary chewing and grinding function, maintaining vertical bite height.",
 };
 
 function typeFor(fdi: string): ToothType {
@@ -73,9 +74,11 @@ export const ALL_TEETH: Tooth[] = Object.keys(names)
   .sort((a, b) => Number(a) - Number(b))
   .map((fdi) => {
     const type = typeFor(fdi);
+    const en = names[fdi].en;
     return {
       fdi,
-      nameAr: names[fdi],
+      nameAr: en, // Set nameAr to English so all existing call sites get the English name seamlessly
+      nameEn: en,
       type,
       arch: archFor(fdi),
       side: sideFor(fdi),
@@ -98,5 +101,5 @@ export function formatTeeth(codes: string[]) {
       const tooth = TEETH_BY_FDI[code];
       return tooth ? `${code} — ${tooth.nameAr}` : code;
     })
-    .join("، ");
+    .join(", ");
 }

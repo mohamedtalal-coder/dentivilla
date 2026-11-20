@@ -7,35 +7,37 @@ export type SiteImageSlotDef = {
   locationAr: string;
   recommendedSize: string;
   defaultUrl: string;
+  multiple?: boolean;
 };
 
 export const CORE_IMAGE_SLOTS: readonly SiteImageSlotDef[] = [
   {
     key: "doctor",
-    labelAr: "صورة د. محمد ياسر الجبالي",
-    locationAr: "القسم الرئيسي (Hero) في الصفحة الرئيسية وصفحة عن العيادة",
-    recommendedSize: "نسبة 5:6 (مثال: 960 × 1152 بكسل)",
+    labelAr: "Dr. Mohamed Yasser El Gebaly Portrait",
+    locationAr: "Hero section on Homepage and About Doctor page",
+    recommendedSize: "5:6 ratio (e.g. 960 × 1152 px)",
     defaultUrl: "/images/doctor.jpg",
   },
   {
     key: "logo",
-    labelAr: "شعار العيادة (Logo)",
-    locationAr: "أعلى الصفحة (Navbar) وأسفلها (Footer)",
-    recommendedSize: "مربع متناسق (مثال: 512 × 512 بكسل، بخلفية شفافة PNG)",
+    labelAr: "Clinic Logo",
+    locationAr: "Navbar header and Footer",
+    recommendedSize: "Square icon (e.g. 512 × 512 px, transparent PNG)",
     defaultUrl: "/images/logo.png",
   },
   {
     key: "philosophy",
-    labelAr: "كارت فلسفة العيادة («لا نصنع ابتسامة مكررة»)",
-    locationAr: "قسم الفلسفة في الصفحة الرئيسية",
-    recommendedSize: "نسبة 4:5 (مثال: 800 × 1000 بكسل)",
+    labelAr: "Clinic Philosophy Gallery ('Never a Duplicate Smile')",
+    locationAr: "Philosophy section on Homepage (multi-image carousel)",
+    recommendedSize: "4:5 ratio (e.g. 800 × 1000 px)",
     defaultUrl: "/images/teeth/incisor.webp",
+    multiple: true,
   },
   {
     key: "about",
-    labelAr: "صورة قسم عن الطبيب والعيادة",
-    locationAr: "صفحة عن الطبيب (القسم السفلي)",
-    recommendedSize: "أفقي أو شفاف (مثال: 800 × 600 بكسل)",
+    labelAr: "About Doctor & Clinic Section Image",
+    locationAr: "About Doctor page (lower section)",
+    recommendedSize: "Landscape or transparent (e.g. 800 × 600 px)",
     defaultUrl: "/images/teeth/molar.webp",
   },
 ] as const;
@@ -44,8 +46,9 @@ export type SiteImagesMap = {
   doctor: string;
   logo: string;
   philosophy: string;
+  philosophyImages: string[];
   about: string;
-  [key: string]: string;
+  [key: string]: string | string[];
 };
 
 /**
@@ -54,18 +57,41 @@ export type SiteImagesMap = {
  * Cached per request.
  */
 export const getSiteImages = cache(async (): Promise<SiteImagesMap> => {
-  const result: Record<string, string> = {};
+  const result: Record<string, string | string[]> = {};
   for (const slot of CORE_IMAGE_SLOTS) {
     result[slot.key] = slot.defaultUrl;
+    if (slot.multiple) {
+      result[`${slot.key}Images`] = [];
+    }
   }
 
   try {
-    const rows = await prisma.siteImage.findMany();
+    const rows = await prisma.siteImage.findMany({
+      include: {
+        items: {
+          orderBy: { sortOrder: "asc" },
+        },
+      },
+    });
+
     for (const row of rows) {
-      if (row.mediaId) {
+      const itemUrls: string[] = [];
+      if (row.items && row.items.length > 0) {
+        for (const item of row.items) {
+          if (item.mediaId) itemUrls.push(`/media/${item.mediaId}`);
+          else if (item.customUrl) itemUrls.push(item.customUrl);
+        }
+      }
+
+      if (itemUrls.length > 0) {
+        result[`${row.id}Images`] = itemUrls;
+        result[row.id] = itemUrls[0];
+      } else if (row.mediaId) {
         result[row.id] = `/media/${row.mediaId}`;
+        result[`${row.id}Images`] = [`/media/${row.mediaId}`];
       } else if (row.customUrl) {
         result[row.id] = row.customUrl;
+        result[`${row.id}Images`] = [row.customUrl];
       }
     }
   } catch (error) {

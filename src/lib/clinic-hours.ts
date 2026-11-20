@@ -3,25 +3,20 @@ import { weekdayLabels } from "@/lib/site";
 
 export type HoursRow = { days: string; hours: string | null };
 
-// Display order for an Egyptian clinic week: Saturday first.
+// Display order for clinic week: Saturday first.
 const WEEK_ORDER = [6, 0, 1, 2, 3, 4, 5];
-
-function toArabicDigits(value: string) {
-  return value.replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[Number(d)]);
-}
 
 function formatTime(hhmm: string) {
   const [h, m] = hhmm.split(":").map(Number);
-  const period = h < 12 ? "ص" : "م";
+  const period = h < 12 ? "AM" : "PM";
   const hour12 = h % 12 === 0 ? 12 : h % 12;
-  return toArabicDigits(`${hour12}${m ? `:${String(m).padStart(2, "0")}` : ""}`) + ` ${period}`;
+  return `${hour12}${m ? `:${String(m).padStart(2, "0")}` : ""} ${period}`;
 }
 
 /**
  * Groups consecutive weekdays that share the same working hours,
- * e.g. "السبت – الخميس: ١٠ ص – ٦ م" and "الجمعة: مغلق".
- * Reads the same WorkingHours rows the booking engine uses, so the
- * published hours can never disagree with bookable slots.
+ * e.g. "Saturday – Thursday: 10:00 AM – 6:00 PM" and "Friday: Closed".
+ * Reads the same WorkingHours rows the booking engine uses.
  */
 export async function getHoursSummary(): Promise<HoursRow[]> {
   try {
@@ -51,8 +46,8 @@ export async function getHoursSummary(): Promise<HoursRow[]> {
   } catch (error) {
     console.warn("Could not query working hours from database, using fallback schedule:", error);
     return [
-      { days: "السبت – الخميس", hours: "١٠ ص – ٦ م" },
-      { days: "الجمعة", hours: null },
+      { days: "Saturday – Thursday", hours: "10:00 AM – 6:00 PM" },
+      { days: "Friday", hours: null },
     ];
   }
 }

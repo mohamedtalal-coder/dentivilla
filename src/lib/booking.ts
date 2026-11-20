@@ -70,7 +70,7 @@ export async function loadAvailabilityData(
     }),
   ]);
 
-  if (!settings) throw new BookingError("إعدادات المواعيد غير موجودة", "CONFIG");
+  if (!settings) throw new BookingError("Appointment settings not found", "CONFIG");
 
   return {
     rules: settings,
@@ -99,7 +99,7 @@ export async function listPublicSlots(ymd: string, durationMinutes: number, opti
 export async function monthAvailability(month: string, durationMinutes: number) {
   const now = new Date();
   const settings = await prisma.availabilitySettings.findUnique({ where: { id: "default" } });
-  if (!settings) throw new BookingError("إعدادات المواعيد غير موجودة", "CONFIG");
+  if (!settings) throw new BookingError("Appointment settings not found", "CONFIG");
 
   const today = cairoYmd(now);
   const lastDate = lastBookableYmd(settings, now);
@@ -142,8 +142,8 @@ export async function assertSlotAvailable(
       end: new Date(busy.end.getTime() + data.rules.bufferMinutes * 60_000),
     }),
   );
-  if (taken) throw new BookingError("عذراً، حُجز هذا الوقت للتو. اختر وقتاً آخر.", "SLOT_TAKEN");
-  throw new BookingError("هذا الوقت لم يعد متاحاً للحجز. اختر وقتاً آخر.", "SLOT_INVALID");
+  if (taken) throw new BookingError("Sorry, this time slot was just booked. Please choose another time.", "SLOT_TAKEN");
+  throw new BookingError("This time slot is no longer available. Please choose another time.", "SLOT_INVALID");
 }
 
 /** Conflict check for confirming an existing request: overlap (with buffer) or blocked time only. */
@@ -164,12 +164,12 @@ export async function findConflict(
     },
     select: { reference: true },
   });
-  if (clash) return `يتعارض مع الموعد ${clash.reference}`;
+  if (clash) return `Conflicts with appointment ${clash.reference}`;
   const blocked = await db.blockedPeriod.findFirst({
     where: { startsAt: { lt: endsAt }, endsAt: { gt: startsAt } },
     select: { reason: true },
   });
-  if (blocked) return `يقع في فترة محجوبة (${blocked.reason})`;
+  if (blocked) return `Falls within a blocked period (${blocked.reason})`;
   return null;
 }
 
