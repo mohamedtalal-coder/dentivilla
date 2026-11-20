@@ -43,9 +43,9 @@ export default async function AdminSiteImagesPage() {
   return (
     <div className="grid gap-6">
       <div>
-        <h1 className="text-3xl font-bold text-teal-deep">Core Website Images</h1>
+        <h1 className="text-3xl font-bold text-teal-deep">صور الموقع الرئيسية</h1>
         <p className="mt-1 text-sm text-muted">
-          Customize and manage core homepage and site imagery (Doctor portrait, clinic logo, philosophy gallery carousel).
+          تحكم في الصور الأساسية المعروضة في الصفحة الرئيسية وصفحات الموقع (صورة الطبيب الشخصية، شعار العيادة، ومعرض صور الفلسفة).
         </p>
       </div>
       <SiteImageManager slots={slots} />

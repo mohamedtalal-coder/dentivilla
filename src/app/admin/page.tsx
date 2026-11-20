@@ -58,10 +58,10 @@ export default async function AdminHomePage() {
   const pendingList = rawPendingList.map(decryptAppointmentWithPatient);
 
   const cards = [
-    { label: "Today's Appointments", value: today.length },
-    { label: "Pending Requests", value: pending },
-    { label: "Available Slots This Week", value: weekSlots },
-    { label: "Total Patients", value: patients },
+    { label: "مواعيد اليوم", value: today.length },
+    { label: "طلبات معلّقة", value: pending },
+    { label: "أوقات متاحة هذا الأسبوع", value: weekSlots },
+    { label: "إجمالي المرضى", value: patients },
   ];
 
   return (
@@ -69,16 +69,16 @@ export default async function AdminHomePage() {
       {/* Top Bar with New Appointment */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-teal-deep">Dentivilla Dashboard</h1>
+          <h1 className="text-3xl font-bold text-teal-deep">لوحة Dentivilla</h1>
           <p className="mt-1 text-sm text-muted">
-            Overview of today&apos;s appointments, pending requests, and requested treatments.
+            نظرة عامة على مواعيد اليوم، والطلبات المعلّقة، والخدمات الأكثر طلباً في العيادة.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <NewAppointmentModal treatments={treatments} />
           <Link href="/admin/calendar" className="btn-secondary px-4 py-2 text-sm">
             <CalendarDays className="size-4" aria-hidden />
-            Calendar
+            التقويم
           </Link>
         </div>
       </div>
@@ -99,17 +99,17 @@ export default async function AdminHomePage() {
           <div>
             <h2 className="heading-sm flex items-center gap-2 text-teal-deep">
               <Sparkles className="size-5 text-teal" />
-              Most Requested Treatments
+              الخدمات والعلاجات الأكثر طلباً
             </h2>
             <p className="mt-0.5 text-xs text-muted">
-              Breakdown of booked appointments by requested dental service.
+              توزيع الحجوزات المسجلة حسب نوع الخدمة أو سبب الزيارة.
             </p>
           </div>
           <Link
             href="/admin/treatments"
             className="text-xs font-semibold text-teal-mid hover:underline"
           >
-            Manage Treatments →
+            إدارة العلاجات ←
           </Link>
         </div>
 
@@ -134,7 +134,7 @@ export default async function AdminHomePage() {
                 </p>
               </div>
               <span className="mt-3 text-[11px] text-teal-mid font-medium group-hover:underline">
-                View Appointments ({item._count.appointments}) →
+                عرض المواعيد ({item._count.appointments}) ←
               </span>
             </Link>
           ))}
@@ -144,9 +144,9 @@ export default async function AdminHomePage() {
       {/* Today and Pending Appointments */}
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="card-soft rounded-[28px] p-6">
-          <h2 className="heading-sm text-teal-deep">Today&apos;s Appointments</h2>
+          <h2 className="heading-sm text-teal-deep">مواعيد اليوم</h2>
           <ul className="mt-4 space-y-3 text-sm">
-            {today.length === 0 && <li className="text-muted text-xs">No appointments scheduled today.</li>}
+            {today.length === 0 && <li className="text-muted text-xs">لا توجد مواعيد مجدولة اليوم.</li>}
             {today.map((item) => (
               <li
                 key={item.id}
@@ -175,9 +175,9 @@ export default async function AdminHomePage() {
         </section>
 
         <section className="card-soft rounded-[28px] p-6">
-          <h2 className="heading-sm text-teal-deep">Requests Pending Review</h2>
+          <h2 className="heading-sm text-teal-deep">طلبات تحتاج مراجعة</h2>
           <ul className="mt-4 space-y-3 text-sm">
-            {pendingList.length === 0 && <li className="text-muted text-xs">No pending requests.</li>}
+            {pendingList.length === 0 && <li className="text-muted text-xs">لا توجد طلبات معلّقة.</li>}
             {pendingList.map((item) => (
               <li
                 key={item.id}

@@ -16,18 +16,18 @@ const STATUS_TONE: Record<AppointmentStatus, string> = {
   CANCELLED: "border-red-200 bg-red-50 text-red-800",
 };
 
-const NUM = new Intl.NumberFormat("en-US");
+const NUM = new Intl.NumberFormat("ar-EG");
 
 type FilterKey = "upcoming" | "pending" | "confirmed" | "past" | "closed" | "all";
 
 function filters(now: Date): Record<FilterKey, { label: string; where: Prisma.AppointmentWhereInput; order: "asc" | "desc" }> {
   return {
-    upcoming: { label: "Upcoming", where: { startsAt: { gte: now }, status: { in: ["PENDING", "CONFIRMED"] } }, order: "asc" },
-    pending: { label: "Pending Confirmation", where: { status: "PENDING" }, order: "asc" },
-    confirmed: { label: "Confirmed", where: { status: "CONFIRMED", startsAt: { gte: now } }, order: "asc" },
-    past: { label: "Past", where: { startsAt: { lt: now } }, order: "desc" },
-    closed: { label: "Cancelled & Declined", where: { status: { in: ["CANCELLED", "REJECTED"] } }, order: "desc" },
-    all: { label: "All", where: {}, order: "desc" },
+    upcoming: { label: "القادمة", where: { startsAt: { gte: now }, status: { in: ["PENDING", "CONFIRMED"] } }, order: "asc" },
+    pending: { label: "بانتظار التأكيد", where: { status: "PENDING" }, order: "asc" },
+    confirmed: { label: "مؤكدة", where: { status: "CONFIRMED", startsAt: { gte: now } }, order: "asc" },
+    past: { label: "السابقة", where: { startsAt: { lt: now } }, order: "desc" },
+    closed: { label: "ملغاة ومرفوضة", where: { status: { in: ["CANCELLED", "REJECTED"] } }, order: "desc" },
+    all: { label: "الكل", where: {}, order: "desc" },
   };
 }
 
@@ -114,16 +114,16 @@ export default async function AppointmentsPage({
       {/* Top Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-teal-deep">Appointments & Bookings</h1>
+          <h1 className="text-3xl font-bold text-teal-deep">المواعيد والحجوزات</h1>
           <p className="mt-1 text-sm text-muted">
-            Manage patient appointments, filter by treatment (reason for visit), and create direct bookings.
+            إدارة مواعيد المرضى، والفلترة حسب نوع العلاج (سبب الزيارة)، وتسجيل الحجوزات المباشرة.
           </p>
         </div>
         <div className="flex items-center gap-2">
           <NewAppointmentModal treatments={treatments} />
           <Link href="/admin/calendar" className="btn-secondary px-4 py-2 text-sm">
             <CalendarDays className="size-4" aria-hidden />
-            View Calendar
+            عرض التقويم
           </Link>
         </div>
       </div>
@@ -135,19 +135,19 @@ export default async function AppointmentsPage({
           <form method="GET" action="/admin/appointments" className="relative flex-1 max-w-md">
             {filter && <input type="hidden" name="filter" value={filter} />}
             {treatment && <input type="hidden" name="treatment" value={treatment} />}
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted pointer-events-none" />
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-muted pointer-events-none" />
             <input
               type="search"
               name="q"
               defaultValue={query}
-              placeholder="Search by patient name, phone, or reference..."
-              className="input pl-9 pr-8 text-sm"
+              placeholder="ابحث باسم المريض أو هاتفه أو رقم المرجع..."
+              className="input pr-9 pl-8 text-sm"
             />
             {query && (
               <Link
                 href={`/admin/appointments?filter=${key}${treatment ? `&treatment=${treatment}` : ""}`}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-muted hover:text-ink"
-                title="Clear search"
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 p-1 text-muted hover:text-ink"
+                title="مسح البحث"
               >
                 <X className="size-3.5" />
               </Link>
@@ -157,10 +157,10 @@ export default async function AppointmentsPage({
           {/* Quick link to manage treatments */}
           <Link
             href="/admin/treatments"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-mid hover:underline self-end sm:self-center"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-mid hover:underline self-start sm:self-center"
           >
             <Stethoscope className="size-3.5" />
-            Manage Treatments & Reasons for Visit →
+            إدارة العلاجات وأسباب الزيارة ←
           </Link>
         </div>
 
@@ -168,10 +168,10 @@ export default async function AppointmentsPage({
         <div>
           <div className="flex items-center gap-2 mb-2 text-xs font-bold text-teal-deep">
             <Filter className="size-3.5 text-teal" />
-            Filter by Treatment (Reason for Visit):
+            تصفية حسب نوع العلاج (سبب الزيارة):
             {selectedTreatment && (
               <span className="font-normal text-muted">
-                (Selected: {selectedTreatment.nameAr} - {totalForSelectedTreatment} total appointments)
+                (المحدد: {selectedTreatment.nameAr} — {totalForSelectedTreatment} موعد إجمالي)
               </span>
             )}
           </div>
@@ -184,7 +184,7 @@ export default async function AppointmentsPage({
                   : "border-line bg-white hover:border-teal/40 text-neutral-700"
               }`}
             >
-              All Treatments
+              جميع العلاجات
             </Link>
             {treatments.map((t) => {
               const active = t.slug === treatment || t.id === treatment;
@@ -209,7 +209,7 @@ export default async function AppointmentsPage({
       </div>
 
       {/* Status Tabs Navigation */}
-      <nav aria-label="Filter appointments by status" className="flex flex-wrap gap-2 text-sm">
+      <nav aria-label="تصفية المواعيد حسب الحالة" className="flex flex-wrap gap-2 text-sm">
         {(Object.keys(all) as FilterKey[]).map((k, i) => {
           const active = k === key;
           const href = `/admin/appointments?filter=${k}${
@@ -235,7 +235,7 @@ export default async function AppointmentsPage({
       {/* Treatment Breakdown in current results */}
       {treatmentCounts.size > 1 && !selectedTreatment && (
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="text-muted font-medium">Treatments in this list:</span>
+          <span className="text-muted font-medium">العلاجات في هذه القائمة:</span>
           {Array.from(treatmentCounts.entries()).map(([name, c]) => (
             <span
               key={name}
@@ -251,32 +251,32 @@ export default async function AppointmentsPage({
       {/* Appointments List / Table */}
       {appointments.length === 0 ? (
         <div className="card-soft rounded-3xl p-10 text-center text-sm text-muted">
-          <p className="font-semibold text-ink text-base">No matching appointments found.</p>
+          <p className="font-semibold text-ink text-base">لا توجد مواعيد مطابقة.</p>
           <p className="mt-1">
             {selectedTreatment
-              ? `No appointments found for treatment "${selectedTreatment.nameAr}" in this view.`
-              : "No appointments recorded matching these criteria."}
+              ? `لا توجد مواعيد مسجلة لعلاج «${selectedTreatment.nameAr}» في هذا التبويب.`
+              : "لا توجد مواعيد مسجلة تطابق هذه الشروط."}
           </p>
           {(treatment || query) && (
             <Link
               href={`/admin/appointments?filter=${key}`}
               className="btn-secondary mt-4 inline-block text-xs"
             >
-              Reset Filters
+              إلغاء الفلاتر
             </Link>
           )}
         </div>
       ) : (
         <div className="card-soft overflow-x-auto rounded-3xl">
-          <table className="w-full min-w-[760px] text-left text-sm">
+          <table className="w-full min-w-[760px] text-right text-sm">
             <thead className="bg-ivory text-xs text-muted">
               <tr>
-                <th className="p-3 font-medium">Date & Time</th>
-                <th className="p-3 font-medium">Patient</th>
-                <th className="p-3 font-medium">Treatment</th>
-                <th className="p-3 font-medium">Teeth</th>
-                <th className="p-3 font-medium">Status</th>
-                <th className="p-3 font-medium">Reference</th>
+                <th className="p-3 font-medium">الموعد</th>
+                <th className="p-3 font-medium">المريض</th>
+                <th className="p-3 font-medium">العلاج</th>
+                <th className="p-3 font-medium">الأسنان</th>
+                <th className="p-3 font-medium">الحالة</th>
+                <th className="p-3 font-medium">المرجع</th>
               </tr>
             </thead>
             <tbody>
@@ -308,7 +308,7 @@ export default async function AppointmentsPage({
                     <Link
                       href={`/admin/appointments?filter=${key}&treatment=${item.treatment.slug}`}
                       className="inline-flex items-center gap-1.5 rounded-full border border-teal/20 bg-teal-light/60 px-3 py-1 text-xs font-semibold text-teal-deep hover:bg-teal-light transition-colors"
-                      title="Filter by this treatment"
+                      title="تصفية حسب هذا العلاج"
                     >
                       <Sparkles className="size-3 text-teal" aria-hidden />
                       {item.treatment.nameAr}
@@ -317,7 +317,7 @@ export default async function AppointmentsPage({
                   <td className="p-3 font-mono text-xs">
                     {item.teeth.length ? (
                       <span className="font-semibold text-teal-deep" dir="ltr">
-                        {item.teeth.join(", ")}
+                        {item.teeth.join("، ")}
                       </span>
                     ) : (
                       <span className="text-muted">—</span>
@@ -329,7 +329,7 @@ export default async function AppointmentsPage({
                     </span>
                     {item.medicalConditions.length > 0 && (
                       <span className="mt-1 block text-[11px] text-amber-dark">
-                        Medical history reported
+                        تاريخ مرضي مُبلغ عنه
                       </span>
                     )}
                   </td>

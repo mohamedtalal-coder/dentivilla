@@ -61,7 +61,7 @@ export function AppointmentTreatmentEditor({
         className="mt-2 inline-flex items-center gap-1.5 rounded-xl border border-teal/30 bg-teal-light/50 px-3 py-1.5 text-xs font-semibold text-teal-deep hover:bg-teal-light transition-colors"
       >
         <Edit2 className="size-3.5" aria-hidden />
-        Change Treatment & Teeth
+        تغيير العلاج والأسنان المحددة
       </button>
     );
   }
@@ -71,7 +71,7 @@ export function AppointmentTreatmentEditor({
       <div className="flex items-center justify-between border-b border-line pb-3">
         <h4 className="flex items-center gap-2 text-sm font-bold text-teal-deep">
           <Sparkles className="size-4 text-teal" />
-          Edit Treatment & Teeth (Reason for Visit)
+          تعديل العلاج والأسنان (سبب الزيارة)
         </h4>
         <button
           type="button"
@@ -81,7 +81,7 @@ export function AppointmentTreatmentEditor({
             setTeeth(currentTeeth);
           }}
           className="rounded-full p-1 text-muted hover:bg-neutral-200"
-          aria-label="Cancel"
+          aria-label="إلغاء"
         >
           <X className="size-4" />
         </button>
@@ -94,7 +94,7 @@ export function AppointmentTreatmentEditor({
             result.ok ? "bg-teal-light text-teal-deep" : "bg-red-50 text-red-700"
           }`}
         >
-          {result.ok ? result.message ?? "Saved successfully" : result.error}
+          {result.ok ? result.message ?? "تم الحفظ بنجاح" : result.error}
         </div>
       )}
 
@@ -102,7 +102,7 @@ export function AppointmentTreatmentEditor({
         {/* Treatment Selector */}
         <div>
           <label htmlFor="treatment-select" className="field-label text-xs">
-            New Treatment (Service Requested)
+            العلاج الجديد (الخدمة المطلوبة)
           </label>
           <select
             id="treatment-select"
@@ -112,7 +112,7 @@ export function AppointmentTreatmentEditor({
           >
             {treatments.map((t) => (
               <option key={t.id} value={t.id}>
-                {t.nameAr} ({t.durationMinutes} mins)
+                {t.nameAr} ({t.durationMinutes} دقيقة)
               </option>
             ))}
           </select>
@@ -128,7 +128,7 @@ export function AppointmentTreatmentEditor({
           <div className="rounded-xl border border-line bg-white p-3.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-teal-deep">
-                Select Affected Teeth (FDI)
+                تحديد الأسنان المراد علاجها (FDI)
               </span>
               {teeth.length > 0 && (
                 <button
@@ -136,7 +136,7 @@ export function AppointmentTreatmentEditor({
                   onClick={() => setTeeth([])}
                   className="text-[11px] text-muted hover:text-red-600"
                 >
-                  Clear selection ({teeth.length})
+                  مسح التحديد ({teeth.length})
                 </button>
               )}
             </div>
@@ -144,7 +144,7 @@ export function AppointmentTreatmentEditor({
             {/* Quick Jaw FDI code selector */}
             <div className="mt-3 grid gap-3 text-xs">
               <div>
-                <p className="text-[11px] font-medium text-muted mb-1.5">Upper Arch (Maxillary):</p>
+                <p className="text-[11px] font-medium text-muted mb-1.5">الفك العلوي:</p>
                 <div className="flex flex-wrap gap-1" dir="ltr">
                   {[...UPPER_RIGHT, ...UPPER_LEFT].map((code) => {
                     const active = teeth.includes(code);
@@ -168,7 +168,7 @@ export function AppointmentTreatmentEditor({
               </div>
 
               <div>
-                <p className="text-[11px] font-medium text-muted mb-1.5">Lower Arch (Mandibular):</p>
+                <p className="text-[11px] font-medium text-muted mb-1.5">الفك السفلي:</p>
                 <div className="flex flex-wrap gap-1" dir="ltr">
                   {[...LOWER_RIGHT, ...LOWER_LEFT].map((code) => {
                     const active = teeth.includes(code);
@@ -194,7 +194,7 @@ export function AppointmentTreatmentEditor({
 
             {teeth.length > 0 && (
               <p className="mt-2.5 text-xs text-teal-deep font-medium">
-                Selected teeth: {teeth.map((c) => `${c} (${TEETH_BY_FDI[c]?.nameAr ?? c})`).join(", ")}
+                الأسنان المحددة: {teeth.map((c) => `${c} (${TEETH_BY_FDI[c]?.nameAr ?? c})`).join("، ")}
               </p>
             )}
           </div>
@@ -206,7 +206,7 @@ export function AppointmentTreatmentEditor({
             onClick={() => setIsOpen(false)}
             className="btn-secondary text-xs px-3 py-1.5"
           >
-            Cancel
+            إلغاء
           </button>
           <button
             type="button"
@@ -217,12 +217,12 @@ export function AppointmentTreatmentEditor({
             {pending ? (
               <>
                 <Loader2 className="size-3.5 animate-spin" aria-hidden />
-                Saving...
+                جاري الحفظ...
               </>
             ) : (
               <>
                 <Check className="size-3.5" aria-hidden />
-                Save Treatment
+                حفظ التعديلات
               </>
             )}
           </button>

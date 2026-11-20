@@ -39,7 +39,7 @@ export default async function AppointmentDetailPage({ params }: { params: Promis
   return (
     <div className="grid gap-6">
       <Link href="/admin/appointments" className="text-sm text-teal-mid hover:underline">
-        ← All Appointments
+        ← كل المواعيد
       </Link>
       <div className="card-soft rounded-3xl p-6 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -56,8 +56,8 @@ export default async function AppointmentDetailPage({ params }: { params: Promis
           <div className="mt-5 flex gap-3 rounded-2xl border border-amber/40 bg-amber-light p-4 text-sm">
             <HeartPulse className="mt-0.5 size-5 shrink-0 text-amber-dark" aria-hidden />
             <div>
-              <p className="font-semibold text-amber-dark">Reported Medical History</p>
-              <p className="mt-1">{conditions.join(", ")}</p>
+              <p className="font-semibold text-amber-dark">تاريخ مرضي مُبلغ عنه</p>
+              <p className="mt-1">{conditions.join("، ")}</p>
             </div>
           </div>
         )}
@@ -67,7 +67,7 @@ export default async function AppointmentDetailPage({ params }: { params: Promis
           <div className="md:col-span-2 rounded-2xl border border-teal/20 bg-teal-light/20 p-4">
             <dt className="text-xs font-semibold text-teal-deep flex items-center gap-1.5">
               <Sparkles className="size-3.5 text-teal" />
-              Treatment / Reason for Visit
+              العلاج / سبب الزيارة
             </dt>
             <dd className="mt-2 flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -76,7 +76,7 @@ export default async function AppointmentDetailPage({ params }: { params: Promis
                 </span>
                 <span className="mx-2 text-muted">•</span>
                 <span className="text-xs font-mono text-muted">
-                  Session duration: {appointment.treatment.durationMinutes} mins
+                  مدة الجلسة: {appointment.treatment.durationMinutes} دقيقة
                 </span>
                 <p className="mt-1 text-xs text-muted leading-relaxed">
                   {appointment.treatment.summaryAr}
@@ -92,11 +92,11 @@ export default async function AppointmentDetailPage({ params }: { params: Promis
           </div>
 
           <div>
-            <dt className="text-muted">Date & Time</dt>
+            <dt className="text-muted">الموعد</dt>
             <dd className="mt-0.5 font-medium">{formatCairoDateTime(appointment.startsAt)}</dd>
           </div>
           <div>
-            <dt className="text-muted">Phone Number</dt>
+            <dt className="text-muted">الهاتف</dt>
             <dd className="mt-0.5 font-medium" dir="ltr">
               <a href={`tel:${appointment.patient.phone}`} className="hover:underline">
                 {appointment.patient.phone}
@@ -104,7 +104,7 @@ export default async function AppointmentDetailPage({ params }: { params: Promis
             </dd>
           </div>
           <div>
-            <dt className="text-muted">WhatsApp</dt>
+            <dt className="text-muted">واتساب</dt>
             <dd className="mt-0.5 font-medium" dir="ltr">
               {appointment.patient.whatsapp ? (
                 <a
@@ -121,18 +121,18 @@ export default async function AppointmentDetailPage({ params }: { params: Promis
             </dd>
           </div>
           <div>
-            <dt className="text-muted">Teeth Involved</dt>
+            <dt className="text-muted">الأسنان المعنية</dt>
             <dd className="mt-0.5 font-medium">
-              {appointment.teeth.length ? formatTeeth(appointment.teeth) : "Not specified (or doesn't require tooth selection)"}
+              {appointment.teeth.length ? formatTeeth(appointment.teeth) : "غير محددة (أو لا تتطلب سناً)"}
             </dd>
           </div>
           <div className="md:col-span-2">
-            <dt className="text-muted">Patient Notes</dt>
+            <dt className="text-muted">ملاحظات المريض</dt>
             <dd className="mt-0.5 whitespace-pre-line">{appointment.patientNotes || "—"}</dd>
           </div>
           {appointment.adminNotes && (
             <div className="md:col-span-2">
-              <dt className="text-muted">Internal Admin Notes</dt>
+              <dt className="text-muted">ملاحظات الإدارة</dt>
               <dd className="mt-0.5 whitespace-pre-line">{appointment.adminNotes}</dd>
             </div>
           )}

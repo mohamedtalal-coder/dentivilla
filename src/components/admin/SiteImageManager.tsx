@@ -49,17 +49,17 @@ export function SiteImageManager({
 
   async function handleSingleUpload(key: string, file: File) {
     setUploadingSlot(key);
-    setUploadProgress("Processing and uploading image...");
+    setUploadProgress("جاري معالجة ورفع الصورة...");
     try {
       const body = new FormData();
       body.set("file", file);
       const res = await fetch("/api/admin/media", { method: "POST", body });
       const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload.error ?? "Failed to upload image.");
+      if (!res.ok) throw new Error(payload.error ?? "تعذر رفع الصورة.");
 
       await run(() => updateSiteImageSlot({ key, mediaId: payload.id }));
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to upload image.");
+      alert(err instanceof Error ? err.message : "تعذر رفع الصورة.");
     } finally {
       setUploadingSlot(null);
       setUploadProgress(null);
@@ -74,17 +74,17 @@ export function SiteImageManager({
     try {
       for (let i = 0; i < fileArray.length; i++) {
         const file = fileArray[i];
-        setUploadProgress(`Processing and uploading image ${i + 1} of ${fileArray.length}...`);
+        setUploadProgress(`جاري معالجة ورفع الصورة ${i + 1} من ${fileArray.length}...`);
         const body = new FormData();
         body.set("file", file);
         const res = await fetch("/api/admin/media", { method: "POST", body });
         const payload = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(payload.error ?? "Failed to upload image.");
+        if (!res.ok) throw new Error(payload.error ?? "تعذر رفع الصورة.");
 
         await run(() => addSiteImageItem({ slotKey: key, mediaId: payload.id }));
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to upload images.");
+      alert(err instanceof Error ? err.message : "تعذر رفع الصور.");
     } finally {
       setUploadingSlot(null);
       setUploadProgress(null);
@@ -104,7 +104,7 @@ export function SiteImageManager({
   return (
     <div className="grid gap-6">
       <div className="rounded-2xl border border-line/80 bg-ivory/60 p-4 text-sm text-neutral-700">
-        💡 You can customize core website images by uploading high-resolution photos that are automatically compressed to fast WebP format. In the Philosophy section, you can add multiple images to transform it into a dynamic carousel with full control over reordering and deletion.
+        💡 يمكنك استبدال أي صورة رئيسية في الموقع برفع صورة جديدة مخصصة من جهازك. تُضغط الصور تلقائياً وتُحفظ بصيغة WebP عالية الجودة وسريعة التحميل، مع إمكانية إضافة صور متعددة لمعرض الفلسفة وترتيبها أو حذفها بسهولة.
       </div>
 
       {result && (
@@ -114,7 +114,7 @@ export function SiteImageManager({
             result.ok ? "bg-teal-light text-teal-deep" : "bg-red-50 text-red-700"
           }`}
         >
-          {result.ok ? result.message ?? "Operation completed successfully" : result.error}
+          {result.ok ? result.message ?? "تمت العملية بنجاح" : result.error}
         </div>
       )}
 
@@ -145,7 +145,7 @@ export function SiteImageManager({
                       {isMultiple && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-amber-light px-2.5 py-0.5 text-xs font-bold text-amber-dark border border-amber/30">
                           <Images className="size-3.5" aria-hidden />
-                          Multi-Image Carousel
+                          معرض صور متحرك
                         </span>
                       )}
                     </div>
@@ -162,16 +162,16 @@ export function SiteImageManager({
                   >
                     {isMultiple
                       ? items.length > 0
-                        ? `Active Carousel (${items.length} images)`
-                        : "Default Display"
+                        ? `معرض نشط (${items.length} صور)`
+                        : "العرض الافتراضي"
                       : slot.isCustom
-                      ? "Custom Image Active"
-                      : "Default Image"}
+                      ? "صورة مخصصة نشطة"
+                      : "الصورة الافتراضية"}
                   </span>
                 </div>
 
                 <p className="mt-2 text-xs leading-5 text-muted">
-                  Recommended size: {slot.recommendedSize}
+                  الحجم الموصى به: {slot.recommendedSize}
                 </p>
 
                 {/* Multiple Images Management Section */}
@@ -179,7 +179,7 @@ export function SiteImageManager({
                   <div className="mt-5 grid gap-5 lg:grid-cols-12">
                     {/* Live Preview Box */}
                     <div className="lg:col-span-6">
-                      <p className="text-xs font-bold text-teal-deep mb-2">Live preview as seen by patients:</p>
+                      <p className="text-xs font-bold text-teal-deep mb-2">معاينة حية كما تظهر للمرضى:</p>
                       <div className="relative aspect-[4/5] max-h-80 w-full overflow-hidden rounded-2xl border border-line bg-teal-deep shadow-inner">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
@@ -189,7 +189,7 @@ export function SiteImageManager({
                         />
                         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-teal-deep/95 via-teal-deep/25 to-transparent" />
                         <blockquote className="pointer-events-none absolute inset-x-4 bottom-4 text-xs font-medium text-white sm:text-sm">
-                          &ldquo;We don&apos;t manufacture duplicate smiles; we help your genuine smile shine through.&rdquo;
+                          «ابتسامتك لا تتكرر، نحن فقط نساعدها على الظهور»
                         </blockquote>
 
                         {/* Slide Selector Arrows in Preview */}
@@ -204,9 +204,9 @@ export function SiteImageManager({
                                 }))
                               }
                               className="grid size-7 place-items-center rounded-full bg-teal-deep/70 text-white backdrop-blur-xs hover:bg-teal-deep active:scale-95"
-                              aria-label="Previous"
+                              aria-label="السابق"
                             >
-                              <ChevronLeft className="size-4" />
+                              <ChevronRight className="size-4" />
                             </button>
                             <button
                               type="button"
@@ -217,9 +217,9 @@ export function SiteImageManager({
                                 }))
                               }
                               className="grid size-7 place-items-center rounded-full bg-teal-deep/70 text-white backdrop-blur-xs hover:bg-teal-deep active:scale-95"
-                              aria-label="Next"
+                              aria-label="التالي"
                             >
-                              <ChevronRight className="size-4" />
+                              <ChevronLeft className="size-4" />
                             </button>
                           </div>
                         )}
@@ -228,7 +228,7 @@ export function SiteImageManager({
                           <div className="absolute inset-0 flex flex-col items-center justify-center bg-teal-deep/85 backdrop-blur-xs z-30">
                             <Loader2 className="size-8 animate-spin text-gold-soft" />
                             <span className="mt-2 text-xs font-semibold text-white">
-                              {uploadProgress || "Processing and uploading images..."}
+                              {uploadProgress || "جاري معالجة ورفع الصور..."}
                             </span>
                           </div>
                         )}
@@ -240,23 +240,23 @@ export function SiteImageManager({
                       <div>
                         <div className="flex items-center justify-between">
                           <p className="text-xs font-bold text-teal-deep">
-                            Current carousel images ({items.length}):
+                            الصور الحالية بالمعرض ({items.length}):
                           </p>
                           <span className="text-[11px] text-muted">
-                            Reorder or delete any slide
+                            إعادة ترتيب أو حذف أي صورة
                           </span>
                         </div>
 
                         {items.length === 0 ? (
                           <div className="mt-3 rounded-2xl border border-dashed border-line bg-alabaster p-6 text-center text-xs text-muted">
-                            No custom images added yet. Default 3D tooth anatomy renders are currently displayed.
+                            لم تتم إضافة صور مخصصة بعد. تظهر حالياً مجسمات ثلاثية الأبعاد لتشريح الأسنان.
                             <br />
                             <span className="mt-1 block font-semibold text-teal-mid">
-                              Click &ldquo;Add Carousel Images&rdquo; below to upload one or more photos.
+                              اضغط على «إضافة صور للمعرض» بالأسفل لرفع صورة أو أكثر.
                             </span>
                           </div>
                         ) : (
-                          <div className="mt-3 grid max-h-72 gap-2.5 overflow-y-auto pr-1">
+                          <div className="mt-3 grid max-h-72 gap-2.5 overflow-y-auto pl-1">
                             {items.map((item, idx) => (
                               <div
                                 key={item.id}
@@ -270,7 +270,7 @@ export function SiteImageManager({
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={item.url}
-                                    alt={`Slide ${idx + 1}`}
+                                    alt={`شريحة ${idx + 1}`}
                                     className="size-12 shrink-0 rounded-lg object-cover border border-line"
                                   />
                                   <div>
@@ -288,11 +288,11 @@ export function SiteImageManager({
                                         }
                                         className="text-xs font-semibold text-teal-deep hover:underline"
                                       >
-                                        Preview
+                                        معاينة
                                       </button>
                                     </div>
                                     <p className="mt-0.5 text-[11px] text-muted">
-                                      {idx === 0 ? "Cover Slide" : `Slide ${idx + 1}`}
+                                      {idx === 0 ? "صورة الغلاف الرئيسية" : `صورة رقم ${idx + 1}`}
                                     </p>
                                   </div>
                                 </div>
@@ -303,8 +303,8 @@ export function SiteImageManager({
                                     type="button"
                                     disabled={pending || idx === 0}
                                     onClick={() => handleMoveItem(slot.key, items, idx, idx - 1)}
-                                    title="Move up"
-                                    aria-label="Move up"
+                                    title="تحريك لأعلى"
+                                    aria-label="تحريك لأعلى"
                                     className="grid size-7 place-items-center rounded-lg border border-line bg-alabaster text-neutral-600 hover:bg-teal-light hover:text-teal-deep disabled:opacity-30"
                                   >
                                     <ArrowUp className="size-3.5" />
@@ -313,8 +313,8 @@ export function SiteImageManager({
                                     type="button"
                                     disabled={pending || idx === items.length - 1}
                                     onClick={() => handleMoveItem(slot.key, items, idx, idx + 1)}
-                                    title="Move down"
-                                    aria-label="Move down"
+                                    title="تحريك لأسفل"
+                                    aria-label="تحريك لأسفل"
                                     className="grid size-7 place-items-center rounded-lg border border-line bg-alabaster text-neutral-600 hover:bg-teal-light hover:text-teal-deep disabled:opacity-30"
                                   >
                                     <ArrowDown className="size-3.5" />
@@ -323,12 +323,12 @@ export function SiteImageManager({
                                     type="button"
                                     disabled={pending || isUploadingThis}
                                     onClick={() => {
-                                      if (confirm(`Remove photo #${idx + 1} from the carousel?`)) {
+                                      if (confirm(`هل ترغب في حذف الصورة رقم ${idx + 1} من المعرض؟`)) {
                                         run(() => deleteSiteImageItem(item.id));
                                       }
                                     }}
-                                    title="Delete image"
-                                    aria-label="Delete image"
+                                    title="حذف الصورة"
+                                    aria-label="حذف الصورة"
                                     className="grid size-7 place-items-center rounded-lg border border-line bg-alabaster text-neutral-500 hover:bg-red-50 hover:text-red-700 hover:border-red-200"
                                   >
                                     <Trash2 className="size-3.5" />
@@ -354,7 +354,7 @@ export function SiteImageManager({
                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-xs">
                         <Loader2 className="size-7 animate-spin text-teal" />
                         <span className="mt-2 text-xs font-semibold text-teal-deep">
-                          {uploadProgress || "Processing and uploading image..."}
+                          {uploadProgress || "جاري معالجة ورفع الصورة..."}
                         </span>
                       </div>
                     )}
@@ -368,7 +368,7 @@ export function SiteImageManager({
                   <div className="flex flex-wrap items-center gap-3">
                     <label className="btn-primary cursor-pointer text-xs shadow-sm">
                       <ImagePlus className="size-4" aria-hidden />
-                      Add Carousel Images (one or more)
+                      إضافة صور للمعرض (صورة أو أكثر)
                       <input
                         type="file"
                         multiple
@@ -388,7 +388,7 @@ export function SiteImageManager({
                 ) : (
                   <label className="btn-primary cursor-pointer text-xs shadow-sm">
                     <ImagePlus className="size-4" aria-hidden />
-                    {slot.isCustom ? "Change Image" : "Upload Custom Image"}
+                    {slot.isCustom ? "تغيير الصورة" : "رفع صورة مخصصة"}
                     <input
                       type="file"
                       accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
@@ -409,8 +409,8 @@ export function SiteImageManager({
                     disabled={pending || isUploadingThis}
                     onClick={() => {
                       const msg = isMultiple
-                        ? `Reset all carousel images to default display for "${slot.labelAr}"?`
-                        : `Restore default image for "${slot.labelAr}"?`;
+                        ? `هل ترغب في استعادة العرض الافتراضي لـ «${slot.labelAr}»؟`
+                        : `هل ترغب في استعادة الصورة الافتراضية لـ «${slot.labelAr}»؟`;
                       if (confirm(msg)) {
                         run(() => resetSiteImageSlot(slot.key));
                       }
@@ -418,7 +418,7 @@ export function SiteImageManager({
                     className="btn-secondary text-xs text-neutral-600 hover:text-red-700"
                   >
                     <RotateCcw className="size-3.5" aria-hidden />
-                    {isMultiple ? "Restore Default Display" : "Restore Default"}
+                    {isMultiple ? "استعادة العرض الافتراضي" : "استعادة الافتراضية"}
                   </button>
                 )}
               </div>

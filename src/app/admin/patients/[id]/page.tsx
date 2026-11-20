@@ -70,13 +70,13 @@ export default async function PatientDetailPage({
     <div className="space-y-6">
       {/* Top Navigation & Breadcrumbs */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <nav aria-label="Breadcrumbs" className="flex items-center gap-2 text-sm text-muted">
+        <nav aria-label="مسار التنقل" className="flex items-center gap-2 text-sm text-muted">
           <Link
             href="/admin/patients"
             className="inline-flex items-center gap-1.5 font-medium text-teal-mid hover:text-teal-deep"
           >
-            <ArrowLeft className="size-4" aria-hidden />
-            Back to Patients
+            <ArrowRight className="size-4" aria-hidden />
+            العودة للمرضى
           </Link>
           <span>/</span>
           <span className="font-semibold text-ink">{patient.fullName}</span>
@@ -84,7 +84,7 @@ export default async function PatientDetailPage({
 
         <span className="inline-flex items-center gap-1.5 rounded-full border border-teal/20 bg-teal-light px-3 py-1 text-xs font-semibold text-teal-deep">
           <Lock className="size-3" aria-hidden />
-          Encrypted & Protected
+          بيانات مشفرة ومحمية
         </span>
       </div>
 
@@ -92,10 +92,9 @@ export default async function PatientDetailPage({
       <div className="flex items-start gap-3 rounded-2xl border border-teal/20 bg-teal-light/50 p-4 text-sm text-teal-deep">
         <Shield className="mt-0.5 size-5 shrink-0 text-teal" aria-hidden />
         <div>
-          <p className="font-bold">Patient Data Privacy & Security</p>
+          <p className="font-bold">خصوصية وأمان بيانات المرضى</p>
           <p className="mt-1 text-xs leading-5 text-muted">
-            Under our strict privacy protocol, stored patient records are strictly limited to name, mobile number,
-            and linked clinical appointments. All identifiable records are encrypted at rest with AES-256-GCM.
+            وفقاً لسياسة الخصوصية الصارمة، تقتصر بيانات المرضى على الاسم ورقم الهاتف والمواعيد المرتبطة به. كافة البيانات مشفرة تشفيراً قياسياً بـ AES-256-GCM.
           </p>
         </div>
       </div>
@@ -104,7 +103,7 @@ export default async function PatientDetailPage({
       <section className="card-soft rounded-[28px] p-6 sm:p-8" aria-labelledby="patient-info-title">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line/60 pb-5">
           <div>
-            <span className="eyebrow">Patient Details</span>
+            <span className="eyebrow">بيانات المريض</span>
             <h1 id="patient-info-title" className="text-2xl font-bold text-teal-deep">
               {patient.fullName}
             </h1>
@@ -117,12 +116,12 @@ export default async function PatientDetailPage({
           </div>
           <div className="flex items-center gap-2 text-xs text-muted">
             <User className="size-4" aria-hidden />
-            <span>Registered: {formatCairoDateTime(patient.createdAt)}</span>
+            <span>تاريخ التسجيل: {formatCairoDateTime(patient.createdAt)}</span>
           </div>
         </div>
 
         <div className="mt-6">
-          <h2 className="mb-4 text-base font-bold text-teal-deep">Edit Patient Information</h2>
+          <h2 className="mb-4 text-base font-bold text-teal-deep">تعديل بيانات المريض</h2>
           <PatientEditForm patient={{ id: patient.id, fullName: patient.fullName, phone: patient.phone }} />
         </div>
       </section>
@@ -133,13 +132,13 @@ export default async function PatientDetailPage({
           <div className="flex items-center gap-2">
             <CalendarCheck className="size-5 text-teal" aria-hidden />
             <h2 id="appointments-list-title" className="text-xl font-bold text-teal-deep">
-              Associated Appointments
+              المواعيد المسجلة
             </h2>
           </div>
           <div className="flex items-center gap-2">
             <NewAppointmentModal treatments={treatments} />
             <span className="rounded-full bg-ivory px-3 py-1 text-xs font-semibold text-teal-deep">
-              Total Appointments: {patient.appointments.length}
+              إجمالي المواعيد: {patient.appointments.length}
             </span>
           </div>
         </div>
@@ -172,7 +171,7 @@ export default async function PatientDetailPage({
                         {formatCairoDateTime(item.startsAt)}
                       </span>
                       {item.teeth.length > 0 && (
-                        <span>Teeth: {formatTeeth(item.teeth)}</span>
+                        <span>الأسنان: {formatTeeth(item.teeth)}</span>
                       )}
                     </div>
                   </div>
@@ -182,8 +181,8 @@ export default async function PatientDetailPage({
                       href={`/admin/appointments/${item.id}`}
                       className="btn-secondary px-4 py-2 text-xs font-semibold inline-flex items-center gap-1.5"
                     >
-                      <span>View Appointment</span>
-                      <ArrowRight className="size-3.5" aria-hidden />
+                      <span>عرض الموعد</span>
+                      <ArrowLeft className="size-3.5" aria-hidden />
                     </Link>
                   </div>
                 </div>
@@ -193,7 +192,7 @@ export default async function PatientDetailPage({
         ) : (
           <div className="py-12 text-center text-muted">
             <CalendarCheck className="mx-auto size-10 text-neutral-300" aria-hidden />
-            <p className="mt-3 font-medium">No appointments currently recorded for this patient.</p>
+            <p className="mt-3 font-medium">لا توجد أي مواعيد مسجلة لهذا المريض حالياً.</p>
           </div>
         )}
       </section>

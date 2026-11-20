@@ -71,7 +71,7 @@ export function FaqManager({ faqs }: { faqs: AdminFaq[] }) {
   }
 
   function handleDelete(id: string, question: string) {
-    if (!confirm(`Are you sure you want to delete FAQ "${question}"?`)) return;
+    if (!confirm(`هل أنت متأكد من حذف سؤال «${question}»؟`)) return;
     run(() => deleteFaq(id));
   }
 
@@ -84,12 +84,12 @@ export function FaqManager({ faqs }: { faqs: AdminFaq[] }) {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-sm text-muted">
-            Published questions automatically appear in the FAQ section on the homepage.
+            الأسئلة المنشورة تظهر تلقائياً في قسم «أسئلة شائعة» في الصفحة الرئيسية.
           </p>
         </div>
         <button type="button" onClick={openCreate} className="btn-primary">
           <Plus className="size-4" aria-hidden />
-          Add New FAQ
+          إضافة سؤال جديد
         </button>
       </div>
 
@@ -98,11 +98,11 @@ export function FaqManager({ faqs }: { faqs: AdminFaq[] }) {
       {faqs.length === 0 ? (
         <div className="card-soft rounded-[28px] p-12 text-center">
           <HelpCircle className="mx-auto size-12 text-teal/40" />
-          <h2 className="mt-4 text-xl font-bold text-teal-deep">No FAQs yet</h2>
-          <p className="mt-2 text-sm text-muted">Add frequently asked questions to provide immediate answers for patients.</p>
+          <h2 className="mt-4 text-xl font-bold text-teal-deep">لا توجد أسئلة حالياً</h2>
+          <p className="mt-2 text-sm text-muted">أضف الأسئلة الشائعة لمساعدة المرضى في العثور على إجابات سريعة.</p>
           <button type="button" onClick={openCreate} className="btn-primary mx-auto mt-6">
             <Plus className="size-4" aria-hidden />
-            Add First FAQ
+            إضافة أول سؤال
           </button>
         </div>
       ) : (
@@ -123,11 +123,11 @@ export function FaqManager({ faqs }: { faqs: AdminFaq[] }) {
                   >
                     {faq.published ? (
                       <>
-                        <Eye className="size-3 text-teal" /> Published
+                        <Eye className="size-3 text-teal" /> منشور
                       </>
                     ) : (
                       <>
-                        <EyeOff className="size-3" /> Hidden
+                        <EyeOff className="size-3" /> مخفي
                       </>
                     )}
                   </span>
@@ -143,8 +143,8 @@ export function FaqManager({ faqs }: { faqs: AdminFaq[] }) {
                     type="button"
                     disabled={pending || index === 0}
                     onClick={() => run(() => moveFaq(faq.id, "up"))}
-                    title="Move up"
-                    aria-label="Move up"
+                    title="تحريك لأعلى"
+                    aria-label="تحريك لأعلى"
                     className="rounded-lg p-1.5 text-muted hover:bg-ivory hover:text-teal-deep disabled:opacity-30"
                   >
                     <ArrowUp className="size-4" />
@@ -153,8 +153,8 @@ export function FaqManager({ faqs }: { faqs: AdminFaq[] }) {
                     type="button"
                     disabled={pending || index === faqs.length - 1}
                     onClick={() => run(() => moveFaq(faq.id, "down"))}
-                    title="Move down"
-                    aria-label="Move down"
+                    title="تحريك لأسفل"
+                    aria-label="تحريك لأسفل"
                     className="rounded-lg p-1.5 text-muted hover:bg-ivory hover:text-teal-deep disabled:opacity-30"
                   >
                     <ArrowDown className="size-4" />
@@ -165,11 +165,11 @@ export function FaqManager({ faqs }: { faqs: AdminFaq[] }) {
                   type="button"
                   disabled={pending}
                   onClick={() => handleToggle(faq.id, faq.published)}
-                  title={faq.published ? "Hide FAQ" : "Publish FAQ"}
+                  title={faq.published ? "إخفاء السؤال" : "نشر السؤال"}
                   className={`btn-secondary p-2.5 text-xs ${faq.published ? "hover:border-amber hover:text-amber-dark" : "hover:border-teal hover:text-teal"}`}
                 >
                   {faq.published ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                  <span className="hidden md:inline">{faq.published ? "Hide" : "Publish"}</span>
+                  <span className="hidden md:inline">{faq.published ? "إخفاء" : "نشر"}</span>
                 </button>
 
                 <button
@@ -177,10 +177,10 @@ export function FaqManager({ faqs }: { faqs: AdminFaq[] }) {
                   disabled={pending}
                   onClick={() => openEdit(faq)}
                   className="btn-secondary p-2.5 text-xs"
-                  title="Edit"
+                  title="تعديل"
                 >
                   <Pencil className="size-4" />
-                  <span className="hidden md:inline">Edit</span>
+                  <span className="hidden md:inline">تعديل</span>
                 </button>
 
                 <button
@@ -188,7 +188,7 @@ export function FaqManager({ faqs }: { faqs: AdminFaq[] }) {
                   disabled={pending}
                   onClick={() => handleDelete(faq.id, faq.question)}
                   className="rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs text-red-700 transition-colors hover:bg-red-100 disabled:opacity-50"
-                  title="Delete FAQ"
+                  title="حذف السؤال"
                 >
                   <Trash2 className="size-4" />
                 </button>
@@ -209,29 +209,29 @@ export function FaqManager({ faqs }: { faqs: AdminFaq[] }) {
             <button
               type="button"
               onClick={closeModal}
-              className="absolute top-5 right-5 rounded-full p-1.5 text-muted hover:bg-neutral-100 hover:text-ink"
-              aria-label="Close"
+              className="absolute top-5 left-5 rounded-full p-1.5 text-muted hover:bg-neutral-100 hover:text-ink"
+              aria-label="إغلاق"
             >
               <X className="size-5" />
             </button>
 
             <h2 className="text-xl font-bold text-teal-deep">
-              {editingId ? "Edit FAQ" : "Add New FAQ"}
+              {editingId ? "تعديل السؤال" : "إضافة سؤال جديد"}
             </h2>
             <p className="mt-1 text-sm text-muted">
-              Add a patient question and detailed answer to be displayed on the homepage.
+              أضف سؤالاً شائعاً وإجابته ليظهر في الصفحة الرئيسية.
             </p>
 
             <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
               <div>
                 <label className="field-label" htmlFor="faq-question">
-                  Question <span className="text-red-500">*</span>
+                  السؤال <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="faq-question"
                   required
                   type="text"
-                  placeholder="e.g. Do cosmetic veneers require tooth shaving?"
+                  placeholder="مثال: هل تحتاج الوجوه التجميلية إلى برد الأسنان؟"
                   value={form.question}
                   onChange={(e) => setForm({ ...form, question: e.target.value })}
                   className="field-input text-sm"
@@ -240,13 +240,13 @@ export function FaqManager({ faqs }: { faqs: AdminFaq[] }) {
 
               <div>
                 <label className="field-label" htmlFor="faq-answer">
-                  Answer <span className="text-red-500">*</span>
+                  الإجابة <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   id="faq-answer"
                   required
                   rows={5}
-                  placeholder="Write clear and concise explanation..."
+                  placeholder="اكتب الإجابة بشكل واضح ومباشر..."
                   value={form.answer}
                   onChange={(e) => setForm({ ...form, answer: e.target.value })}
                   className="field-input text-sm leading-7"
@@ -262,7 +262,7 @@ export function FaqManager({ faqs }: { faqs: AdminFaq[] }) {
                   className="size-4 rounded border-line text-teal-deep focus:ring-teal"
                 />
                 <label htmlFor="faq-published" className="text-sm font-medium text-teal-deep cursor-pointer">
-                  Publish immediately and display on homepage
+                  نشر السؤال فوراً وإظهاره في الصفحة الرئيسية
                 </label>
               </div>
 
@@ -275,7 +275,7 @@ export function FaqManager({ faqs }: { faqs: AdminFaq[] }) {
                   disabled={pending}
                   className="btn-secondary px-5 py-2.5 text-sm"
                 >
-                  Cancel
+                  إلغاء
                 </button>
                 <button
                   type="submit"
@@ -283,7 +283,7 @@ export function FaqManager({ faqs }: { faqs: AdminFaq[] }) {
                   className="btn-primary px-6 py-2.5 text-sm"
                 >
                   {pending && <Loader2 className="size-4 animate-spin" aria-hidden />}
-                  {editingId ? "Save Changes" : "Add FAQ"}
+                  {editingId ? "حفظ التعديلات" : "إضافة السؤال"}
                 </button>
               </div>
             </form>

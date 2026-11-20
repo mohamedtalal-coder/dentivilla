@@ -31,8 +31,8 @@ export function AvailabilityForms({
     <div className="grid gap-6">
       <SettingsForm settings={settings} />
       <section className="card-soft rounded-3xl p-5 sm:p-6">
-        <h2 className="heading-md">Working Days & Clinic Hours</h2>
-        <p className="mt-1 text-sm text-muted">All times are Cairo time. These hours are displayed to patients and used to calculate available appointment slots.</p>
+        <h2 className="heading-md">أيام وساعات العمل</h2>
+        <p className="mt-1 text-sm text-muted">الأوقات بتوقيت القاهرة. تظهر هذه الساعات للمرضى في الموقع وتُحسب منها المواعيد.</p>
         <div className="mt-5 grid gap-2">
           {hours.map((item) => (
             <WorkingDayRow key={item.weekday} item={item} />
@@ -41,20 +41,20 @@ export function AvailabilityForms({
       </section>
       <div className="grid gap-6 lg:grid-cols-2">
         <PeriodSection
-          title="Block a Period"
-          description="Vacations, conferences, or temporary clinic closures. Existing appointments are not automatically cancelled."
+          title="حجب فترة"
+          description="إجازة أو مؤتمر أو أي وقت لا تُقبل فيه حجوزات. لا تُلغى المواعيد القائمة تلقائياً."
           items={blocked}
-          extraField={{ name: "reason", label: "Reason", required: true }}
-          submitLabel="Add Blocked Period"
+          extraField={{ name: "reason", label: "السبب", required: true }}
+          submitLabel="إضافة الحجب"
           onAdd={(values) => addBlockedPeriod({ ...values, reason: values.reason })}
           onRemove={removeBlockedPeriod}
         />
         <PeriodSection
-          title="Extra Working Slot"
-          description="Opens slots for booking outside standard working hours (such as a special Friday clinic)."
+          title="وقت عمل إضافي"
+          description="يفتح وقتاً للحجز خارج ساعات العمل المعتادة (مثل يوم جمعة)."
           items={extras}
-          extraField={{ name: "note", label: "Note (Optional)", required: false }}
-          submitLabel="Add Extra Slot"
+          extraField={{ name: "note", label: "ملاحظة (اختياري)", required: false }}
+          submitLabel="إضافة الوقت"
           onAdd={(values) => addExtraSlot({ ...values, note: values.note })}
           onRemove={removeExtraSlot}
         />
@@ -81,9 +81,9 @@ function SettingsForm({ settings }: { settings: Settings }) {
         );
       }}
     >
-      <h2 className="heading-md md:col-span-4">Booking Rules & Parameters</h2>
+      <h2 className="heading-md md:col-span-4">قواعد الحجز</h2>
       <label className="text-sm">
-        <span className="field-label">Slot Interval (Minutes)</span>
+        <span className="field-label">تباعد أوقات البدء (دقيقة)</span>
         <select name="slotMinutes" defaultValue={settings.slotMinutes} className="field">
           {[10, 15, 20, 30, 45, 60].map((n) => (
             <option key={n} value={n}>
@@ -93,23 +93,23 @@ function SettingsForm({ settings }: { settings: Settings }) {
         </select>
       </label>
       <label className="text-sm">
-        <span className="field-label">Buffer Between Appointments (Minutes)</span>
+        <span className="field-label">فاصل بين المواعيد (دقيقة)</span>
         <input name="bufferMinutes" type="number" min={0} max={60} defaultValue={settings.bufferMinutes} className="field" />
       </label>
       <label className="text-sm">
-        <span className="field-label">Minimum Notice Lead Time (Hours)</span>
+        <span className="field-label">أقل مهلة قبل الموعد (ساعة)</span>
         <input name="bookingLeadHours" type="number" min={0} max={72} defaultValue={settings.bookingLeadHours} className="field" />
       </label>
       <label className="text-sm">
-        <span className="field-label">Booking Horizon (Days Ahead)</span>
+        <span className="field-label">أقصى مدى للحجز (يوم)</span>
         <input name="bookingHorizonDays" type="number" min={7} max={120} defaultValue={settings.bookingHorizonDays} className="field" />
       </label>
       <p className="text-xs text-muted md:col-span-4">
-        Appointment duration is defined per treatment. The buffer is clean-up/prep time automatically reserved before and after every appointment.
+        مدة كل موعد تُحدد من نوع العلاج. «الفاصل» وقت فارغ يُترك قبل كل موعد قائم وبعده للتعقيم والتجهيز.
       </p>
       <div className="flex items-center gap-4 md:col-span-4">
         <button type="submit" className="btn-primary" disabled={pending}>
-          {pending ? "Saving…" : "Save Booking Rules"}
+          {pending ? "جارٍ الحفظ…" : "حفظ القواعد"}
         </button>
         <ActionFeedback result={result} />
       </div>
@@ -138,18 +138,18 @@ function WorkingDayRow({ item }: { item: Hours }) {
       <p className="font-semibold text-teal-deep">{item.label}</p>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" name="enabled" defaultChecked={item.enabled} className="size-4 accent-teal" />
-        Open
+        يوم عمل
       </label>
       <label className="text-sm">
-        <span className="sr-only">From</span>
-        <input name="startTime" type="time" defaultValue={item.startTime} className="field py-2" aria-label={`Start time for ${item.label}`} />
+        <span className="sr-only">من</span>
+        <input name="startTime" type="time" defaultValue={item.startTime} className="field py-2" aria-label={`بداية ${item.label}`} />
       </label>
       <label className="text-sm">
-        <span className="sr-only">To</span>
-        <input name="endTime" type="time" defaultValue={item.endTime} className="field py-2" aria-label={`End time for ${item.label}`} />
+        <span className="sr-only">إلى</span>
+        <input name="endTime" type="time" defaultValue={item.endTime} className="field py-2" aria-label={`نهاية ${item.label}`} />
       </label>
       <button type="submit" className="btn-secondary px-4 py-2" disabled={pending}>
-        {pending ? "…" : "Save"}
+        {pending ? "…" : "حفظ"}
       </button>
       {result && (
         <div className="sm:col-span-5">
@@ -202,11 +202,11 @@ function PeriodSection({
       >
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="text-sm">
-            <span className="field-label">From (Cairo time)</span>
+            <span className="field-label">من (القاهرة)</span>
             <input name="startsAt" type="datetime-local" required className="field" />
           </label>
           <label className="text-sm">
-            <span className="field-label">To</span>
+            <span className="field-label">إلى</span>
             <input name="endsAt" type="datetime-local" required className="field" />
           </label>
         </div>
@@ -216,20 +216,20 @@ function PeriodSection({
         </label>
         <div className="flex flex-wrap items-center gap-4">
           <button type="submit" className="btn-primary" disabled={add.pending}>
-            {add.pending ? "Adding…" : submitLabel}
+            {add.pending ? "جارٍ الإضافة…" : submitLabel}
           </button>
           <ActionFeedback result={add.result} />
         </div>
       </form>
       <ul className="mt-5 grid gap-2 text-sm">
-        {items.length === 0 && <li className="text-muted">No entries added.</li>}
+        {items.length === 0 && <li className="text-muted">لا يوجد شيء مضاف.</li>}
         {items.map((item) => (
           <li key={item.id} className="flex items-center justify-between gap-3 rounded-xl bg-ivory px-3 py-2.5">
             <span>{item.label}</span>
             <button
               type="button"
               className="grid size-8 shrink-0 place-items-center rounded-full text-red-700 hover:bg-red-50 disabled:opacity-40"
-              aria-label={`Delete: ${item.label}`}
+              aria-label={`حذف: ${item.label}`}
               disabled={remove.pending}
               onClick={() => remove.run(() => onRemove(item.id))}
             >

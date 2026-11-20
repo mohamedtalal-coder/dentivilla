@@ -10,7 +10,7 @@ export default async function AdminLayout({
   const session = await auth();
 
   return (
-    <div className="min-h-screen bg-ivory">
+    <div className="min-h-screen bg-ivory font-arabic" dir="rtl" lang="ar">
       {session?.user ? (
         <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 lg:grid-cols-[250px_minmax(0,1fr)]">
           <aside className="card-soft h-fit rounded-[28px] p-5 lg:sticky lg:top-6">
@@ -23,7 +23,7 @@ export default async function AdminLayout({
               }}
             >
               <button className="mt-6 text-sm text-red-800 hover:underline" type="submit">
-                Sign out
+                خروج
               </button>
             </form>
           </aside>

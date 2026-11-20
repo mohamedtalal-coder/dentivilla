@@ -26,9 +26,9 @@ export default async function TreatmentsAdminPage() {
   return (
     <div className="grid gap-6">
       <div>
-        <h1 className="text-3xl font-bold text-teal-deep">Treatments & Visit Types</h1>
+        <h1 className="text-3xl font-bold text-teal-deep">العلاجات والخدمات</h1>
         <p className="mt-1 text-sm text-muted">
-          Manage clinical treatment options and appointment lengths for &ldquo;What is the reason for your visit?&rdquo; in the booking flow.
+          إدارة قائمة العلاجات والخدمات السريرية المعروضة في العيادة، وترتيبها، وتعديل تفاصيلها.
         </p>
       </div>
       <TreatmentManager initialTreatments={treatments} />

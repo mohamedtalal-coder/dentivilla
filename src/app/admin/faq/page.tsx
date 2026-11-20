@@ -18,9 +18,9 @@ export default async function FaqAdminPage() {
   return (
     <div className="grid gap-6">
       <div>
-        <h1 className="text-3xl font-bold text-teal-deep">Frequently Asked Questions</h1>
+        <h1 className="text-3xl font-bold text-teal-deep">الأسئلة الشائعة</h1>
         <p className="mt-1 text-sm text-muted">
-          Manage and organize the FAQs displayed to patients on the homepage.
+          أضف وعدّل الأسئلة الشائعة التي تظهر للمرضى في الصفحة الرئيسية، مع إمكانية ترتيبها ونشرها أو إخفائها.
         </p>
       </div>
       <FaqManager faqs={faqs} />

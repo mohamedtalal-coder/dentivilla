@@ -115,13 +115,13 @@ export function NewAppointmentModal({
     let startsAtIso: string;
     if (customTime) {
       if (!date || !manualTime) {
-        alert("Please select date and custom time");
+        alert("يرجى اختيار التاريخ والوقت المخصص");
         return;
       }
       startsAtIso = `${date}T${manualTime}:00+02:00`;
     } else {
       if (!time) {
-        alert("Please select an available time from the list or enable custom time");
+        alert("يرجى اختيار وقت متاح من القائمة أو تفعيل وقت مخصص");
         return;
       }
       startsAtIso = time;
@@ -159,7 +159,7 @@ export function NewAppointmentModal({
         className="btn-primary inline-flex items-center gap-2 px-4 py-2 text-sm shadow-sm"
       >
         <Plus className="size-4" aria-hidden />
-        Book New Appointment
+        إضافة حجز جديد
       </button>
 
       {isOpen && (
@@ -168,23 +168,23 @@ export function NewAppointmentModal({
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 sm:p-6 backdrop-blur-sm animate-fade-in"
         >
-          <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[2rem] border border-line bg-white p-6 shadow-2xl sm:p-8 text-left">
+          <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[2rem] border border-line bg-white p-6 shadow-2xl sm:p-8 text-right">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-line pb-4">
               <div>
                 <span className="eyebrow flex items-center gap-1.5 text-teal">
                   <Sparkles className="size-3.5" />
-                  Direct Booking
+                  حجز مباشر
                 </span>
                 <h3 className="text-xl font-bold text-teal-deep">
-                  Create New Appointment (In-Clinic)
+                  تسجيل موعد جديد (حضور شخصي / مباشر)
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
                 className="rounded-full p-2 text-muted hover:bg-neutral-100 hover:text-ink"
-                aria-label="Close modal"
+                aria-label="إغلاق النافذة"
               >
                 <X className="size-5" />
               </button>
@@ -197,7 +197,7 @@ export function NewAppointmentModal({
                   result.ok ? "bg-teal-light text-teal-deep" : "bg-red-50 text-red-700"
                 }`}
               >
-                {result.ok ? result.message ?? "Appointment booked successfully" : result.error}
+                {result.ok ? result.message ?? "تم تسجيل الموعد بنجاح" : result.error}
               </div>
             )}
 
@@ -206,10 +206,10 @@ export function NewAppointmentModal({
               <div>
                 <label className="field-label text-sm font-bold text-teal-deep flex items-center gap-2">
                   <Stethoscope className="size-4 text-teal" />
-                  Treatment / Reason for Visit <span className="text-red-500">*</span>
+                  العلاج / سبب الزيارة <span className="text-red-500">*</span>
                 </label>
                 <p className="mt-0.5 text-xs text-muted mb-2">
-                  Select the treatment or reason for this visit:
+                  اختر نوع العلاج أو سبب الزيارة لهذا المريض:
                 </p>
                 <div className="grid gap-2 sm:grid-cols-2 max-h-52 overflow-y-auto p-1">
                   {treatments.map((t) => {
@@ -222,7 +222,7 @@ export function NewAppointmentModal({
                           setSelectedTreatmentId(t.id);
                           setTime("");
                         }}
-                        className={`flex flex-col text-left rounded-xl border p-3 transition-all ${
+                        className={`flex flex-col text-right rounded-xl border p-3 transition-all ${
                           isSelected
                             ? "border-teal bg-teal-light/50 ring-2 ring-teal/20"
                             : "border-line bg-white hover:border-teal/30"
@@ -234,7 +234,7 @@ export function NewAppointmentModal({
                           </span>
                           <span className="inline-flex items-center gap-1 font-mono text-[10px] text-muted">
                             <Clock className="size-2.5" />
-                            {t.durationMinutes} mins
+                            {t.durationMinutes} د
                           </span>
                         </div>
                         <span className="mt-1 line-clamp-1 text-[11px] text-muted">
@@ -251,7 +251,7 @@ export function NewAppointmentModal({
                 <div className="rounded-2xl border border-line bg-ivory/60 p-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-teal-deep">
-                      Select Affected Teeth (Optional for Admin):
+                      تحديد الأسنان المعنية (اختياري للإدارة):
                     </span>
                     {teeth.length > 0 && (
                       <button
@@ -259,13 +259,13 @@ export function NewAppointmentModal({
                         onClick={() => setTeeth([])}
                         className="text-[11px] text-muted hover:text-red-600"
                       >
-                        Clear selection ({teeth.length})
+                        مسح التحديد ({teeth.length})
                       </button>
                     )}
                   </div>
                   <div className="mt-2.5 grid gap-2 text-xs">
                     <div>
-                      <p className="text-[11px] text-muted mb-1">Upper Arch (Maxillary):</p>
+                      <p className="text-[11px] text-muted mb-1">الفك العلوي:</p>
                       <div className="flex flex-wrap gap-1" dir="ltr">
                         {[...UPPER_RIGHT, ...UPPER_LEFT].map((code) => (
                           <button
@@ -285,7 +285,7 @@ export function NewAppointmentModal({
                       </div>
                     </div>
                     <div>
-                      <p className="text-[11px] text-muted mb-1">Lower Arch (Mandibular):</p>
+                      <p className="text-[11px] text-muted mb-1">الفك السفلي:</p>
                       <div className="flex flex-wrap gap-1" dir="ltr">
                         {[...LOWER_RIGHT, ...LOWER_LEFT].map((code) => (
                           <button
@@ -313,7 +313,7 @@ export function NewAppointmentModal({
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                   <label htmlFor="booking-date" className="field-label text-xs font-bold text-teal-deep flex items-center gap-1.5">
                     <CalendarDays className="size-4 text-teal" />
-                    Appointment Date & Time <span className="text-red-500">*</span>
+                    تاريخ ووقت الموعد <span className="text-red-500">*</span>
                   </label>
                   <label className="flex items-center gap-1.5 text-xs text-muted cursor-pointer">
                     <input
@@ -322,13 +322,13 @@ export function NewAppointmentModal({
                       onChange={(e) => setCustomTime(e.target.checked)}
                       className="size-3.5 rounded text-teal focus:ring-teal"
                     />
-                    Custom Time (Override availability)
+                    وقت مخصص (تجاوز جدول التوافر)
                   </label>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <span className="block text-[11px] text-muted mb-1">Select Date:</span>
+                    <span className="block text-[11px] text-muted mb-1">اختر التاريخ:</span>
                     <input
                       id="booking-date"
                       type="date"
@@ -344,7 +344,7 @@ export function NewAppointmentModal({
 
                   {customTime ? (
                     <div>
-                      <span className="block text-[11px] text-muted mb-1">Custom Time (Cairo Time):</span>
+                      <span className="block text-[11px] text-muted mb-1">وقت مخصص (بتوقيت القاهرة):</span>
                       <input
                         type="time"
                         required
@@ -355,12 +355,12 @@ export function NewAppointmentModal({
                     </div>
                   ) : (
                     <div>
-                      <span className="block text-[11px] text-muted mb-1">Available Slots:</span>
+                      <span className="block text-[11px] text-muted mb-1">الأوقات المتاحة:</span>
                       {slotsState.loading ? (
-                        <p className="text-xs text-muted py-2">Checking available time slots...</p>
+                        <p className="text-xs text-muted py-2">جاري فحص الأوقات المتاحة...</p>
                       ) : slotsState.slots.length === 0 ? (
                         <p className="text-xs text-amber-700 py-2">
-                          No available slots on this day. Enable "Custom Time" to book an override appointment.
+                          لا توجد أوقات شاغرة في هذا اليوم. فعّل «وقت مخصص» لتسجيل حجز استثنائي.
                         </p>
                       ) : (
                         <select
@@ -369,7 +369,7 @@ export function NewAppointmentModal({
                           className="input font-mono text-xs"
                           required
                         >
-                          <option value="">Select time slot...</option>
+                          <option value="">اختر موعداً متاحاً...</option>
                           {slotsState.slots.map((s) => (
                             <option key={s.startsAt} value={s.startsAt}>
                               {s.label}
@@ -386,7 +386,7 @@ export function NewAppointmentModal({
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="patient-name" className="field-label text-xs">
-                    Patient Full Name <span className="text-red-500">*</span>
+                    اسم المريض بالكامل <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="patient-name"
@@ -394,14 +394,14 @@ export function NewAppointmentModal({
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="e.g. Johnathan Smith"
+                    placeholder="مثال: أحمد محمود"
                     className="input text-sm"
                   />
                 </div>
 
                 <div>
                   <label htmlFor="patient-phone" className="field-label text-xs">
-                    Mobile Phone Number (Egypt) <span className="text-red-500">*</span>
+                    رقم الهاتف المحمول (مصر) <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="patient-phone"
@@ -417,7 +417,7 @@ export function NewAppointmentModal({
 
                 <div>
                   <label htmlFor="patient-whatsapp" className="field-label text-xs">
-                    WhatsApp Number (Optional)
+                    رقم واتساب (اختياري)
                   </label>
                   <input
                     id="patient-whatsapp"
@@ -432,7 +432,7 @@ export function NewAppointmentModal({
 
                 <div>
                   <label htmlFor="booking-status" className="field-label text-xs">
-                    Initial Appointment Status
+                    حالة الحجز الأولية
                   </label>
                   <select
                     id="booking-status"
@@ -440,8 +440,8 @@ export function NewAppointmentModal({
                     onChange={(e) => setStatus(e.target.value as "CONFIRMED" | "PENDING")}
                     className="input text-sm"
                   >
-                    <option value="CONFIRMED">Confirmed Immediately (CONFIRMED)</option>
-                    <option value="PENDING">Pending Confirmation (PENDING)</option>
+                    <option value="CONFIRMED">مؤكد فورياً (CONFIRMED)</option>
+                    <option value="PENDING">معلق بانتظار التأكيد (PENDING)</option>
                   </select>
                 </div>
               </div>
@@ -449,14 +449,14 @@ export function NewAppointmentModal({
               {/* Notes */}
               <div>
                 <label htmlFor="patient-notes" className="field-label text-xs">
-                  Patient Notes or Concerns (Optional)
+                  ملاحظات أو شكوى المريض (اختياري)
                 </label>
                 <textarea
                   id="patient-notes"
                   rows={2}
                   value={patientNotes}
                   onChange={(e) => setPatientNotes(e.target.value)}
-                  placeholder="Any notes about the case or patient concerns..."
+                  placeholder="أي ملاحظات حول الحالة أو شكوى المريض..."
                   className="input text-sm leading-relaxed"
                 />
               </div>
@@ -468,7 +468,7 @@ export function NewAppointmentModal({
                   onClick={() => setIsOpen(false)}
                   className="btn-secondary text-sm px-4 py-2"
                 >
-                  Cancel
+                  إلغاء
                 </button>
                 <button
                   type="submit"
@@ -478,12 +478,12 @@ export function NewAppointmentModal({
                   {pending ? (
                     <>
                       <Loader2 className="size-4 animate-spin" aria-hidden />
-                      Creating appointment...
+                      جاري تسجيل الموعد...
                     </>
                   ) : (
                     <>
                       <Check className="size-4" aria-hidden />
-                      Confirm & Save Appointment
+                      تأكيد وحفظ الموعد
                     </>
                   )}
                 </button>

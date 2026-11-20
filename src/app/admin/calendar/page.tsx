@@ -16,10 +16,10 @@ import { statusLabel } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
 import { NewAppointmentModal } from "@/components/admin/NewAppointmentModal";
 
-const WEEKDAYS = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-const MONTH_FMT = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
-const DAY_FMT = new Intl.DateTimeFormat("en-US", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
-const NUM = new Intl.NumberFormat("en-US");
+const WEEKDAYS = ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
+const MONTH_FMT = new Intl.DateTimeFormat("ar-EG", { month: "long", year: "numeric", timeZone: "UTC" });
+const DAY_FMT = new Intl.DateTimeFormat("ar-EG", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+const NUM = new Intl.NumberFormat("ar-EG");
 
 const STATUS_TONE: Record<AppointmentStatus, string> = {
   PENDING: "border-amber/40 bg-amber-light text-amber-dark",
@@ -120,9 +120,9 @@ export default async function AdminCalendarPage({
     <div className="grid gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-teal-deep">Calendar</h1>
+          <h1 className="text-3xl font-bold text-teal-deep">التقويم</h1>
           <p className="mt-1 text-sm text-muted">
-            Appointments schedule and available time slots, with direct booking for any patient.
+            جدول المواعيد والأوقات المتاحة، مع إمكانية إضافة حجز مباشر لأي مريض.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -131,38 +131,38 @@ export default async function AdminCalendarPage({
             <input type="hidden" name="month" value={month} />
             <input type="hidden" name="day" value={selectedDay} />
             <label htmlFor="cal-treatment" className="text-muted text-xs">
-              Check availability for:
+              فحص التوافر لـ:
             </label>
             <select id="cal-treatment" name="treatment" defaultValue={treatment?.slug} className="field w-auto py-2 text-xs">
               {treatments.map((t) => (
                 <option key={t.slug} value={t.slug}>
-                  {t.nameAr} ({NUM.format(t.durationMinutes)} min)
+                  {t.nameAr} ({NUM.format(t.durationMinutes)} د)
                 </option>
               ))}
             </select>
             <button type="submit" className="btn-secondary px-3 py-1.5 text-xs">
-              View
+              عرض
             </button>
           </form>
         </div>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
-        <section className="card-soft rounded-3xl p-4 sm:p-5" aria-label="Month calendar">
+        <section className="card-soft rounded-3xl p-4 sm:p-5" aria-label="تقويم الشهر">
           <div className="mb-4 flex items-center justify-between">
-            <Link href={href({ month: prevMonth })} className="grid size-9 place-items-center rounded-full hover:bg-teal-light" aria-label="Previous month">
-              <ChevronLeft className="size-5 text-teal-deep" />
+            <Link href={href({ month: prevMonth })} className="grid size-9 place-items-center rounded-full hover:bg-teal-light" aria-label="الشهر السابق">
+              <ChevronRight className="size-5 text-teal-deep" />
             </Link>
             <div className="text-center">
               <p className="font-bold text-teal-deep">{MONTH_FMT.format(ymdUtc(first))}</p>
               {month !== today.slice(0, 7) && (
                 <Link href={href({ month: today.slice(0, 7), day: today })} className="text-xs text-teal-mid hover:underline">
-                  Back to today
+                  العودة لليوم
                 </Link>
               )}
             </div>
-            <Link href={href({ month: nextMonth })} className="grid size-9 place-items-center rounded-full hover:bg-teal-light" aria-label="Next month">
-              <ChevronRight className="size-5 text-teal-deep" />
+            <Link href={href({ month: nextMonth })} className="grid size-9 place-items-center rounded-full hover:bg-teal-light" aria-label="الشهر التالي">
+              <ChevronLeft className="size-5 text-teal-deep" />
             </Link>
           </div>
 
@@ -186,7 +186,7 @@ export default async function AdminCalendarPage({
                   key={ymd}
                   href={href({ day: ymd })}
                   aria-current={selected ? "date" : undefined}
-                  className={`flex min-h-20 flex-col rounded-xl border p-1.5 text-left transition-colors sm:min-h-24 sm:p-2 ${
+                  className={`flex min-h-20 flex-col rounded-xl border p-1.5 text-right transition-colors sm:min-h-24 sm:p-2 ${
                     selected
                       ? "border-teal-deep bg-teal-deep text-white"
                       : !s.open || s.fullyBlocked
@@ -199,24 +199,24 @@ export default async function AdminCalendarPage({
                   </span>
                   <span className="mt-auto grid gap-0.5 text-[10px] leading-tight sm:text-[11px]">
                     {!s.open ? (
-                      <span>Closed</span>
+                      <span>مغلق</span>
                     ) : s.fullyBlocked ? (
                       <span className="inline-flex items-center gap-0.5">
-                        <Lock className="size-3" aria-hidden /> Blocked
+                        <Lock className="size-3" aria-hidden /> محجوب
                       </span>
                     ) : (
-                      !past && <span className={selected ? "text-teal-light" : "text-teal-mid"}>{NUM.format(s.free)} available</span>
+                      !past && <span className={selected ? "text-teal-light" : "text-teal-mid"}>{NUM.format(s.free)} متاح</span>
                     )}
                     {s.total > 0 && (
                       <span className="flex flex-wrap gap-0.5">
                         {s.pending > 0 && (
                           <span className={`rounded px-1 ${selected ? "bg-white/20" : "bg-amber-light text-amber-dark"}`}>
-                            {NUM.format(s.pending)} pending
+                            {NUM.format(s.pending)} معلّق
                           </span>
                         )}
                         {s.confirmed > 0 && (
                           <span className={`rounded px-1 ${selected ? "bg-white/20" : "bg-teal-light text-teal-deep"}`}>
-                            {NUM.format(s.confirmed)} confirmed
+                            {NUM.format(s.confirmed)} مؤكد
                           </span>
                         )}
                       </span>
@@ -227,17 +227,17 @@ export default async function AdminCalendarPage({
             })}
           </div>
           <p className="mt-4 text-xs text-muted">
-            &quot;Available&quot; = number of slots patients can book right now for this treatment, accounting for existing appointments, buffer times, blocked periods, and advance notice.
+            «متاح» = عدد الأوقات التي يستطيع المرضى حجزها الآن لهذا العلاج، بعد احتساب المواعيد والفاصل والفترات المحجوبة ومهلة الحجز.
           </p>
         </section>
 
-        <section className="card-soft rounded-3xl p-5 sm:p-6" aria-label="Daily schedule">
+        <section className="card-soft rounded-3xl p-5 sm:p-6" aria-label="جدول اليوم">
           <h2 className="heading-md">{DAY_FMT.format(ymdUtc(selectedDay))}</h2>
           <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
             <Clock className="size-4" aria-hidden />
             {dayWindows.length
-              ? dayWindows.map((w) => `${formatCairoTime(w.start)} – ${formatCairoTime(w.end)}`).join(", ")
-              : "Day off"}
+              ? dayWindows.map((w) => `${formatCairoTime(w.start)} – ${formatCairoTime(w.end)}`).join("، ")
+              : "يوم إجازة"}
           </p>
 
           {dayBlocked.length > 0 && (
@@ -245,15 +245,15 @@ export default async function AdminCalendarPage({
               {dayBlocked.map((b, i) => (
                 <li key={i} className="flex items-center gap-2 rounded-xl bg-neutral-100 px-3 py-2 text-neutral-600">
                   <Lock className="size-4" aria-hidden />
-                  Blocked {formatCairoTime(b.start)} – {formatCairoTime(b.end)}
+                  محجوب {formatCairoTime(b.start)} – {formatCairoTime(b.end)}
                 </li>
               ))}
             </ul>
           )}
 
-          <h3 className="mt-6 mb-2 text-sm font-semibold text-ink">Appointments ({NUM.format(dayAppointments.length)})</h3>
+          <h3 className="mt-6 mb-2 text-sm font-semibold text-ink">الحجوزات ({NUM.format(dayAppointments.length)})</h3>
           {dayAppointments.length === 0 ? (
-            <p className="text-sm text-muted">No appointments on this day.</p>
+            <p className="text-sm text-muted">لا توجد حجوزات في هذا اليوم.</p>
           ) : (
             <ol className="grid gap-2">
               {dayAppointments.map((a) => (
@@ -270,7 +270,7 @@ export default async function AdminCalendarPage({
                       <span className="block truncate font-semibold">{a.patient.fullName}</span>
                       <span className="block truncate text-xs text-muted">
                         {a.treatment.nameAr}
-                        {a.teeth.length ? ` · FDI ${a.teeth.join(", ")}` : ""}
+                        {a.teeth.length ? ` · FDI ${a.teeth.join("، ")}` : ""}
                       </span>
                     </span>
                     <span className={`chip shrink-0 ${STATUS_TONE[a.status]}`}>{statusLabel[a.status]}</span>
@@ -283,10 +283,10 @@ export default async function AdminCalendarPage({
           {treatment && dayWindows.length > 0 && selectedDay >= today && (
             <>
               <h3 className="mt-6 mb-2 text-sm font-semibold text-ink">
-                Available slots — {treatment.nameAr} ({NUM.format(daySlots.length)})
+                أوقات متاحة للحجز — {treatment.nameAr} ({NUM.format(daySlots.length)})
               </h3>
               {daySlots.length === 0 ? (
-                <p className="text-sm text-muted">No available slots for this treatment on this day.</p>
+                <p className="text-sm text-muted">لا توجد أوقات متاحة لهذا العلاج في هذا اليوم.</p>
               ) : (
                 <div className="flex flex-wrap gap-1.5">
                   {daySlots.map((s) => (
@@ -301,7 +301,7 @@ export default async function AdminCalendarPage({
 
           <div className="mt-6 flex flex-wrap gap-2 border-t border-line pt-4 text-sm">
             <Link href="/admin/availability" className="btn-secondary px-4 py-2">
-              Edit hours or block period
+              تعديل الساعات أو حجب فترة
             </Link>
           </div>
         </section>

@@ -5,7 +5,7 @@ import { CalendarClock, Search } from "lucide-react";
 import type { AppointmentStatus } from "@prisma/client";
 import { lookupBooking, type LookupResult } from "@/app/actions/booking";
 import { formatCairoDateTime } from "@/lib/datetime";
-import { statusLabel } from "@/lib/labels";
+import { statusLabelEn } from "@/lib/labels";
 import { formatTeeth } from "@/lib/teeth";
 
 const STATUS_TONE: Record<AppointmentStatus, string> = {
@@ -87,7 +87,7 @@ export function BookingStatusForm({ initialReference = "" }: { initialReference?
               {result.appointment.reference}
             </p>
             <span className={`chip ${STATUS_TONE[result.appointment.status as AppointmentStatus]}`}>
-              {statusLabel[result.appointment.status as AppointmentStatus]}
+              {statusLabelEn[result.appointment.status as AppointmentStatus]}
             </span>
           </div>
           <dl className="mt-5 grid gap-3 text-sm">
