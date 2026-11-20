@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CalendarCheck, Menu, X } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
+import { site } from "@/lib/site";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -36,10 +37,10 @@ export function Header({ logoUrl }: { logoUrl?: string } = {}) {
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
   return (
-    <header className="fixed inset-x-0 top-3 z-50 px-3 sm:top-4 sm:px-6">
+    <header className="fixed inset-x-0 top-2.5 z-50 px-2.5 sm:top-4 sm:px-6">
       <nav
         aria-label="Main Navigation"
-        className={`mx-auto flex max-w-7xl items-center justify-between gap-4 rounded-full border bg-white/90 py-2 ps-3 pe-2 backdrop-blur-md transition-shadow sm:ps-5 ${
+        className={`mx-auto flex max-w-7xl items-center justify-between gap-2 sm:gap-4 rounded-full border bg-white/90 py-1.5 sm:py-2 ps-2.5 pe-1.5 sm:ps-5 sm:pe-2 backdrop-blur-md transition-shadow ${
           scrolled ? "border-line shadow-card" : "border-white/60"
         }`}
       >
@@ -61,21 +62,24 @@ export function Header({ logoUrl }: { logoUrl?: string } = {}) {
           ))}
         </ul>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <Link
             href="/booking/status"
             className="hidden sm:inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold text-neutral-600 transition-colors hover:bg-teal-light hover:text-teal-deep"
           >
             Check Status
           </Link>
-          <Link href="/booking" className="btn-primary px-4 py-2.5 whitespace-nowrap sm:px-5">
-            <CalendarCheck className="size-4" aria-hidden />
+          <Link
+            href="/booking"
+            className="btn-primary px-3 py-2 text-xs whitespace-nowrap sm:px-5 sm:py-2.5 sm:text-sm"
+          >
+            <CalendarCheck className="size-3.5 sm:size-4" aria-hidden />
             <span className="sm:hidden">Book</span>
             <span className="hidden sm:inline">Book Appointment</span>
           </Link>
           <button
             type="button"
-            className="grid size-10 place-items-center rounded-full text-teal-deep transition-colors hover:bg-teal-light lg:hidden"
+            className="grid size-9 sm:size-10 place-items-center rounded-full text-teal-deep transition-colors hover:bg-teal-light lg:hidden"
             onClick={() => setOpen((prev) => !prev)}
             aria-expanded={open}
             aria-controls="mobile-nav"
@@ -91,6 +95,10 @@ export function Header({ logoUrl }: { logoUrl?: string } = {}) {
           id="mobile-nav"
           className="mx-auto mt-2 max-w-7xl animate-fade-in rounded-3xl border border-line bg-white p-3 shadow-lift lg:hidden"
         >
+          <div className="mb-2 rounded-2xl bg-teal-light/50 p-3 text-xs border border-teal-light/70">
+            <p className="font-semibold text-teal-deep">{site.doctor.name}</p>
+            <p className="text-muted">{site.doctor.title}</p>
+          </div>
           <ul className="grid gap-1 text-base">
             {navLinks.map((link) => (
               <li key={link.href}>
