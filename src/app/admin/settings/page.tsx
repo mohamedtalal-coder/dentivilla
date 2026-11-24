@@ -20,7 +20,7 @@ export default async function SettingsPage() {
   };
   return (
     <div className="grid gap-6">
-      <h1 className="text-3xl font-bold text-teal-deep">إعدادات الموقع</h1>
+      <h1 className="text-3xl font-bold text-teal-deep">التواصل والسوشيال</h1>
       <SiteSettingsForm values={values} />
     </div>
   );

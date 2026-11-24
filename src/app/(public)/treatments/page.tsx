@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Clock, Repeat } from "lucide-react";
 import { BookLink } from "@/components/booking/BookLink";
+import { getSiteCopy } from "@/lib/site-settings";
 import { getBookingTreatments } from "@/lib/treatments";
 
 export const metadata: Metadata = {
@@ -10,13 +11,13 @@ export const metadata: Metadata = {
 };
 
 export default async function TreatmentsPage() {
-  const treatments = await getBookingTreatments();
+  const [treatments, copy] = await Promise.all([getBookingTreatments(), getSiteCopy()]);
   return (
     <div className="container-page pt-28 pb-20 md:pt-36">
       <div className="max-w-3xl">
-        <p className="eyebrow">Our Treatments</p>
-        <h1 className="heading-xl">Dentistry as a Precise, Thoughtful Craft.</h1>
-        <p className="lede mt-4">Every procedure starts with clear diagnostic evaluation and a written plan that respects your natural tooth structure.</p>
+        <p className="eyebrow">{copy.treatmentsPageEyebrow}</p>
+        <h1 className="heading-xl">{copy.treatmentsPageTitle}</h1>
+        <p className="lede mt-4">{copy.treatmentsPageLede}</p>
       </div>
       <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {treatments.map((item) => (
@@ -27,7 +28,19 @@ export default async function TreatmentsPage() {
             >
               <h2 className="text-xl font-bold text-teal-deep">{item.nameAr}</h2>
               <p className="mt-2 flex-1 leading-7 text-muted">{item.summaryAr}</p>
-              <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-teal-mid">
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1 rounded-full border border-line bg-ivory px-2.5 py-1 text-xs font-semibold text-teal-deep">
+                  <Clock className="size-3 text-teal" aria-hidden />
+                  {item.durationMinutes} min
+                </span>
+                {item.numberOfVisits != null && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-line bg-ivory px-2.5 py-1 text-xs font-semibold text-teal-deep">
+                    <Repeat className="size-3 text-teal" aria-hidden />
+                    {item.numberOfVisits} {item.numberOfVisits === 1 ? "visit" : "visits"}
+                  </span>
+                )}
+              </div>
+              <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-teal-mid">
                 Details
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
               </span>

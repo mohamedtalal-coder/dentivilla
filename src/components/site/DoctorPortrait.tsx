@@ -10,16 +10,20 @@ import { site } from "@/lib/site";
 export function DoctorPortrait({
   src = "/images/doctor.jpg",
   preload = false,
+  name = site.doctor.name,
+  title = site.doctor.title,
 }: {
   src?: string;
   preload?: boolean;
+  name?: string;
+  title?: string;
 }) {
   return (
     <figure className="relative mx-auto w-full max-w-[480px]">
       <div className="relative aspect-[5/6] overflow-hidden rounded-[2rem] bg-ivory shadow-lift ring-1 ring-black/5">
         <Image
           src={src}
-          alt={`${site.doctor.name} — ${site.doctor.title}`}
+          alt={`${name} — ${title}`}
           fill
           sizes="(min-width: 1024px) 480px, 92vw"
           className="object-cover object-[12%_18%]"
@@ -29,8 +33,8 @@ export function DoctorPortrait({
       </div>
       <figcaption className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-4 text-white">
         <span>
-          <span className="block text-base font-bold">{site.doctor.name}</span>
-          <span className="block text-sm text-white/80">{site.doctor.title}</span>
+          <span className="block text-base font-bold">{name}</span>
+          <span className="block text-sm text-white/80">{title}</span>
         </span>
         <span className="shrink-0 rounded-full bg-white/15 px-3 py-1 text-xs backdrop-blur-sm">
           {site.addressShort}

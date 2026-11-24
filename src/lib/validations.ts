@@ -180,6 +180,8 @@ export const siteSettingsSchema = z.object({
   snapchat: optionalUrlOn(["snapchat.com"], "Snapchat"),
 });
 
+export const siteCopySchema = z.record(z.string(), z.string().trim().max(2000, "Text must be 2000 characters or fewer"));
+
 export const caseSchema = z
   .object({
     titleAr: z.string().trim().min(3, "Case title is required (at least 3 characters)").max(120),
@@ -224,6 +226,7 @@ export const treatmentSchema = z.object({
   descriptionAr: z.string().trim().min(10, "Treatment description is required (at least 10 characters)").max(2000, "Description is too long"),
   requiresTeeth: z.boolean().default(true),
   durationMinutes: z.coerce.number().int().min(15).max(180).default(45),
+  numberOfVisits: z.coerce.number().int().min(1).max(100).optional().nullable(),
 });
 
 export const updateAppointmentTreatmentSchema = z.object({

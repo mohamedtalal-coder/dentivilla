@@ -13,6 +13,7 @@ export default async function TreatmentsAdminPage() {
       summaryAr: true,
       descriptionAr: true,
       durationMinutes: true,
+      numberOfVisits: true,
       requiresTeeth: true,
       sortOrder: true,
       _count: {

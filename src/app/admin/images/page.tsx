@@ -1,18 +1,26 @@
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { requireAdminSession } from "@/lib/admin-auth";
 import { CORE_IMAGE_SLOTS } from "@/lib/site-images";
+import { getStoredSiteCopy } from "@/lib/site-settings";
 import { SiteImageManager } from "@/components/admin/SiteImageManager";
+import { SiteCopyForm } from "@/components/admin/SiteCopyForm";
+import { SiteDataTabs } from "@/components/admin/SiteDataTabs";
 
-export default async function AdminSiteImagesPage() {
+export default async function AdminSiteDataPage() {
   await requireAdminSession();
 
-  const siteImageRows = await prisma.siteImage.findMany({
-    include: {
-      items: {
-        orderBy: { sortOrder: "asc" },
+  const [copyValues, siteImageRows] = await Promise.all([
+    getStoredSiteCopy(),
+    prisma.siteImage.findMany({
+      include: {
+        items: {
+          orderBy: { sortOrder: "asc" },
+        },
       },
-    },
-  });
+    }),
+  ]);
+
   const siteImageMap = new Map(siteImageRows.map((row) => [row.id, row]));
 
   const slots = CORE_IMAGE_SLOTS.map((slot) => {
@@ -24,9 +32,11 @@ export default async function AdminSiteImagesPage() {
       sortOrder: it.sortOrder,
     }));
 
-    const activeUrl = items[0]?.url || (custom?.mediaId
-      ? `/media/${custom.mediaId}`
-      : custom?.customUrl || slot.defaultUrl);
+    const activeUrl =
+      items[0]?.url ||
+      (custom?.mediaId
+        ? `/media/${custom.mediaId}`
+        : custom?.customUrl || slot.defaultUrl);
 
     const isCustom = items.length > 0 || Boolean(custom?.mediaId || custom?.customUrl);
 
@@ -43,12 +53,18 @@ export default async function AdminSiteImagesPage() {
   return (
     <div className="grid gap-6">
       <div>
-        <h1 className="text-3xl font-bold text-teal-deep">صور الموقع الرئيسية</h1>
+        <h1 className="text-3xl font-bold text-teal-deep">بيانات الموقع</h1>
         <p className="mt-1 text-sm text-muted">
-          تحكم في الصور الأساسية المعروضة في الصفحة الرئيسية وصفحات الموقع (صورة الطبيب الشخصية، شعار العيادة، ومعرض صور الفلسفة).
+          إدارة صور الموقع والنصوص الظاهرة للزوار: العناوين، الأوصاف، وسيرة الطبيب.
         </p>
       </div>
-      <SiteImageManager slots={slots} />
+
+      <Suspense>
+        <SiteDataTabs
+          media={<SiteImageManager slots={slots} />}
+          text={<SiteCopyForm values={copyValues} />}
+        />
+      </Suspense>
     </div>
   );
 }

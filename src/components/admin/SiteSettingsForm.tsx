@@ -10,6 +10,8 @@ export type SiteSettingsValues = Record<
   string
 >;
 
+type Section = "contact" | "social";
+
 const CONTACT_FIELDS: { name: keyof SiteSettingsValues; label: string; placeholder: string; dir?: "ltr"; type?: string }[] = [
   { name: "phone", label: "هاتف العيادة", placeholder: "01XXXXXXXXX", dir: "ltr", type: "tel" },
   { name: "whatsapp", label: "رقم واتساب", placeholder: "01XXXXXXXXX", dir: "ltr", type: "tel" },
@@ -26,8 +28,15 @@ const SOCIAL_FIELDS: { name: SocialKey; label: string; placeholder: string }[] =
   { name: "snapchat", label: "سناب شات", placeholder: "https://snapchat.com/add/…" },
 ];
 
-export function SiteSettingsForm({ values }: { values: SiteSettingsValues }) {
+export function SiteSettingsForm({
+  values,
+  sectionsToShow,
+}: {
+  values: SiteSettingsValues;
+  sectionsToShow?: Section[];
+}) {
   const { pending, result, run } = useAdminAction();
+  const show = (s: Section) => !sectionsToShow || sectionsToShow.includes(s);
 
   return (
     <form
@@ -38,52 +47,56 @@ export function SiteSettingsForm({ values }: { values: SiteSettingsValues }) {
         run(() => saveSiteSettings(Object.fromEntries(form.entries())));
       }}
     >
-      <section className="card-soft rounded-3xl p-5 sm:p-6">
-        <h2 className="heading-md">بيانات التواصل</h2>
-        <p className="mt-1 text-sm text-muted">تظهر في تذييل الموقع وصفحة التواصل وأزرار واتساب. اترك الحقل فارغاً لاستخدام القيمة الافتراضية.</p>
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          {CONTACT_FIELDS.map((field) => (
-            <label key={field.name} className="text-sm">
-              <span className="field-label">{field.label}</span>
-              <input
-                name={field.name}
-                type={field.type ?? "text"}
-                dir={field.dir}
-                defaultValue={values[field.name]}
-                placeholder={field.placeholder}
-                className={`field ${field.dir ? "text-left" : ""}`}
-              />
+      {show("contact") && (
+        <section className="card-soft rounded-3xl p-5 sm:p-6">
+          <h2 className="heading-md">بيانات التواصل</h2>
+          <p className="mt-1 text-sm text-muted">تظهر في تذييل الموقع وصفحة التواصل وأزرار واتساب. اترك الحقل فارغاً لاستخدام القيمة الافتراضية.</p>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            {CONTACT_FIELDS.map((field) => (
+              <label key={field.name} className="text-sm">
+                <span className="field-label">{field.label}</span>
+                <input
+                  name={field.name}
+                  type={field.type ?? "text"}
+                  dir={field.dir}
+                  defaultValue={values[field.name]}
+                  placeholder={field.placeholder}
+                  className={`field ${field.dir ? "text-left" : ""}`}
+                />
+              </label>
+            ))}
+            <label className="text-sm sm:col-span-2">
+              <span className="field-label">العنوان</span>
+              <input name="address" defaultValue={values.address} maxLength={200} className="field" />
             </label>
-          ))}
-          <label className="text-sm sm:col-span-2">
-            <span className="field-label">العنوان</span>
-            <input name="address" defaultValue={values.address} maxLength={200} className="field" />
-          </label>
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
 
-      <section className="card-soft rounded-3xl p-5 sm:p-6">
-        <h2 className="heading-md">حسابات التواصل الاجتماعي</h2>
-        <p className="mt-1 text-sm text-muted">الصق رابط الحساب كاملاً. الحسابات الفارغة لا تظهر في الموقع.</p>
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          {SOCIAL_FIELDS.map((field) => (
-            <label key={field.name} className="text-sm">
-              <span className="field-label flex items-center gap-2">
-                <SocialIcon network={field.name} className="size-4 text-teal-deep" />
-                {field.label}
-              </span>
-              <input
-                name={field.name}
-                dir="ltr"
-                inputMode="url"
-                defaultValue={values[field.name]}
-                placeholder={field.placeholder}
-                className="field text-left"
-              />
-            </label>
-          ))}
-        </div>
-      </section>
+      {show("social") && (
+        <section className="card-soft rounded-3xl p-5 sm:p-6">
+          <h2 className="heading-md">حسابات التواصل الاجتماعي</h2>
+          <p className="mt-1 text-sm text-muted">الصق رابط الحساب كاملاً. الحسابات الفارغة لا تظهر في الموقع.</p>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            {SOCIAL_FIELDS.map((field) => (
+              <label key={field.name} className="text-sm">
+                <span className="field-label flex items-center gap-2">
+                  <SocialIcon network={field.name} className="size-4 text-teal-deep" />
+                  {field.label}
+                </span>
+                <input
+                  name={field.name}
+                  dir="ltr"
+                  inputMode="url"
+                  defaultValue={values[field.name]}
+                  placeholder={field.placeholder}
+                  className="field text-left"
+                />
+              </label>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="flex flex-wrap items-center gap-4">
         <button type="submit" className="btn-primary" disabled={pending}>

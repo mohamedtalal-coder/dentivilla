@@ -23,7 +23,7 @@ const LINKS = [
   { href: "/admin/appointments", label: "الحجوزات", icon: ListChecks },
   { href: "/admin/patients", label: "المرضى", icon: Users },
   { href: "/admin/treatments", label: "العلاجات والخدمات", icon: Stethoscope },
-  { href: "/admin/images", label: "الصور الرئيسية للموقع", icon: ImageIcon },
+  { href: "/admin/images", label: "بيانات الموقع", icon: ImageIcon },
   { href: "/admin/availability", label: "ساعات العمل والتوافر", icon: Clock },
   { href: "/admin/cases", label: "حالات قبل وبعد", icon: Images },
   { href: "/admin/offers", label: "العروض الخاصة", icon: Tag },

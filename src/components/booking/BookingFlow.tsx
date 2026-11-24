@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, MessageCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clock, MessageCircle, Repeat } from "lucide-react";
 import { submitBooking } from "@/app/actions/booking";
 import { AvailabilityCalendar, formatDayLabel } from "@/components/booking/AvailabilityCalendar";
 import { ToothSelector } from "@/components/booking/ToothSelector";
@@ -19,6 +19,7 @@ export type BookingTreatment = {
   nameAr: string;
   summaryAr: string;
   durationMinutes: number;
+  numberOfVisits: number | null;
   requiresTeeth: boolean;
 };
 
@@ -354,6 +355,18 @@ export function BookingFlow({
                               </span>
                             </span>
                             <span className="mt-1.5 line-clamp-2 text-sm leading-6 text-muted">{item.summaryAr}</span>
+                            <span className="mt-3 flex flex-wrap items-center gap-1.5">
+                              <span className="inline-flex items-center gap-1 rounded-full border border-line bg-ivory px-2 py-0.5 text-[11px] font-semibold text-teal-deep">
+                                <Clock className="size-3 text-teal" aria-hidden />
+                                {item.durationMinutes} min
+                              </span>
+                              {item.numberOfVisits != null && (
+                                <span className="inline-flex items-center gap-1 rounded-full border border-line bg-ivory px-2 py-0.5 text-[11px] font-semibold text-teal-deep">
+                                  <Repeat className="size-3 text-teal" aria-hidden />
+                                  {item.numberOfVisits} {item.numberOfVisits === 1 ? "visit" : "visits"}
+                                </span>
+                              )}
+                            </span>
                           </button>
                         );
                       })}

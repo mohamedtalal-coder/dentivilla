@@ -3,8 +3,7 @@ import Link from "next/link";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { SocialIcon } from "@/components/site/SocialIcon";
 import { getHoursSummary } from "@/lib/clinic-hours";
-import { site } from "@/lib/site";
-import { getContactInfo } from "@/lib/site-settings";
+import { getContactInfo, getSiteCopy } from "@/lib/site-settings";
 
 const pageLinks = [
   { href: "/", label: "Home" },
@@ -15,7 +14,7 @@ const pageLinks = [
 ];
 
 export async function Footer({ logoUrl }: { logoUrl?: string } = {}) {
-  const [hours, contact] = await Promise.all([getHoursSummary(), getContactInfo()]);
+  const [hours, contact, copy] = await Promise.all([getHoursSummary(), getContactInfo(), getSiteCopy()]);
   const year = new Date().getFullYear();
 
   return (
@@ -27,12 +26,12 @@ export async function Footer({ logoUrl }: { logoUrl?: string } = {}) {
               <Image src={logoUrl || "/images/logo.png"} alt="" width={48} height={48} className="size-full object-contain" />
             </span>
             <div>
-              <p className="font-bold">{site.doctor.name}</p>
-              <p className="text-sm text-teal-light/75">{site.doctor.subtitle}</p>
+              <p className="font-bold">{copy.doctorName}</p>
+              <p className="text-sm text-teal-light/75">{copy.doctorSubtitle}</p>
             </div>
           </div>
           <p className="mt-5 max-w-sm text-sm leading-7 text-teal-light/75">
-            Personalized care and a transparent written plan before every procedure, dedicated to preserving your natural tooth structure.
+            {copy.footerBlurb}
           </p>
           <Link href="/booking" className="btn-gold mt-6">
             Book an Appointment
@@ -127,7 +126,7 @@ export async function Footer({ logoUrl }: { logoUrl?: string } = {}) {
       <div className="border-t border-white/10">
         <div className="container-page flex flex-col items-center justify-between gap-3 py-6 text-xs text-teal-light/60 sm:flex-row">
           <p>
-            © {year} Dentivilla — {site.doctor.name}. All rights reserved.
+            © {year} Dentivilla — {copy.doctorName}. All rights reserved.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <Link href="/privacy" className="transition-colors hover:text-white underline-offset-4 hover:underline">

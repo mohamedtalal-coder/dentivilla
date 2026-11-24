@@ -21,7 +21,7 @@ export const CORE_IMAGE_SLOTS: readonly SiteImageSlotDef[] = [
   {
     key: "logo",
     labelAr: "شعار العيادة (Logo)",
-    locationAr: "شريط التنقل (Header) وأسفل الموقع (Footer)",
+    locationAr: "شريط التنقل (Header) وأسفل الموقع (Footer) وتبويب المتصفح",
     recommendedSize: "مربع متناسق (مثال: 512 × 512 بكسل، بخلفية شفافة PNG)",
     defaultUrl: "/images/logo.png",
   },

@@ -15,7 +15,17 @@ const navLinks = [
   { href: "/contact", label: "Contact" },
 ];
 
-export function Header({ logoUrl }: { logoUrl?: string } = {}) {
+export function Header({
+  logoUrl,
+  doctorName = site.doctor.name,
+  doctorTitle = site.doctor.title,
+  doctorSubtitle = site.doctor.subtitle,
+}: {
+  logoUrl?: string;
+  doctorName?: string;
+  doctorTitle?: string;
+  doctorSubtitle?: string;
+} = {}) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
@@ -45,7 +55,7 @@ export function Header({ logoUrl }: { logoUrl?: string } = {}) {
         }`}
       >
         <Link href="/" className="shrink-0 rounded-full" aria-label="Dentivilla — Home">
-          <Logo src={logoUrl} />
+          <Logo src={logoUrl} doctorName={doctorName} subtitle={doctorSubtitle} />
         </Link>
 
         <ul className="hidden items-center gap-1 text-sm text-neutral-600 lg:flex">
@@ -96,8 +106,8 @@ export function Header({ logoUrl }: { logoUrl?: string } = {}) {
           className="mx-auto mt-2 max-w-7xl animate-fade-in rounded-3xl border border-line bg-white p-3 shadow-lift lg:hidden"
         >
           <div className="mb-2 rounded-2xl bg-teal-light/50 p-3 text-xs border border-teal-light/70">
-            <p className="font-semibold text-teal-deep">{site.doctor.name}</p>
-            <p className="text-muted">{site.doctor.title}</p>
+            <p className="font-semibold text-teal-deep">{doctorName}</p>
+            <p className="text-muted">{doctorTitle}</p>
           </div>
           <ul className="grid gap-1 text-base">
             {navLinks.map((link) => (

@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Readex_Pro } from "next/font/google";
 import "./globals.css";
+import { site } from "@/lib/site";
+import { getSiteImages } from "@/lib/site-images";
+import { getSiteMetadata } from "@/lib/site-settings";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -25,16 +28,57 @@ const siteUrl =
         ? `https://${process.env.VERCEL_URL}`
         : "http://localhost:3000";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: "Dentivilla | Dr. Mohamed Yasser El Gebaly — Aesthetic & Restorative Dentistry",
-    template: "%s | Dentivilla",
-  },
-  description:
-    "Dentivilla Dental Clinic — Dr. Mohamed Yasser El Gebaly. General, aesthetic, and restorative dentistry in Cairo. Online appointment booking and interactive 3D dental model.",
-  openGraph: { locale: "en_US", type: "website", siteName: "Dentivilla" },
-};
+const DEFAULT_TITLE = "Dentivilla | Dr. Mohamed Yasser El Gebaly — Aesthetic & Restorative Dentistry";
+const DEFAULT_DESCRIPTION =
+  "Dentivilla Dental Clinic — Dr. Mohamed Yasser El Gebaly. General, aesthetic, and restorative dentistry in Cairo. Online appointment booking and interactive 3D dental model.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [{ title, description }, { logo }] = await Promise.all([getSiteMetadata(), getSiteImages()]);
+  const resolvedTitle = title || DEFAULT_TITLE;
+  const resolvedDescription = description || DEFAULT_DESCRIPTION;
+
+  return {
+    metadataBase: new URL(siteUrl),
+    applicationName: site.name,
+    title: {
+      default: resolvedTitle,
+      template: `%s | ${site.name}`,
+    },
+    description: resolvedDescription,
+    keywords: [
+      "Dentivilla",
+      "dentist Cairo",
+      "dental clinic Nasr City",
+      "aesthetic dentistry",
+      "restorative dentistry",
+      site.doctor.name,
+    ],
+    authors: [{ name: site.doctor.name }],
+    creator: site.doctor.name,
+    publisher: site.name,
+    icons: {
+      icon: [{ url: logo, type: "image/png" }],
+      apple: [{ url: logo }],
+      shortcut: logo,
+    },
+    openGraph: {
+      title: resolvedTitle,
+      description: resolvedDescription,
+      url: "/",
+      locale: "en_US",
+      type: "website",
+      siteName: site.name,
+      images: [{ url: logo, alt: site.name }],
+    },
+    twitter: {
+      card: "summary",
+      title: resolvedTitle,
+      description: resolvedDescription,
+      images: [logo],
+    },
+    robots: { index: true, follow: true },
+  };
+}
 
 export const viewport: Viewport = { themeColor: "#0c4f4d" };
 

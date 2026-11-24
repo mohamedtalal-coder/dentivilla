@@ -11,6 +11,7 @@ import {
   FileText,
   Loader2,
   Plus,
+  Repeat,
   Stethoscope,
   Trash2,
   X,
@@ -30,6 +31,7 @@ export type AdminTreatment = {
   summaryAr: string;
   descriptionAr: string;
   durationMinutes: number;
+  numberOfVisits: number | null;
   requiresTeeth: boolean;
   sortOrder: number;
   _count?: {
@@ -113,6 +115,7 @@ export function TreatmentManager({
                 descriptionAr: String(fd.get("descriptionAr") ?? ""),
                 requiresTeeth: fd.get("requiresTeeth") === "on",
                 durationMinutes: Number(fd.get("durationMinutes") || 45),
+                numberOfVisits: fd.get("numberOfVisits") ? Number(fd.get("numberOfVisits")) : null,
               };
 
               if (editing) {
@@ -210,6 +213,26 @@ export function TreatmentManager({
                   </label>
                 </div>
               </div>
+            </div>
+
+            <div>
+              <label htmlFor="numberOfVisits" className="field-label">
+                عدد الجلسات المطلوبة
+              </label>
+              <input
+                id="numberOfVisits"
+                name="numberOfVisits"
+                type="number"
+                min={1}
+                max={100}
+                step={1}
+                defaultValue={editing?.numberOfVisits ?? ""}
+                placeholder="مثال: 3"
+                className="input font-mono"
+              />
+              <span className="mt-1 block text-xs text-muted">
+                عدد الزيارات / الجلسات المتوقعة لإتمام هذا العلاج (اختياري — اتركه فارغاً إذا كان متغيراً).
+              </span>
             </div>
 
             <div>
@@ -315,6 +338,12 @@ export function TreatmentManager({
                       <Clock className="size-3 text-teal" aria-hidden />
                       {treatment.durationMinutes} دقيقة
                     </span>
+                    {treatment.numberOfVisits != null && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-line bg-ivory px-2.5 py-0.5 font-mono text-[11px] text-teal-deep">
+                        <Repeat className="size-3 text-teal" aria-hidden />
+                        {treatment.numberOfVisits} {treatment.numberOfVisits === 1 ? "جلسة" : "جلسات"}
+                      </span>
+                    )}
                     {appointmentCount > 0 ? (
                       <Link
                         href={`/admin/appointments?treatment=${treatment.slug}`}

@@ -4,6 +4,7 @@ import { BookLink } from "@/components/booking/BookLink";
 import { BeforeAfter } from "@/components/site/BeforeAfter";
 import { getPublishedCases } from "@/lib/cases";
 import { prisma } from "@/lib/prisma";
+import { getSiteCopy } from "@/lib/site-settings";
 
 export const metadata: Metadata = {
   title: "Before & After Gallery",
@@ -11,21 +12,22 @@ export const metadata: Metadata = {
 };
 
 export default async function CasesPage() {
-  const [cases, treatments] = await Promise.all([
+  const [cases, treatments, copy] = await Promise.all([
     getPublishedCases(),
     prisma.treatment.findMany({ select: { slug: true, nameAr: true } }).catch((error) => {
       console.warn("Could not fetch treatment names for cases, using fallback:", error);
       return [];
     }),
+    getSiteCopy(),
   ]);
   const treatmentName = new Map(treatments.map((t) => [t.slug, t.nameAr]));
 
   return (
     <div className="container-page pt-28 pb-20 md:pt-36">
       <div className="mx-auto max-w-3xl text-center">
-        <p className="eyebrow">Before & After</p>
-        <h1 className="heading-xl">A Visible Difference, A Natural Smile.</h1>
-        <p className="lede mt-4">Slide the divider — or use the arrow keys on your keyboard — to compare before and after treatment.</p>
+        <p className="eyebrow">{copy.casesPageEyebrow}</p>
+        <h1 className="heading-xl">{copy.casesPageTitle}</h1>
+        <p className="lede mt-4">{copy.casesPageLede}</p>
       </div>
 
       {cases.length > 0 ? (

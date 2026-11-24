@@ -25,6 +25,7 @@ import {
   addSiteImageItemSchema,
   reorderSiteImageItemsSchema,
   siteSettingsSchema,
+  siteCopySchema,
   treatmentSchema,
   updateAppointmentTreatmentSchema,
   blockedPeriodSchema,
@@ -33,6 +34,7 @@ import {
   workingHoursSchema,
 } from "@/lib/validations";
 import { CORE_IMAGE_SLOTS } from "@/lib/site-images";
+import { SITE_COPY_KEYS } from "@/lib/site-copy";
 
 export type ActionResult = { ok: true; message?: string } | { ok: false; error: string };
 
@@ -345,6 +347,25 @@ export async function saveSiteSettings(input: unknown) {
     await prisma.siteSettings.upsert({ where: { id: "default" }, update: data, create: { id: "default", ...data } });
     revalidatePath("/", "layout"); // footer, contact page and WhatsApp buttons everywhere
     return "تم حفظ بيانات التواصل بنجاح";
+  });
+}
+
+export async function saveSiteCopy(input: unknown) {
+  return run(async () => {
+    const data = siteCopySchema.parse(input);
+    const copy: Record<string, string> = {};
+    for (const key of SITE_COPY_KEYS) {
+      const value = data[key];
+      if (typeof value === "string" && value.trim()) copy[key] = value.trim();
+    }
+    await prisma.siteSettings.upsert({
+      where: { id: "default" },
+      update: { copy },
+      create: { id: "default", copy },
+    });
+    revalidatePath("/", "layout");
+    revalidatePath("/admin/images");
+    return "تم حفظ نصوص الموقع بنجاح";
   });
 }
 

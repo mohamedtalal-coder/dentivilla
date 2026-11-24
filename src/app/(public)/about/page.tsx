@@ -4,9 +4,8 @@ import { ArrowRight, FileCheck, Microscope, Phone, ShieldCheck, Sparkles } from 
 import { BookLink } from "@/components/booking/BookLink";
 import { DoctorPortrait } from "@/components/site/DoctorPortrait";
 import { getHoursSummary } from "@/lib/clinic-hours";
-import { getContactInfo } from "@/lib/site-settings";
+import { getContactInfo, getSiteCopy } from "@/lib/site-settings";
 import { getSiteImages } from "@/lib/site-images";
-import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "About the Doctor",
@@ -37,26 +36,27 @@ const commitments = [
 ];
 
 export default async function AboutPage() {
-  const [hours, contact, siteImages] = await Promise.all([
+  const [hours, contact, siteImages, copy] = await Promise.all([
     getHoursSummary(),
     getContactInfo(),
     getSiteImages(),
+    getSiteCopy(),
   ]);
   return (
     <div className="container-page pt-28 pb-20 md:pt-36">
       <section className="grid items-center gap-12 lg:grid-cols-12">
         <div className="lg:col-span-7">
-          <p className="eyebrow">Our Clinical Vision</p>
-          <h1 className="heading-xl">{site.doctor.name}</h1>
-          <p className="mt-2 text-xl font-medium text-amber-dark">{site.doctor.title}</p>
+          <p className="eyebrow">{copy.aboutEyebrow}</p>
+          <h1 className="heading-xl">{copy.doctorName}</h1>
+          <p className="mt-2 text-xl font-medium text-amber-dark">{copy.doctorTitle}</p>
           <p className="lede mt-6 font-medium text-ink/90">
-            Experienced in veneers, crowns, bridges, root canal treatments, dental implants, orthodontics, oral surgery, and comprehensive dental care.
+            {copy.doctorBioLead}
           </p>
           <p className="lede mt-4">
-            Combining a comprehensive approach to dentistry with precision, attention to detail, and personalized treatment planning to deliver long-lasting results and naturally beautiful smiles.
+            {copy.doctorBio}
           </p>
           <p className="mt-4 leading-8 text-muted">
-            We rely on digital diagnostics and 3D CBCT imaging to reach an exact assessment, and we make sure to discuss a written, comprehensive plan with you before starting, so you feel completely confident in every step.
+            {copy.aboutExtra}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <BookLink intent={{ treatmentSlug: "consultation" }} className="btn-primary">
@@ -70,14 +70,14 @@ export default async function AboutPage() {
           </div>
         </div>
         <div className="lg:col-span-5">
-          <DoctorPortrait preload src={siteImages.doctor} />
+          <DoctorPortrait preload src={siteImages.doctor} name={copy.doctorName} title={copy.doctorTitle} />
         </div>
       </section>
 
       <section className="mt-24" aria-labelledby="standards-title">
-        <p className="eyebrow">Our Standards</p>
+        <p className="eyebrow">{copy.standardsEyebrow}</p>
         <h2 id="standards-title" className="heading-lg">
-          Our Clinical Commitments in Every Session
+          {copy.standardsTitle}
         </h2>
         <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {commitments.map(({ icon: Icon, title, text }) => (
@@ -95,12 +95,12 @@ export default async function AboutPage() {
       <section className="mt-24 overflow-hidden rounded-[2rem] bg-teal-deep text-white" aria-labelledby="philosophy-title">
         <div className="grid items-stretch lg:grid-cols-12">
           <div className="p-8 sm:p-12 lg:col-span-7">
-            <p className="eyebrow eyebrow-light">Clinic Philosophy</p>
+            <p className="eyebrow eyebrow-light">{copy.philosophyEyebrow}</p>
             <h2 id="philosophy-title" className="text-3xl leading-tight font-bold sm:text-4xl">
-              &ldquo;Listening First, Then Care Begins&rdquo;
+              {copy.philosophyTitle}
             </h2>
             <p className="mt-5 leading-8 text-teal-light/85">
-              A smile is never a repetitive mold. Every patient has unique facial contours, dental history, and personal expectations; that is why we dedicate ample time to listen attentively and discuss every detail of your treatment before touching any tooth.
+              {copy.philosophyBody}
             </p>
             <dl className="mt-8 grid gap-6 border-t border-white/10 pt-6 text-sm sm:grid-cols-2">
               <div>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, Crosshair, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock, Crosshair, Repeat, Sparkles } from "lucide-react";
 import { BookLink } from "@/components/booking/BookLink";
 import { prisma } from "@/lib/prisma";
 
@@ -50,6 +50,24 @@ export default async function TreatmentPage({ params }: Props) {
               </dd>
             </div>
           </div>
+          <div className="flex gap-3 rounded-2xl bg-ivory p-4">
+            <Clock className="mt-0.5 size-5 text-teal" aria-hidden />
+            <div>
+              <dt className="text-sm text-muted">Session Duration</dt>
+              <dd className="font-semibold">{treatment.durationMinutes} minutes per visit</dd>
+            </div>
+          </div>
+          {treatment.numberOfVisits != null && (
+            <div className="flex gap-3 rounded-2xl bg-ivory p-4">
+              <Repeat className="mt-0.5 size-5 text-teal" aria-hidden />
+              <div>
+                <dt className="text-sm text-muted">Number of Visits</dt>
+                <dd className="font-semibold">
+                  {treatment.numberOfVisits} {treatment.numberOfVisits === 1 ? "visit" : "visits"}
+                </dd>
+              </div>
+            </div>
+          )}
         </dl>
         <div className="mt-8 flex flex-wrap gap-3">
           <BookLink intent={{ treatmentSlug: treatment.slug }} className="btn-primary">

@@ -5,10 +5,14 @@ export function Logo({
   src = "/images/logo.png",
   compact = false,
   light = false,
+  doctorName = site.doctor.name,
+  subtitle = "Dentivilla · Aesthetic & Restorative Dentistry",
 }: {
   src?: string;
   compact?: boolean;
   light?: boolean;
+  doctorName?: string;
+  subtitle?: string;
 }) {
   return (
     <span className="flex items-center gap-2 sm:gap-2.5">
@@ -20,11 +24,11 @@ export function Logo({
           Dentivilla
         </span>
         <span className={`hidden text-sm font-bold sm:block sm:text-[15px] ${light ? "text-white" : "text-teal-deep"}`}>
-          {site.doctor.name}
+          {doctorName}
         </span>
         {!compact && (
           <span className={`hidden text-xs sm:block ${light ? "text-teal-light/75" : "text-muted"}`}>
-            Dentivilla · Aesthetic & Restorative Dentistry
+            {subtitle}
           </span>
         )}
       </span>

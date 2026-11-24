@@ -3,11 +3,13 @@ import {
   ArrowRight,
   CalendarCheck,
   CheckCircle2,
+  Clock,
   FileCheck,
   MapPin,
   MessageCircle,
   Microscope,
   Phone,
+  Repeat,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
@@ -19,8 +21,7 @@ import { PhilosophyPanel } from "@/components/site/PhilosophyPanel";
 import { getHomepageCases } from "@/lib/cases";
 import { getHoursSummary } from "@/lib/clinic-hours";
 import { getPublicOffers } from "@/lib/offers";
-import { site } from "@/lib/site";
-import { getContactInfo } from "@/lib/site-settings";
+import { getContactInfo, getSiteCopy } from "@/lib/site-settings";
 import { getBookingTreatments } from "@/lib/treatments";
 import { getSiteImages } from "@/lib/site-images";
 
@@ -48,13 +49,14 @@ const reasons = [
 ];
 
 export default async function HomePage() {
-  const [treatments, contact, homepageCases, offers, hours, siteImages] = await Promise.all([
+  const [treatments, contact, homepageCases, offers, hours, siteImages, copy] = await Promise.all([
     getBookingTreatments(),
     getContactInfo(),
     getHomepageCases(4),
     getPublicOffers(),
     getHoursSummary(),
     getSiteImages(),
+    getSiteCopy(),
   ]);
 
   // Featured treatments to display on the homepage
@@ -68,13 +70,13 @@ export default async function HomePage() {
       <section className="container-page pt-28 pb-16 md:pt-36 md:pb-24" aria-labelledby="hero-title">
         <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-7">
-            <p className="eyebrow">Dentivilla Clinic · {site.addressShort}</p>
+            <p className="eyebrow">{copy.heroEyebrow}</p>
             <h1 id="hero-title" className="heading-xl">
-              A Natural, Harmonious Smile
-              <span className="block text-amber-dark">Rooted in Precision and Attentive Care.</span>
+              {copy.heroTitle}
+              <span className="block text-amber-dark">{copy.heroHighlight}</span>
             </h1>
             <p className="lede mt-6 max-w-xl">
-              {site.doctor.name} — {site.doctor.title}. Conservative and aesthetic dentistry dedicated to preserving your natural tooth structure, guided by a clear written plan you see and understand before treatment begins.
+              {copy.doctorName} — {copy.doctorTitle}. {copy.heroLede}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/booking" className="btn-primary px-7 py-3.5 text-base">
@@ -103,7 +105,7 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="lg:col-span-5">
-            <DoctorPortrait preload src={siteImages.doctor} />
+            <DoctorPortrait preload src={siteImages.doctor} name={copy.doctorName} title={copy.doctorTitle} />
           </div>
         </div>
       </section>
@@ -113,12 +115,12 @@ export default async function HomePage() {
         <div className="container-page">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div className="max-w-2xl">
-              <p className="eyebrow">Clinic Services</p>
+              <p className="eyebrow">{copy.treatmentsEyebrow}</p>
               <h2 id="treatments-title" className="heading-lg">
-                Specialized Treatments with Conservative Craftsmanship
+                {copy.treatmentsTitle}
               </h2>
               <p className="lede mt-3">
-                Aesthetic and restorative solutions designed to safeguard your natural teeth while delivering lasting comfort and harmonious beauty.
+                {copy.treatmentsLede}
               </p>
             </div>
             <Link href="/treatments" className="btn-secondary">
@@ -146,6 +148,18 @@ export default async function HomePage() {
                   <p className="mt-2.5 text-sm leading-6 text-muted">
                     {treatment.summaryAr}
                   </p>
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-line bg-white px-2.5 py-1 text-xs font-semibold text-teal-deep">
+                      <Clock className="size-3 text-teal" aria-hidden />
+                      {treatment.durationMinutes} min
+                    </span>
+                    {treatment.numberOfVisits != null && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-line bg-white px-2.5 py-1 text-xs font-semibold text-teal-deep">
+                        <Repeat className="size-3 text-teal" aria-hidden />
+                        {treatment.numberOfVisits} {treatment.numberOfVisits === 1 ? "visit" : "visits"}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="mt-6 flex items-center justify-between border-t border-line/60 pt-4 text-sm font-semibold">
                   <Link
@@ -175,18 +189,18 @@ export default async function HomePage() {
       <section className="section bg-alabaster" aria-labelledby="doctor-title">
         <div className="container-page grid items-center gap-12 lg:grid-cols-12">
           <div className="lg:col-span-7">
-            <p className="eyebrow">About the Doctor</p>
+            <p className="eyebrow">{copy.doctorEyebrow}</p>
             <h2 id="doctor-title" className="heading-lg">
-              {site.doctor.name}
+              {copy.doctorName}
             </h2>
             <p className="mt-2 text-lg font-medium text-amber-dark">
-              {site.doctor.title}
+              {copy.doctorTitle}
             </p>
             <p className="lede mt-5 max-w-2xl font-medium text-ink/90">
-              Experienced in veneers, crowns, bridges, root canal treatments, dental implants, orthodontics, oral surgery, and comprehensive dental care.
+              {copy.doctorBioLead}
             </p>
             <p className="mt-4 leading-8 text-muted">
-              Combining a comprehensive approach to dentistry with precision, attention to detail, and personalized treatment planning to deliver long-lasting results and naturally beautiful smiles.
+              {copy.doctorBio}
             </p>
             <ul className="mt-6 grid gap-2.5 text-sm font-medium text-teal-deep sm:grid-cols-2">
               <li className="flex items-center gap-2">
@@ -226,12 +240,12 @@ export default async function HomePage() {
         <section className="section border-t border-line bg-white" aria-labelledby="cases-title">
           <div className="container-page">
             <div className="mx-auto max-w-2xl text-center">
-              <p className="eyebrow">Clinical Results</p>
+              <p className="eyebrow">{copy.casesEyebrow}</p>
               <h2 id="cases-title" className="heading-lg">
-                Real Results Reflecting Nature & Balance
+                {copy.casesTitle}
               </h2>
               <p className="lede mt-3">
-                Slide the divider to compare before and after treatment. Each result represents a personalized treatment pathway tailored to the patient.
+                {copy.casesLede}
               </p>
             </div>
             <CasesCarousel cases={homepageCases} />
@@ -255,12 +269,12 @@ export default async function HomePage() {
       <section className="section bg-alabaster" aria-labelledby="reasons-title">
         <div className="container-page">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="eyebrow">Why Dentivilla?</p>
+            <p className="eyebrow">{copy.reasonsEyebrow}</p>
             <h2 id="reasons-title" className="heading-lg">
-              Standards That Ensure Safety and Peace of Mind
+              {copy.reasonsTitle}
             </h2>
             <p className="lede mt-3">
-              A careful, conservative medical approach placing patient safety, comfort, and absolute transparency first.
+              {copy.reasonsLede}
             </p>
           </div>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -284,12 +298,12 @@ export default async function HomePage() {
       <section className="section border-t border-line bg-white" aria-labelledby="contact-cta-title">
         <div className="container-page">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="eyebrow">Visit Us</p>
+            <p className="eyebrow">{copy.visitEyebrow}</p>
             <h2 id="contact-cta-title" className="heading-lg">
-              Ready for a Healthy, Confident Smile?
+              {copy.visitTitle}
             </h2>
             <p className="lede mt-3">
-              Choose your preferred appointment online in minutes, or connect directly with our clinic team.
+              {copy.visitLede}
             </p>
           </div>
 

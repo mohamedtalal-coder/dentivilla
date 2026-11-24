@@ -50,6 +50,7 @@ model Treatment {
   summaryAr       String
   descriptionAr   String
   durationMinutes Int           @default(45)
+  numberOfVisits  Int?
   requiresTeeth   Boolean       @default(true)
   sortOrder       Int           @default(0)
   appointments    Appointment[]
@@ -116,19 +117,25 @@ model AvailabilitySettings {
 
 /// Editable public clinic details (singleton row id = "default"); empty fields fall back to defaults in src/lib/site.ts
 model SiteSettings {
-  id        String   @id @default("default")
-  phone     String?
-  whatsapp  String?
-  email     String?
-  address   String?
-  mapsUrl   String?
-  instagram String?
-  facebook  String?
-  tiktok    String?
-  youtube   String?
-  x         String?
-  snapchat  String?
-  updatedAt DateTime @updatedAt
+  id              String   @id @default("default")
+  /// Browser tab / SEO title (falls back to the hard-coded default in layout.tsx)
+  siteTitle       String?
+  /// Meta description shown in search-engine result previews
+  siteDescription String?
+  phone           String?
+  whatsapp        String?
+  email           String?
+  address         String?
+  mapsUrl         String?
+  instagram       String?
+  facebook        String?
+  tiktok          String?
+  youtube         String?
+  x               String?
+  snapchat        String?
+  /// Public page copy (titles, bios, section text). Empty keys fall back to defaults in src/lib/site-copy.ts
+  copy            Json?
+  updatedAt       DateTime @updatedAt
 }
 
 /// Uploaded images, stored compressed (WebP) in the database so they survive redeploys on any host

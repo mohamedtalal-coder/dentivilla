@@ -5,12 +5,13 @@ import type { BookingTreatment } from "@/components/booking/BookingFlow";
 export async function getBookingTreatments(): Promise<BookingTreatment[]> {
   try {
     const rows = await prisma.treatment.findMany({ orderBy: { sortOrder: "asc" } });
-    return rows.map(({ id, slug, nameAr, summaryAr, durationMinutes, requiresTeeth }) => ({
+    return rows.map(({ id, slug, nameAr, summaryAr, durationMinutes, numberOfVisits, requiresTeeth }) => ({
       id,
       slug,
       nameAr,
       summaryAr,
       durationMinutes,
+      numberOfVisits,
       requiresTeeth,
     }));
   } catch (error) {

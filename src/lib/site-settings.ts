@@ -2,7 +2,40 @@ import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { normalizeEgyptianMobile } from "@/lib/phone";
 import { site } from "@/lib/site";
+import { mergeSiteCopy, storedSiteCopy, type SiteCopy, type SiteCopyKey } from "@/lib/site-copy";
 
+/** Site title + meta description editable from the dashboard. */
+export type SiteMetadata = { title: string | null; description: string | null };
+
+/** Fetches the editable site title and description. Cached per request. */
+export const getSiteCopy = cache(async (): Promise<SiteCopy> => {
+  try {
+    const row = await prisma.siteSettings.findUnique({ where: { id: "default" }, select: { copy: true } });
+    return mergeSiteCopy(row?.copy ?? null);
+  } catch (error) {
+    console.warn("Could not query site copy, using defaults:", error);
+    return mergeSiteCopy(null);
+  }
+});
+
+export const getStoredSiteCopy = cache(async (): Promise<Record<SiteCopyKey, string>> => {
+  try {
+    const row = await prisma.siteSettings.findUnique({ where: { id: "default" }, select: { copy: true } });
+    return storedSiteCopy(row?.copy ?? null);
+  } catch (error) {
+    console.warn("Could not query stored site copy:", error);
+    return storedSiteCopy(null);
+  }
+});
+
+export const getSiteMetadata = cache(async (): Promise<SiteMetadata> => {
+  try {
+    const row = await prisma.siteSettings.findUnique({ where: { id: "default" }, select: { siteTitle: true, siteDescription: true } });
+    return { title: row?.siteTitle ?? null, description: row?.siteDescription ?? null };
+  } catch {
+    return { title: null, description: null };
+  }
+});
 export const SOCIAL_NETWORKS = [
   { key: "instagram", label: "Instagram", labelAr: "Instagram", hosts: ["instagram.com"] },
   { key: "facebook", label: "Facebook", labelAr: "Facebook", hosts: ["facebook.com", "fb.com", "fb.me"] },

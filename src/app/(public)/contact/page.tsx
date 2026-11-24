@@ -4,7 +4,7 @@ import { ArrowRight, Clock, MapPin, MessageCircle, Phone } from "lucide-react";
 import { BookLink } from "@/components/booking/BookLink";
 import { SocialIcon } from "@/components/site/SocialIcon";
 import { getHoursSummary } from "@/lib/clinic-hours";
-import { getContactInfo } from "@/lib/site-settings";
+import { getContactInfo, getSiteCopy } from "@/lib/site-settings";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -13,13 +13,13 @@ export const metadata: Metadata = {
 };
 
 export default async function ContactPage() {
-  const [hours, contact] = await Promise.all([getHoursSummary(), getContactInfo()]);
+  const [hours, contact, copy] = await Promise.all([getHoursSummary(), getContactInfo(), getSiteCopy()]);
   return (
     <div className="container-page pt-28 pb-20 md:pt-36">
       <div className="max-w-2xl">
-        <p className="eyebrow">Contact Us</p>
-        <h1 className="heading-xl">We Are Here to Answer Your Questions.</h1>
-        <p className="lede mt-4">Book directly online, or get in touch with our reception team by phone or WhatsApp.</p>
+        <p className="eyebrow">{copy.contactPageEyebrow}</p>
+        <h1 className="heading-xl">{copy.contactPageTitle}</h1>
+        <p className="lede mt-4">{copy.contactPageLede}</p>
       </div>
 
       <div className="mt-12 grid gap-5 md:grid-cols-3">
