@@ -45,7 +45,7 @@
 > **لا تقم أبداً** بإضافة متغير `AUTH_URL="http://localhost:3000"` في Vercel!
 > التطبيق مضبوط تلقائياً للتعرف على الدومين الحقيقي للموقع على Vercel. إذا كنت قد أضفت `AUTH_URL` مسبقاً بقيمة `localhost:3000` في Vercel، **قم بحذفه فوراً من لوحة تحكم Vercel Settings -> Environment Variables**.
 
-> **ملاحظة بخصوص Neon**: إذا قمت بإضافة Neon عبر تبويب **Storage** في Vercel، سيقوم Vercel بإضافة `DATABASE_URL` تلقائياً نيابةً عنك!
+> **ملاحظة بخصوص Neon**: إذا قمت بإضافة Neon عبر تبويب **Storage** في Vercel، يضيف التكامل `DATABASE_URL` (اتصال مُجمَّع / PgBouncer) و`DATABASE_URL_UNPOOLED` (اتصال مباشر). البناء يستخدم الاتصال المباشر للترحيلات تلقائياً — لا تستبدل `DATABASE_URL` يدوياً برابط localhost.
 
 ### الخطوة الثالثة: الضغط على Deploy
 اضغط زر **Deploy**. سيبدأ Vercel بتثبيت الحزم وبناء المشروع (`prisma generate && next build`).

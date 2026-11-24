@@ -2,7 +2,8 @@
 // On a Vercel *production* build any problem fails the build with a clear
 // message, instead of shipping a site whose database silently doesn't work.
 import { execSync, spawnSync } from "node:child_process";
-import { readdirSync } from "node:fs";
+import { readdirSync, writeFileSync, unlinkSync } from "node:fs";
+import { join } from "node:path";
 
 if (typeof process.loadEnvFile === "function") {
   try {
@@ -33,9 +34,20 @@ function run(label, command) {
   }
 }
 
+function firstEnv(...keys) {
+  for (const key of keys) {
+    const value = process.env[key]?.trim();
+    if (value) return value;
+  }
+}
+
 /** Same rule as src/lib/database-url.ts: on Vercel, Dentivilla lives in its own "dentivilla" schema. */
-function appDatabaseUrl(raw) {
-  const schema = process.env.DATABASE_SCHEMA ?? (process.env.VERCEL ? "dentivilla" : undefined);
+function appSchema() {
+  return process.env.DATABASE_SCHEMA ?? (process.env.VERCEL ? "dentivilla" : undefined);
+}
+
+function withAppSchema(raw) {
+  const schema = appSchema();
   if (!raw || !schema) return raw;
   try {
     const parsed = new URL(raw);
@@ -47,19 +59,87 @@ function appDatabaseUrl(raw) {
   }
 }
 
-const url = appDatabaseUrl(process.env.DATABASE_URL);
-if (url) {
-  // child processes (prisma CLI, seed) inherit this
-  process.env.DATABASE_URL = url;
-  const schema = new URL(url).searchParams.get("schema");
-  if (schema) console.log(`[prepare-db] Using Postgres schema "${schema}".`);
+function withoutSchemaParam(raw) {
+  if (!raw) return raw;
+  try {
+    const parsed = new URL(raw);
+    parsed.searchParams.delete("schema");
+    return parsed.toString();
+  } catch {
+    return raw;
+  }
 }
-if (!url) {
-  fail("DATABASE_URL is not set. Add your cloud Postgres URL (e.g. Neon) in Vercel → Settings → Environment Variables.");
-} else if (process.env.VERCEL && /@(localhost|127\.0\.0\.1)[:/]/.test(url)) {
-  fail("DATABASE_URL points to localhost, which does not exist on Vercel. Use a cloud Postgres URL (e.g. Neon).");
-} else if (migrate()) {
-  run("Seeding reference data and the admin account", "npx tsx prisma/seed.ts");
+
+function deriveDirectUrl(pooled) {
+  const explicit = firstEnv("DATABASE_URL_UNPOOLED", "POSTGRES_URL_NON_POOLING", "DIRECT_URL");
+  if (explicit) return explicit;
+  if (!pooled) return pooled;
+  try {
+    const url = new URL(pooled);
+    url.searchParams.delete("pgbouncer");
+    url.searchParams.delete("connection_limit");
+    url.hostname = url.hostname.replace("-pooler.", ".");
+    if (url.port === "6543") url.port = "5432";
+    return url.toString();
+  } catch {
+    return pooled;
+  }
+}
+
+const pooled = firstEnv(
+  "DATABASE_URL",
+  "POSTGRES_PRISMA_URL",
+  "POSTGRES_URL",
+  "DATABASE_URL_UNPOOLED",
+  "POSTGRES_URL_NON_POOLING",
+  "DIRECT_URL",
+);
+const direct = deriveDirectUrl(pooled);
+const schema = appSchema();
+
+if (!pooled) {
+  fail(
+    "No Postgres URL found. Neon on Vercel usually sets DATABASE_URL (and DATABASE_URL_UNPOOLED). " +
+      "If you connected Neon under Storage, confirm the project is linked and both variables exist for Production.",
+  );
+} else if (process.env.VERCEL && /@(localhost|127\.0\.0\.1)[:/]/.test(pooled)) {
+  fail("DATABASE_URL points to localhost, which does not exist on Vercel. Use the Neon connection string.");
+} else {
+  // Prisma migrate / db execute need a direct (unpooled) session. Neon’s Vercel
+  // integration puts PgBouncer in DATABASE_URL, which cannot take advisory locks.
+  process.env.DATABASE_URL = withAppSchema(direct);
+  process.env.DIRECT_URL = process.env.DATABASE_URL;
+  if (schema) console.log(`[prepare-db] Using Postgres schema "${schema}".`);
+  if (direct !== pooled) console.log("[prepare-db] Using the unpooled Neon URL for migrations.");
+  if (ensureSchema(direct, schema) && migrate()) {
+    run("Seeding reference data and the admin account", "npx tsx prisma/seed.ts");
+  }
+}
+
+function ensureSchema(directUrl, schemaName) {
+  if (!schemaName) return true;
+  const adminUrl = withoutSchemaParam(directUrl);
+  console.log(`[prepare-db] Ensuring Postgres schema "${schemaName}" exists…`);
+  const sqlPath = join("prisma", ".ensure-schema.sql");
+  writeFileSync(sqlPath, `CREATE SCHEMA IF NOT EXISTS "${schemaName}";\n`);
+  try {
+    const result = spawnSync(
+      "npx",
+      ["prisma", "db", "execute", "--file", sqlPath, "--url", adminUrl],
+      { encoding: "utf8" },
+    );
+    process.stdout.write(result.stdout ?? "");
+    process.stderr.write(result.stderr ?? "");
+    if (result.status === 0) return true;
+    fail(`Could not create schema "${schemaName}" (see the output above).`);
+    return false;
+  } finally {
+    try {
+      unlinkSync(sqlPath);
+    } catch {
+      // ignore
+    }
+  }
 }
 
 /** prisma migrate deploy, plus a one-time safe baseline for databases created with `db push` (P3005). */
@@ -69,7 +149,8 @@ function migrate() {
   process.stdout.write(result.stdout ?? "");
   process.stderr.write(result.stderr ?? "");
   if (result.status === 0) return true;
-  if (!`${result.stdout}${result.stderr}`.includes("P3005")) {
+  const output = `${result.stdout}${result.stderr}`;
+  if (!output.includes("P3005")) {
     fail("Applying database migrations failed (see the output above).");
     return false;
   }

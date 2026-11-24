@@ -42,6 +42,9 @@ intro-frame-now.png
 # vercel
 .vercel
 
+# generated during Vercel migrate
+/prisma/.ensure-schema.sql
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

@@ -1,9 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { fromZonedTime } from "date-fns-tz";
+import { databaseUrl } from "../src/lib/database-url";
 import { computePhoneBlindIndex, encryptField, encryptOptional } from "../src/lib/encryption";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({ datasourceUrl: databaseUrl() });
 const TIMEZONE = "Africa/Cairo";
 
 const treatments = [
