@@ -2,6 +2,9 @@ import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { getSiteImages } from "@/lib/site-images";
 import { getSiteCopy } from "@/lib/site-settings";
+
+export const dynamic = "force-dynamic";
+
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const [siteImages, copy] = await Promise.all([getSiteImages(), getSiteCopy()]);
 

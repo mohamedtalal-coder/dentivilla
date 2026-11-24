@@ -372,8 +372,8 @@ export async function saveSiteCopy(input: unknown) {
 /* --------------------------- before / after cases --------------------------- */
 
 function revalidateCases() {
-  revalidatePath("/");
-  revalidatePath("/cases");
+  revalidatePath("/", "layout");
+  revalidatePath("/cases", "layout");
   revalidatePath("/admin/cases");
 }
 
@@ -469,7 +469,7 @@ export async function deleteCase(id: string) {
 /* --------------------------------- offers --------------------------------- */
 
 function revalidateOffers() {
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   revalidatePath("/admin/offers");
 }
 
@@ -547,7 +547,7 @@ export async function moveOffer(id: string, direction: "up" | "down") {
 /* ---------------------------------- faqs ---------------------------------- */
 
 function revalidateFaqs() {
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   revalidatePath("/admin/faq");
 }
 
@@ -618,8 +618,9 @@ export async function moveFaq(id: string, direction: "up" | "down") {
 }
 
 function revalidateTreatments() {
-  revalidatePath("/treatments", "page");
-  revalidatePath("/", "page");
+  revalidatePath("/", "layout");
+  revalidatePath("/treatments", "layout");
+  revalidatePath("/treatments/[slug]", "page");
   revalidatePath("/booking", "page");
   revalidatePath("/admin/treatments", "page");
 }
