@@ -141,7 +141,7 @@ function isJsonObject(value: Prisma.JsonValue | null | undefined): value is Pris
 }
 
 export function mergeSiteCopy(stored: Prisma.JsonValue | null | undefined): SiteCopy {
-  const result = { ...SITE_COPY_DEFAULTS };
+  const result: SiteCopy = { ...SITE_COPY_DEFAULTS };
   if (!isJsonObject(stored)) return result;
   for (const key of SITE_COPY_KEYS) {
     const value = stored[key];
